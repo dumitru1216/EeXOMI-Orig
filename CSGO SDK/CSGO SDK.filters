@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="main">
+      <UniqueIdentifier>{d9575ed4-b3b4-4b35-9715-450fd649126b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{41483e86-f744-4484-a527-99a75fc9ae59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{74483f8d-c1bb-44bf-aef2-72f57f9240bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="valve">
+      <UniqueIdentifier>{0b8ba8d0-6ca4-41b0-af2a-a9575fb25456}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="horizon">
+      <UniqueIdentifier>{afab3aa9-a591-4015-baa1-441cf2a7286c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="horizon\memory">
+      <UniqueIdentifier>{0da61017-6a41-4c48-8a51-81e55e0908c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="horizon\win32">
+      <UniqueIdentifier>{63fe72a3-3796-4265-90ac-a6a6f533aa70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\hooked">
+      <UniqueIdentifier>{c19225b9-87db-4485-a546-a3158b8d7757}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="valve\core">
+      <UniqueIdentifier>{3bfc70c2-c268-42f3-9903-e6ae45313e7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="horizon\core">
+      <UniqueIdentifier>{d8bcae19-60fb-49bd-9683-74354a11b74c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine">
+      <UniqueIdentifier>{4f47dc83-0c5c-4c90-8ace-bce5ec86def9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\prop_manager">
+      <UniqueIdentifier>{1f9527f9-0f87-4188-8ba2-8766e26decd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\displacement">
+      <UniqueIdentifier>{adf8f900-81fb-46b8-9476-438ce0f30a98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="valve\object">
+      <UniqueIdentifier>{b3bd3363-0705-4107-9ec4-35f9ca95029e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\prediction">
+      <UniqueIdentifier>{ff3e2749-42ad-47b7-92c3-60c89777c02f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="source.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="createmove.cpp">
+      <Filter>source\hooked</Filter>
+    </ClCompile>
+    <ClCompile Include="painttraverse.cpp">
+      <Filter>source\hooked</Filter>
+    </ClCompile>
+    <ClCompile Include="vector2d.cpp">
+      <Filter>valve\core</Filter>
+    </ClCompile>
+    <ClCompile Include="vector.cpp">
+      <Filter>valve\core</Filter>
+    </ClCompile>
+    <ClCompile Include="vector4d.cpp">
+      <Filter>valve\core</Filter>
+    </ClCompile>
+    <ClCompile Include="qangle.cpp">
+      <Filter>valve\core</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix.cpp">
+      <Filter>valve\core</Filter>
+    </ClCompile>
+    <ClCompile Include="prop_manager.cpp">
+      <Filter>engine\prop_manager</Filter>
+    </ClCompile>
+    <ClCompile Include="sdk.cpp">
+      <Filter>valve</Filter>
+    </ClCompile>
+    <ClCompile Include="displacement.cpp">
+      <Filter>engine\displacement</Filter>
+    </ClCompile>
+    <ClCompile Include="framestagenotify.cpp">
+      <Filter>source\hooked</Filter>
+    </ClCompile>
+    <ClCompile Include="scan.cpp">
+      <Filter>horizon\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="print.cpp">
+      <Filter>horizon\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="entity.cpp">
+      <Filter>valve\object</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>valve\object</Filter>
+    </ClCompile>
+    <ClCompile Include="weapon.cpp">
+      <Filter>valve\object</Filter>
+    </ClCompile>
+    <ClCompile Include="prediction.cpp">
+      <Filter>engine\prediction</Filter>
+    </ClCompile>
+    <ClCompile Include="runcommand.cpp">
+      <Filter>source\hooked</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="os.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="auto.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="source.hpp">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="sdk.hpp">
+      <Filter>valve</Filter>
+    </ClInclude>
+    <ClInclude Include="vmt_swap.hpp">
+      <Filter>horizon\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="vcall.hpp">
+      <Filter>horizon\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="horizon.hpp">
+      <Filter>horizon</Filter>
+    </ClInclude>
+    <ClInclude Include="hooked.hpp">
+      <Filter>source\hooked</Filter>
+    </ClInclude>
+    <ClInclude Include="core.hpp">
+      <Filter>valve\core</Filter>
+    </ClInclude>
+    <ClInclude Include="vector2d.hpp">
+      <Filter>valve\core</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.hpp">
+      <Filter>valve\core</Filter>
+    </ClInclude>
+    <ClInclude Include="vector4d.hpp">
+      <Filter>valve\core</Filter>
+    </ClInclude>
+    <ClInclude Include="qangle.hpp">
+      <Filter>valve\core</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix.hpp">
+      <Filter>valve\core</Filter>
+    </ClInclude>
+    <ClInclude Include="singleton.hpp">
+      <Filter>horizon\core</Filter>
+    </ClInclude>
+    <ClInclude Include="prop_manager.hpp">
+      <Filter>engine\prop_manager</Filter>
+    </ClInclude>
+    <ClInclude Include="displacement.hpp">
+      <Filter>engine\displacement</Filter>
+    </ClInclude>
+    <ClInclude Include="scan.hpp">
+      <Filter>horizon\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="print.hpp">
+      <Filter>horizon\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="entity.hpp">
+      <Filter>valve\object</Filter>
+    </ClInclude>
+    <ClInclude Include="player.hpp">
+      <Filter>valve\object</Filter>
+    </ClInclude>
+    <ClInclude Include="weapon.hpp">
+      <Filter>valve\object</Filter>
+    </ClInclude>
+    <ClInclude Include="prediction.hpp">
+      <Filter>engine\prediction</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
