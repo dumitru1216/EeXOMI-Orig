@@ -2042,7 +2042,9 @@ namespace Source
 				  msg << XorStr( " | " );
 				  msg << XorStr( " delay: " ) << rageData->m_iDelayTicksStored;
 				  msg << XorStr( " | " );
-				  msg << XorStr( " ping: " ) << int( ping );
+				  msg << XorStr( " ping: " ) << int( ping );				
+				  msg << XorStr( " | " );
+				  msg << XorStr( " rt: " ) << lagData->m_iResolverMode;
 				  msg << XorStr( " | " );
 				  msg << XorStr( " miss: " ) << lagData->m_iMissedShots << ":" << lagData->m_iMissedStand1;
 

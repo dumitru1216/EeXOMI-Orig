@@ -101,6 +101,7 @@ namespace Engine
 
 	  // resolver new
 	  int m_iMissedStand1 = 0;
+	  int m_iResolverMode = 0;
 
 	  bool m_bGotAbsYaw = false;
 	  bool m_bGotAbsYawShot = false;

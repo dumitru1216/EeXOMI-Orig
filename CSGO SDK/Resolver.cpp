@@ -233,7 +233,7 @@ namespace Engine {
 
 						lag_data->m_iMissedShots++;
 
-						if ( resolver_data.m_iResolverMode == eResolverModes::STAND_LM )
+						if ( lag_data->m_iResolverMode == eResolverModes::STAND_LM )
 							lag_data->m_iMissedStand1++;
 
 
@@ -392,7 +392,7 @@ namespace Engine {
 					if ( lagData.IsValid( ) ) {
 						lagData->m_iMissedShots = 0;
 						lagData->m_iMissedStand1 = 0;
-						
+						lagData->m_iResolverMode = eResolverModes::NONE;
 					}
 				}
 			}
@@ -403,7 +403,7 @@ namespace Engine {
 					if ( lagData.IsValid( ) ) {
 						lagData->m_iMissedShots = 0;
 						lagData->m_iMissedStand1 = 0;
-						
+						lagData->m_iResolverMode = eResolverModes::NONE;
 					}
 				}
 

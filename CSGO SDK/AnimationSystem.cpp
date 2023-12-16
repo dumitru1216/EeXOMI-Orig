@@ -909,18 +909,22 @@ namespace Engine
 		  data.m_flNextBodyUpdate = Entity->m_flAnimationTime( ) + 0.22f;
 		  data.m_bPredictingUpdates = false;
 		  data.m_iResolverMode = eResolverModes::PRED_22;
+		  lag_data->m_iResolverMode = eResolverModes::PRED_22;
 
-		  /* lby upd */
+		  /* reso mode */
 		  g_ResolverData[ index ].m_ResolverText = "0.22";
 	  }
 	  else if ( Entity->m_flAnimationTime( ) >= data.m_flNextBodyUpdate && !current->m_bFakeWalking ) {
 		  data.m_flNextBodyUpdate = Entity->m_flAnimationTime( ) + 1.1f;
 		  data.m_bPredictingUpdates = true;
+
+		  /* reso mode */
 		  data.m_iResolverMode = eResolverModes::PRED_11;
+		  lag_data->m_iResolverMode = eResolverModes::PRED_11;
 
 		  current->m_angEyeAngles.y = Entity->m_flLowerBodyYawTarget( );
 
-		  /* lby upd */
+		  /* reso mode */
 		  g_ResolverData[ index ].m_ResolverText = "1.1";
 	  }
 
@@ -940,7 +944,10 @@ namespace Engine
 			 
 		  /* lby upd */
 		  g_ResolverData[index].m_ResolverText = "LBY UPDATE";
+
+		  /* reso mode */
 		  data.m_iResolverMode = eResolverModes::LBYU;
+		  lag_data->m_iResolverMode = eResolverModes::LBYU;
 
 	  } else if ( abs( Entity->m_vecVelocity( ).Length2D( ) ) > 29.f && ( Entity->m_fFlags( ) & FL_ONGROUND ) ) {
 		  current->m_angEyeAngles.y = Entity->m_flLowerBodyYawTarget( );
@@ -978,7 +985,9 @@ namespace Engine
 		  Math::VectorAngles( local->m_vecOrigin( ) - current->m_vecOrigin, angle_away );
 
 		  if ( data.m_bCollectedValidMoveData ) {
+			  /* resolver mode */
 			  data.m_iResolverMode = eResolverModes::STAND_VM;
+			  lag_data->m_iResolverMode = eResolverModes::STAND_VM;
 
 			  /* WE VE got lastmove */
 			  auto m_bLastMoveValid = [ & ]( )-> bool {
@@ -988,12 +997,16 @@ namespace Engine
 
 			  if ( m_bLastMoveValid( ) && ( lag_data->m_iMissedStand1 < 2 ) ) {
 				  current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
+
+				  /* resolver mode */
 				  data.m_iResolverMode = eResolverModes::STAND_LM;
+				  lag_data->m_iResolverMode = eResolverModes::STAND_LM;
 
 				  g_ResolverData[ index ].m_ResolverText = "VM:LM";
 			  }
 		  } else {
 			  data.m_iResolverMode = eResolverModes::STAND;
+			  lag_data->m_iResolverMode = eResolverModes::STAND;
 
 			  auto lby_delta = Entity->m_flLowerBodyYawTarget( );
 			  float angle_lby = 0.0f;
@@ -1025,6 +1038,7 @@ namespace Engine
 		  g_ResolverData[ index ].m_ResolverText = "AIR";
 
 		  data.m_iResolverMode = eResolverModes::AIR;
+		  lag_data->m_iResolverMode = eResolverModes::AIR;
 	  }
 
 	  player->SetEyeAngles( current->m_angEyeAngles ); // we set that for visual resolving
