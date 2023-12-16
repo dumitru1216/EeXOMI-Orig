@@ -444,3 +444,7 @@ void CCollisionProperty::SetCollisionBounds( const Vector& mins, const Vector& m
    static auto mem = ( Fn )Memory::Scan( XorStr( "client.dll" ), XorStr( "53 8B DC 83 EC 08 83 E4 F8 83 C4 04 55 8B 6B 04 89 6C 24 04 8B EC 83 EC 10 56 57 8B 7B" ) );   
    mem( this, mins, maxs );
 }
+
+float C_BaseEntity::m_flAnimationTime( ) {
+	return m_flOldSimulationTime( ) + Source::m_pGlobalVars->interval_per_tick;
+}

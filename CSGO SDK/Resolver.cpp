@@ -154,6 +154,7 @@ end:
 }
 
 C_BruteforceData g_BruteforceData[ 65 ] = {};
+ResolverData_t g_ResolverData[ 65 ] = {};
 
 namespace Engine
 {

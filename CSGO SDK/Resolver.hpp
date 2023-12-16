@@ -31,6 +31,33 @@ struct C_BruteforceData {
 
 extern C_BruteforceData g_BruteforceData[ 65 ];
 
+enum eResolverModes {
+	NONE,
+	STAND,
+	STAND_VM,
+	AIR,
+	PRED_22,
+	PRED_11,
+	LBYU
+};
+
+struct ResolverData_t {
+	struct LastMoveData_t {
+		float m_flLowerBodyYawTarget;
+		float m_flSimulationTime;
+		float m_flAnimTime;
+		Vector m_vecOrigin;
+	};
+	LastMoveData_t m_sMoveData;
+
+	std::string m_ResolverText;
+
+	float m_flNextBodyUpdate;
+	int m_iResolverMode;
+	bool m_bPredictingUpdates, m_bCollectedValidMoveData;
+};
+extern ResolverData_t g_ResolverData[ 65 ];
+
 namespace Engine
 {
    struct ShotSnapshot {

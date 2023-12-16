@@ -36,6 +36,7 @@ namespace Engine
 	  bool m_bIsShoting;
 	  bool m_bTeleportDistance;
 	  bool m_bShiftingTickbase;
+	  bool m_bFakeWalking;
 
 	  bool m_bNoFakeAngles;
 	  bool m_bAnimationResolverUsed;

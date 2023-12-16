@@ -3,7 +3,7 @@
 #include "Math.h"
 #include "SetupBones.hpp"
 #include "Utils\threading.h"
-
+#include "Resolver.hpp"
 #define MT_SETUP_BONES
 
 namespace Engine
@@ -402,16 +402,14 @@ namespace Engine
 
 	  this->m_vecSimulationData.clear( );
 
-	  AnimationResolver( record, previous_record );
-
 	  this->m_iResolverSide = record->m_iResolverSide;
 
-	  float delta_1 = std::fabsf( std::remainderf( this->m_Animations[ 2 ].m_flAbsRotation - this->m_Animations[ 0 ].m_flAbsRotation, 360.f ) );
-	  float delta_2 = std::fabsf( std::remainderf( this->m_Animations[ 1 ].m_flAbsRotation - this->m_Animations[ 0 ].m_flAbsRotation, 360.f ) );
-
-	  if ( g_Vars.rage.enabled ) {
-		 record->m_bNoFakeAngles = delta_1 <= 0.1f && delta_2 <= 0.1f;
-	  }
+	  //float delta_1 = std::fabsf( std::remainderf( this->m_Animations[ 2 ].m_flAbsRotation - this->m_Animations[ 0 ].m_flAbsRotation, 360.f ) );
+	  //float delta_2 = std::fabsf( std::remainderf( this->m_Animations[ 1 ].m_flAbsRotation - this->m_Animations[ 0 ].m_flAbsRotation, 360.f ) );
+	  //
+	  //if ( g_Vars.rage.enabled ) {
+		// record->m_bNoFakeAngles = delta_1 <= 0.1f && delta_2 <= 0.1f;
+	  //}
    }
 
    void C_AnimationData::Collect( C_CSPlayer* player ) {
@@ -539,6 +537,7 @@ namespace Engine
 	  record->m_flDuckAmount = player->m_flDuckAmount( );
 
 	  record->m_bIsShoting = false;
+	  record->m_bFakeWalking = false;
 	  record->m_flShotTime = 0.0f;
 
 	  if ( previous_record.IsValid( ) ) {
@@ -654,6 +653,16 @@ namespace Engine
 			velocity.z -= g_Vars.sv_gravity->GetFloat( ) * record->m_flChokeTime * 0.5f;
 		 else
 			velocity.z = 0.0f;
+
+
+		 if ( record->m_vecVelocity.Length( ) > 1.f &&
+			  record->m_iChokeTicks >= 12 &&
+			  record->m_serverAnimOverlays[ 12 ].m_flWeight == 0.0f &&
+			  record->m_serverAnimOverlays[ 6 ].m_flWeight == 0.0f &&
+			  record->m_serverAnimOverlays[ 6 ].m_flPlaybackRate < 0.0001f &&
+			  ( record->m_fFlags & FL_ONGROUND ) ) {
+			 record->m_bFakeWalking = true;
+		 }
 	  }
 
 	  if ( !record->m_bShiftingTickbase
@@ -761,6 +770,7 @@ namespace Engine
 			player->m_AnimOverlay( ).Base( )[ i ].m_pStudioHdr = player->m_pStudioHdr( );
 		 }
 
+
 		 g_Vars.globals.m_bUpdatingAnimations = true;
 		 player->FixedAnimationsUpdate( );
 		 g_Vars.globals.m_bUpdatingAnimations = false;
@@ -775,7 +785,11 @@ namespace Engine
 
 		 player->InvalidatePhysicsRecursive( 2 | 8 | 32 );
 	  };
+	  
 
+	  AnimationResolver( current, previous );
+
+	  // end 
 	  auto animState = player->m_PlayerAnimState( );
 
 	  if ( previous.IsValid( ) ) {
@@ -795,7 +809,6 @@ namespace Engine
 		 *( float* ) ( uintptr_t( animState ) + 0x180 ) = current->m_serverAnimOverlays[ 12 ].m_flWeight;
 	  }
 
-	  float MAX_ROTATION = animState->GetDesyncDelta( );
 	  if ( this->m_vecSimulationData.size( ) > 1 && current->m_iChokeTicks != 1 ) {
 		 SimulationRestore restore;
 		 restore.Setup( player );
@@ -806,15 +819,6 @@ namespace Engine
 			   player->m_fFlags( ) |= FL_ONGROUND;
 			} else {
 			   player->m_fFlags( ) &= ~FL_ONGROUND;
-			}
-
-			if ( resolverIndex != 0 && ( it + 1 ) != this->m_vecSimulationData.end( ) && ( !current->m_bIsShoting || current->m_flShotTime > simData.m_flTime ) ) {
-			   float yaw = player->m_angEyeAngles( ).yaw;
-			   if ( resolverIndex <= 0 )
-				  yaw -= player->m_flLowerBodyYawTarget();
-			   else
-				  yaw += player->m_flLowerBodyYawTarget( );
-			   animState->m_flAbsRotation = std::remainderf( yaw, 360.0f );
 			}
 
 			player->m_vecOrigin( ) = simData.m_vecOrigin;
@@ -830,22 +834,6 @@ namespace Engine
 	  } else {
 		 this->player->SetAbsVelocity( current->m_vecVelocity );
 		 this->player->SetAbsOrigin( current->m_vecOrigin );
-
-		 if ( resolverIndex ) {
-			float yaw = current->m_angEyeAngles.yaw;
-			if ( previous.IsValid( ) && !previous->m_bIsInvalid ) {
-			   if ( resolverIndex <= 0 )
-				  yaw = this->m_Animations[ 1 ].m_flAbsRotation;
-			   else
-				  yaw = this->m_Animations[ 2 ].m_flAbsRotation;
-			} else {
-			   if ( resolverIndex <= 0 )
-				  yaw = current->m_angEyeAngles.yaw - player->m_flLowerBodyYawTarget( ) + 110.f;
-			   else
-				  yaw = current->m_angEyeAngles.yaw + player->m_flLowerBodyYawTarget( ) + 110.f;
-			}
-			animState->m_flAbsRotation = std::remainderf( yaw, 360.0f );
-		 }
 
 		 UpdateAnimations( player, current->m_flSimulationTime );
 	  }
@@ -873,51 +861,160 @@ namespace Engine
 		 return;
 	  }
 
-	  if ( current->m_fFlags & FL_ONGROUND && previous->m_fFlags & FL_ONGROUND && !current->m_bShiftingTickbase && !AnimationData->m_bSuppressAnimationResolver ) {
-		 float speed = player->m_vecVelocity( ).Length2D( );
-		 if ( speed <= 0.1f ) {
-			if ( current->m_serverAnimOverlays[ 3 ].m_flWeight == 0.0f && current->m_serverAnimOverlays[ 3 ].m_flCycle == 0.0f &&
-				 current->m_serverAnimOverlays[ 6 ].m_flWeight == 0.0f ) {
-			   float delta = std::remainderf( this->m_Animations[ 1 ].m_flAbsRotation - player->m_angEyeAngles( ).yaw, 360.f );
-			   current->m_iResolverSide = 2 * ( delta <= 0.0 ) - 1;
-			   current->m_bAnimationResolverUsed = true;
-			}
-		 } else {
-			// TODO: improve this check
-			auto lean_check = [&] ( ) {
-			#if 1
-			   // yaw rate
-			   if ( int( current->m_serverAnimOverlays[ 6 ].m_flWeight * 1000.0f ) != int( previous->m_serverAnimOverlays[ 6 ].m_flWeight * 1000.0f ) )
-				  return false;
+	  int index = this->player->entindex( );
 
-			   // lean check
-			   if ( !( int( current->m_serverAnimOverlays[ 12 ].m_flWeight * 1000.0f ) ) )
-				  return true;
+	  static float moving_sim[ 65 ];
+	  static float stored_lby[ 65 ];
+	  static float old_lby[ 65 ];
+	  static float lby_delta[ 65 ];
+	  static float predicted_yaw[ 65 ];
+	  static bool lby_changes[ 65 ];
+	  static int shots_check[ 65 ];
+	  static float angle_brute[ 65 ];
+	  static float AtTargetAngle;
+	  static float FixPitch;
+	  static float FixPitch2;
+	  static bool HitNS[ 65 ];
+	  static Vector StoredAngle[ 65 ];
+	  static Vector Hitstored[ 65 ];
+	  static int StoredShots[ 65 ];
+	  static int HitShots[ 65 ];
+	  static int HitShotsStored[ 65 ];
+	  
+	  auto Entity = this->player;
 
-			   if ( int( current->m_serverAnimOverlays[ 12 ].m_flWeight * 1000.0f ) == int( previous->m_serverAnimOverlays[ 12 ].m_flWeight * 1000.0f ) )
-				  return true;
-			#endif
-			   return false;
-			};
+	  auto NormalizeYaw = [ ]( float yaw ) -> float {
+		  if ( yaw > 180 )
+			  yaw -= ( round( yaw / 360 ) * 360.f );
+		  else if ( yaw < -180 )
+			  yaw += ( round( yaw / 360 ) * -360.f );
 
-			// check if animation synced correctly
-			if ( lean_check( ) ) {
-			   auto delta_fake = int( current->m_serverAnimOverlays[ 6 ].m_flPlaybackRate - current->fakeLayersFake[ 6 ].m_flPlaybackRate );
-			   auto delta_right = int( current->m_serverAnimOverlays[ 6 ].m_flPlaybackRate - current->fakeLayersRight[ 6 ].m_flPlaybackRate );
-			   auto delta_left = int( current->m_serverAnimOverlays[ 6 ].m_flPlaybackRate - current->fakeLayersLeft[ 6 ].m_flPlaybackRate );
+		  return yaw;
+	  };
 
-			   if ( delta_fake < delta_right || delta_left <= delta_right || int( delta_right * 1000.0f ) ) {
-				  if ( delta_fake >= delta_left && delta_right > delta_left && !( int( delta_left * 1000.0f ) ) ) {
-					 current->m_iResolverSide = 1;
-					 current->m_bAnimationResolverUsed = true;
-				  }
-			   } else {
-				  current->m_iResolverSide = -1;
-				  current->m_bAnimationResolverUsed = true;
-			   }
-			}	
-		 }
+	  /* use global data*/
+	  auto data = g_ResolverData[ index ];
+
+	  /* lets detect lm lby */
+	  if ( current->m_vecVelocity.Length2D( ) > 0.1f && !current->m_bFakeWalking ) {	  
+		  data.m_flNextBodyUpdate = Entity->m_flAnimationTime( ) + 0.22f;
+		  data.m_bPredictingUpdates = false;
+		  data.m_iResolverMode = eResolverModes::PRED_22;
+
+		  /* lby upd */
+		  g_ResolverData[ index ].m_ResolverText = "0.22";
+	  }
+	  else if ( Entity->m_flAnimationTime( ) >= data.m_flNextBodyUpdate && !current->m_bFakeWalking ) {
+		  data.m_flNextBodyUpdate = Entity->m_flAnimationTime( ) + 1.1f;
+		  data.m_bPredictingUpdates = true;
+		  data.m_iResolverMode = eResolverModes::PRED_11;
+
+		  current->m_angEyeAngles.y = Entity->m_flLowerBodyYawTarget( );
+
+		  /* lby upd */
+		  g_ResolverData[ index ].m_ResolverText = "1.1";
 	  }
 
+	  if ( stored_lby[ index ] != Entity->m_flLowerBodyYawTarget( ) ) {
+		  old_lby[ index ] = stored_lby[ index ];
+		  lby_changes[ index ] = true;
+		  stored_lby[ index ] = Entity->m_flLowerBodyYawTarget( );
+	  }
+
+	  lby_delta[ index ] = NormalizeYaw( stored_lby[ index ] - old_lby[ index ] );
+
+	  if ( stored_lby[ index ] != Entity->m_flLowerBodyYawTarget( ) ) {
+		  old_lby[ index ] = stored_lby[ index ];
+		  current->m_angEyeAngles.y = Entity->m_flLowerBodyYawTarget( );
+		  lby_changes[ index ] = true;
+		  stored_lby[ index ] = Entity->m_flLowerBodyYawTarget( );
+			 
+		  /* lby upd */
+		  g_ResolverData[index].m_ResolverText = "LBY UPDATE";
+		  data.m_iResolverMode = eResolverModes::LBYU;
+
+	  } else if ( abs( Entity->m_vecVelocity( ).Length2D( ) ) > 29.f && ( Entity->m_fFlags( ) & FL_ONGROUND ) ) {
+		  current->m_angEyeAngles.y = Entity->m_flLowerBodyYawTarget( );
+		  moving_sim[ index ] = Entity->m_flSimulationTime( );
+		  lby_changes[ index ] = false;
+		  predicted_yaw[ index ] = 0;
+		  angle_brute[ index ] = 0;
+
+		  data.m_sMoveData.m_flLowerBodyYawTarget = Entity->m_flLowerBodyYawTarget( );
+		  data.m_bCollectedValidMoveData = false;
+
+		  g_ResolverData[ index ].m_ResolverText = "MOVING";
+	  } else if ( ( Entity->m_fFlags( ) & FL_ONGROUND ) ) {
+		  /* we have a valid move record */
+		  static Vector vDormantOrigin;
+		  if ( player->IsDormant( ) ) {
+			  data.m_bCollectedValidMoveData = false;
+			  vDormantOrigin = current->m_vecOrigin;
+		  } else {
+			  Vector delta = vDormantOrigin - current->m_vecOrigin;
+			  if ( delta.Length( ) > 16.f ) {
+				  data.m_bCollectedValidMoveData = true;
+				  vDormantOrigin = Vector( );
+			  }
+		  }
+
+		  auto local = C_CSPlayer::GetLocalPlayer( );
+		  if ( !local || !g_Vars.globals.HackIsReady )
+			  return;
+
+		  /* just angle away */
+		  Vector angle_away;
+		  Math::VectorAngles( local->m_vecOrigin( ) - current->m_vecOrigin, angle_away );
+
+		  if ( data.m_bCollectedValidMoveData ) {
+			  data.m_iResolverMode = eResolverModes::STAND_VM;
+
+			  /* WE VE got lastmove */
+			  auto m_bLastMoveValid = [ & ]( )-> bool {
+				  const auto fl_delta = std::fabsf( Math::AngleNormalize( angle_away.y - data.m_sMoveData.m_flLowerBodyYawTarget ) );
+				  return fl_delta > 20.f && fl_delta < 160.f;
+				  };
+
+			  if ( m_bLastMoveValid( ) ) {
+				  current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
+
+				  g_ResolverData[ index ].m_ResolverText = "VM:LM";
+			  }
+		  } else {
+			  data.m_iResolverMode = eResolverModes::STAND;
+
+			  auto lby_delta = Entity->m_flLowerBodyYawTarget( );
+			  float angle_lby = 0.0f;
+
+			  if ( lby_delta < 85.f && lby_delta > -85.f ) {
+				  angle_lby = lby_delta;
+			  } else if ( lby_delta > 85.f ) {
+				  if ( lby_delta < 180.f ) {
+					  g_ResolverData[ index ].m_ResolverText = "NVM:110";
+					  angle_lby = 110.f;
+				  }
+			  } else if ( lby_delta < 85.f ) {
+				  if ( lby_delta > -180.f ) {
+					  if ( lby_delta < -85.f ) {
+						  angle_lby = -110.f;
+						  g_ResolverData[ index ].m_ResolverText = "NVM:-110";
+					  } else {
+						  g_ResolverData[ index ].m_ResolverText = "NVM:LD:1";
+						  angle_lby = lby_delta;
+					  }
+				  }
+			  }
+
+			  current->m_angEyeAngles.y = angle_lby;
+		  }
+
+	  } else {
+		  current->m_angEyeAngles.y = Entity->m_flLowerBodyYawTarget( );
+		  g_ResolverData[ index ].m_ResolverText = "AIR";
+
+		  data.m_iResolverMode = eResolverModes::AIR;
+	  }
+
+	  player->SetEyeAngles( current->m_angEyeAngles ); // we set that for visual resolving
    }
 }

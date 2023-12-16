@@ -2080,7 +2080,7 @@ namespace Source
 				  msg << XorStr( " | " );
 				  msg << XorStr( " hc: " ) << best_point->hitchance;
 				  msg << XorStr( " | " );
-				  msg << XorStr( " r: " ) << best_point->target->side << XorStr( " | " ) << g_Vars.globals.m_iResolverType2[ best_point->target->player->entindex( ) ] << XorStr( " | " ) << g_Vars.globals.m_iResolverType[ best_point->target->player->entindex( ) ];
+				  msg << XorStr( " r: " ) << g_ResolverData[ best_point->target->player->entindex()].m_ResolverText;
 				  msg << XorStr( " | " );
 				  msg << XorStr( " safe: " ) << int( best_point->is_safe );
 				  msg << XorStr( " | " );
@@ -2100,48 +2100,6 @@ namespace Source
 			   }
 			#endif
 
-			#ifdef BETA_MODE 
-			   if ( Source::m_pEngine->GetPlayerInfo( best_point->target->player->entindex( ), &info ) ) {
-				  int ping = 0;
-
-				  auto netchannel = Encrypted_t<INetChannel>( Source::m_pEngine->GetNetChannelInfo( ) );
-				  if ( !netchannel.IsValid( ) )
-					 ping = 0;
-				  else
-					 ping = static_cast< int >( netchannel->GetLatency( FLOW_OUTGOING ) * 1000.0f );
-
-				  msg << XorStr( "fired shot at " ) << FixedStrLenght( info.szName ).c_str( );
-				  msg << XorStr( " | " );
-				  msg << TranslateHitbox( best_point->hitbox_idx ).c_str( );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " bt: " ) << TIME_TO_TICKS( lagData->m_History.front( ).m_flSimulationTime - best_point->target->record->m_flSimulationTime );
-				  msg << XorStr( " (" ) << lagData->m_History.front( ).m_flSimulationTime - best_point->target->record->m_flSimulationTime << XorStr( "s) " );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " hp: " ) << best_point->target->player->m_iHealth( );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " p hp: " ) << Math::Clamp<int>( best_point->target->player->m_iHealth( ) - int( best_point->damage ), 0, best_point->target->player->m_iHealth( ) );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " dmg: " ) << int( best_point->damage );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " hc: " ) << best_point->hitchance;
-				  msg << XorStr( " | " );
-				  msg << XorStr( " r: " ) << best_point->target->side << XorStr( " | " ) << g_Vars.globals.m_iResolverType2[ best_point->target->player->entindex( ) ] << XorStr( " | " ) << g_Vars.globals.m_iResolverType[ best_point->target->player->entindex( ) ];
-				  msg << XorStr( " | " );
-				  msg << XorStr( " safe: " ) << int( best_point->is_safe );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " s safe: " ) << int( best_point->is_static_safe );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " sp: " ) << int( *rageData->m_pSendPacket );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " shot: " ) << int( best_point->target->record->m_bIsShoting );
-				  msg << XorStr( " | " );
-				  msg << XorStr( " miss: " ) << lagData->m_iMissedShots;
-				  msg << XorStr( " | " );
-				  msg << XorStr( " ping: " ) << int( ping );
-
-				  ILoggerEvent::Get( )->PushEvent( msg.str( ), FloatColor( 0.5f, 0.5f, 0.5f ) );
-			   }
-			#endif
 
 			   Engine::C_Resolver::Get( )->CreateSnapshot( best_point->target->player, rageData->m_vecEyePos, best_point->point, best_point->target->record, best_point->target->side, best_point->hitgroup );
 
@@ -2502,52 +2460,10 @@ namespace Source
 	  static bool prev_right_side = false;
 	  static bool prev_left_side = false;
 
-	  if ( record->m_bIsNoDesyncAnimation ) {
-		 g_Vars.globals.m_iResolverType[ player->entindex( ) ] = 15;
-		 g_BruteforceData[ player->m_entIndex ].LastResolverAttempt = Source::m_pGlobalVars->tickcount;
-		 g_BruteforceData[ player->m_entIndex ].LastResolverSide = 0;
-		 g_BruteforceData[ player->m_entIndex ].LastAnimationResolverSide = g_BruteforceData[ player->m_entIndex ].LastResolverSide;
-	  } else if ( record->m_iRecordPriority == 3 && record->m_iResolverSide != 0 ) {
-		 g_Vars.globals.m_iResolverType[ player->entindex( ) ] = 11;
-		 g_BruteforceData[ player->m_entIndex ].LastResolverAttempt = Source::m_pGlobalVars->tickcount;
-		 g_BruteforceData[ player->m_entIndex ].LastResolverSide = ( record->m_iResolverSide == -1 ) + 1;
-		 g_BruteforceData[ player->m_entIndex ].LastAnimationResolverSide = g_BruteforceData[ player->m_entIndex ].LastResolverSide;
-	  } else {
-		 float left_damage = 0.f, right_damage = 0.f;
-		 record->Apply( player, -1 );
-		 right_damage = check_hitbox( player, record, HITBOX_HEAD );
-		 record->Apply( player, 1 );
-		 left_damage = check_hitbox( player, record, HITBOX_HEAD );
-		 record->Apply( player );
-		 bool right_side = right_damage >= 1.f;
-		 bool left_side = left_damage >= 1.f;
-
-		 if ( right_damage >= 0.f || left_damage >= 0.f ) {
-			if ( left_damage < right_damage )
-			   g_BruteforceData[ player->m_entIndex ].LastResolverSide = 2;
-			else
-			   g_BruteforceData[ player->m_entIndex ].LastResolverSide = 1;
-
-			v36 = Source::m_pGlobalVars->tickcount;
-			g_Vars.globals.m_iResolverType[ player->entindex( ) ] = 12;
-		 } else if ( right_side != left_side ) {
-			g_Vars.globals.m_iResolverType[ player->entindex( ) ] = 10;
-			v36 = Source::m_pGlobalVars->tickcount;
-			g_BruteforceData[ player->m_entIndex ].LastResolverAttempt = Source::m_pGlobalVars->tickcount;
-			if ( left_damage < 1.f ) {
-			   g_BruteforceData[ player->m_entIndex ].LastResolverSide = 2;
-			   g_BruteforceData[ player->m_entIndex ].LastAnimationResolverSide = g_BruteforceData[ player->m_entIndex ].LastResolverSide;
-			}
-			if ( !right_side ) {
-			   g_BruteforceData[ player->m_entIndex ].LastResolverSide = 1;
-			   g_BruteforceData[ player->m_entIndex ].LastAnimationResolverSide = g_BruteforceData[ player->m_entIndex ].LastResolverSide;
-			}
-		 } else {
-			v36 = Source::m_pGlobalVars->tickcount;
-			g_BruteforceData[ player->m_entIndex ].LastResolverAttempt = v36;
-		 }
-		 //v36 = Source::m_pGlobalVars->tickcount;
-	  }
+	  float left_damage = 0.f, right_damage = 0.f;
+	  record->Apply( player, -1 );
+	  record->Apply( player, 1 );
+	  record->Apply( player );
 
 	  auto hitboxSet = hdr->pHitboxSet( player->m_nHitboxSet( ) );
 

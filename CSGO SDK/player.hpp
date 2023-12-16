@@ -77,6 +77,7 @@ public:
 
 public:
    CCSGOPlayerAnimState*& m_PlayerAnimState( );
+   void SetEyeAngles( QAngle Angle );
    QAngle& m_angEyeAngles( );
    int& m_nSurvivalTeam( );
    int& m_ArmorValue( );

@@ -188,6 +188,11 @@ CCSGOPlayerAnimState*& C_CSPlayer::m_PlayerAnimState( ) {
    return *( CCSGOPlayerAnimState** ) ( ( uintptr_t ) this + Engine::Displacement.C_CSPlayer.m_PlayerAnimState );
 }
 
+void C_CSPlayer::SetEyeAngles( QAngle Angle ) {
+	static int m_angEyeAngles = Engine::Displacement.DT_CSPlayer.m_angEyeAngles;
+	*reinterpret_cast< QAngle* >( uintptr_t( this ) + m_angEyeAngles ) = Angle;
+}
+
 QAngle& C_CSPlayer::m_angEyeAngles( ) {
    return *( QAngle* ) ( ( uintptr_t ) this + Engine::Displacement.DT_CSPlayer.m_angEyeAngles );
 }

@@ -249,7 +249,7 @@ public:
 
    float& m_flSimulationTime( );
    float& m_flOldSimulationTime( );
-
+   float m_flAnimationTime( );
 public:
    static void SetPredictionRandomSeed( const CUserCmd* cmd );
    static void SetPredictionPlayer( C_BasePlayer* player );
