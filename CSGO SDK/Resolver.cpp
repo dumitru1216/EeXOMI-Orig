@@ -395,12 +395,7 @@ namespace Engine {
 						lagData->m_iMissedStand1 = 0;
 						lagData->m_iMissedStand2 = 0;
 
-						g_ResolverData[ i ].m_bBrutingLastmove = false;
-						g_ResolverData[ i ].m_bCollectedValidMoveData = false;
-						g_ResolverData[ i ].m_bPredictingUpdates = false;
-
-						g_ResolverData[ i ].m_flNextBodyUpdate = 0.f;
-						g_ResolverData[ i ].m_sMoveData.m_flLowerBodyYawTarget = 0.f;
+						g_ResolverData[ i ].Reset( );
 
 						lagData->m_iResolverMode = eResolverModes::NONE;
 					}
@@ -415,12 +410,7 @@ namespace Engine {
 						lagData->m_iMissedStand1 = 0;
 						lagData->m_iMissedStand2 = 0;
 
-						g_ResolverData[ i ].m_bBrutingLastmove = false;
-						g_ResolverData[ i ].m_bCollectedValidMoveData = false;
-						g_ResolverData[ i ].m_bPredictingUpdates = false;
-
-						g_ResolverData[ i ].m_flNextBodyUpdate = 0.f;
-						g_ResolverData[ i ].m_sMoveData.m_flLowerBodyYawTarget = 0.f;
+						g_ResolverData[ i ].Reset( );
 
 						lagData->m_iResolverMode = eResolverModes::NONE;
 					}

@@ -784,6 +784,14 @@ namespace Engine {
 			return;
 		}
 
+		auto local = C_CSPlayer::GetLocalPlayer( );
+		if ( !local || !g_Vars.globals.HackIsReady )
+			return;
+
+		/* just angle away */
+		Vector angle_away;
+		Math::VectorAngles( local->m_vecOrigin( ) - current->m_vecOrigin, angle_away );
+
 		int index = this->player->entindex( );
 		auto Entity = this->player;
 
@@ -796,6 +804,22 @@ namespace Engine {
 			return yaw;
 			};
 
+		auto m_bIsYawSideways = [ & ]( float yaw ) -> bool {
+			const auto at_target_yaw = angle_away.y;
+
+			const float delta = Math::AngleDiff( at_target_yaw, yaw );
+
+			return delta > 25.f && delta < 165.f;
+		};
+
+		auto m_bIsYawSideways1 = [ & ]( float yaw ) -> bool {
+			const auto at_target_yaw = angle_away.y;
+
+			const float delta = Math::AngleDiff( at_target_yaw, yaw );
+
+			return delta > 35.f && delta < 145.f;
+		};
+
 		/* use global data*/
 		auto data = g_ResolverData[ index ];
 
@@ -803,6 +827,9 @@ namespace Engine {
 		if ( current->m_vecVelocity.Length2D( ) > 0.1f && !current->m_bFakeWalking ) {
 			data.m_flNextBodyUpdate = Entity->m_flAnimationTime( ) + 0.22f;
 			data.m_bPredictingUpdates = false;
+			data.m_bBrokeLby = true;
+
+			/* store */
 			data.m_iResolverMode = eResolverModes::PRED_22;
 			lag_data->m_iResolverMode = eResolverModes::PRED_22;
 
@@ -811,6 +838,7 @@ namespace Engine {
 		} else if ( ( Entity->m_flAnimationTime( ) >= data.m_flNextBodyUpdate ) && !current->m_bFakeWalking && lag_data->m_iMissedStand1 < 1 ) { // fix overspam it, go for brute
 			data.m_flNextBodyUpdate = Entity->m_flAnimationTime( ) + 1.1f;
 			data.m_bPredictingUpdates = true;
+			data.m_bBrokeLby = true;
 
 			/* reso mode */
 			data.m_iResolverMode = eResolverModes::PRED_11;
@@ -829,32 +857,30 @@ namespace Engine {
 			current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
 
 			data.m_sMoveData.m_flLowerBodyYawTarget = current->m_flLowerBodyYawTarget;
+			data.m_sMoveData.m_vecOrigin = current->m_vecOrigin;
+			data.m_sMoveData.m_flAnimTime = player->m_flAnimationTime( );
+
 			data.m_bCollectedValidMoveData = false;
+			data.m_bBrokeLby = false;
 
 			g_ResolverData[ index ].m_ResolverText = "MOVING";
 		} else if ( ( current->m_fFlags & FL_ONGROUND ) ) {
 			/* we have a valid move record */
-			static Vector vDormantOrigin;
-			if ( player->IsDormant( ) ) {
+			if ( player->IsDormant( ) ) { /* store these shits */
 				data.m_bCollectedValidMoveData = false;
-				vDormantOrigin = current->m_vecOrigin;
 			} else {
-				Vector delta = vDormantOrigin - current->m_vecOrigin;
-				if ( delta.Length( ) > 16.f ) {
+				Vector delta = data.m_sMoveData.m_vecOrigin - current->m_vecOrigin;
+				if ( delta.Length( ) > 16.f ) { /* proper way? */
 					data.m_bCollectedValidMoveData = true;
-					vDormantOrigin = Vector( ); /* keep this */
 				} else if ( delta.Length( ) < 16.f ) { /* we weren't checking this */
 					data.m_bCollectedValidMoveData = false;
 				}
 			}
 
-			auto local = C_CSPlayer::GetLocalPlayer( );
-			if ( !local || !g_Vars.globals.HackIsReady )
-				return;
+			bool m_bIsSideways_Lamb = m_bIsYawSideways1( data.m_sMoveData.m_flLowerBodyYawTarget );
+			bool m_bIsBackwards = !m_bIsSideways_Lamb || Math::AngleDiff( data.m_sMoveData.m_flLowerBodyYawTarget, angle_away.y + 180.f ) <= 60.f;
 
-			/* just angle away */
-			Vector angle_away;
-			Math::VectorAngles( local->m_vecOrigin( ) - current->m_vecOrigin, angle_away );
+			float m_flAnimTime = player->m_flAnimationTime( ) - data.m_sMoveData.m_flAnimTime;
 
 			if ( data.m_bCollectedValidMoveData ) {
 				/* WE VE got lastmove */
@@ -871,6 +897,14 @@ namespace Engine {
 					lag_data->m_iResolverMode = eResolverModes::STAND_LM;
 
 					g_ResolverData[ index ].m_ResolverText = "VM:LM";
+				} else if ( m_flAnimTime < 0.22 && !data.m_bBrokeLby ) {
+					current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
+
+					/* resolver mode */
+					data.m_iResolverMode = eResolverModes::PRED_LBY;
+					lag_data->m_iResolverMode = eResolverModes::PRED_LBY;
+
+					g_ResolverData[ index ].m_ResolverText = "LBY(22)";
 				} /* im not sure if the logic is right theere */
 				else if ( lag_data->m_iMissedStand1 > 1 /* after 1 */ && lag_data->m_iMissedStand2 < 6 /* do not exceed brute elements */ ) {
 
@@ -886,11 +920,11 @@ namespace Engine {
 						break;
 						case 1:
 							g_ResolverData[ index ].m_ResolverText = "BVM:L+";
-							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget + 110.f;
+							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget + 67.f;
 						break;
 						case 2: 
 							g_ResolverData[ index ].m_ResolverText = "BVM:L-";
-							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget - 110.f;
+							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget - 67.f;
 						break;
 						case 3: 
 							g_ResolverData[ index ].m_ResolverText = "BVM:RIGHT";

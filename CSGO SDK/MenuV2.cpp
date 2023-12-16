@@ -1200,7 +1200,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 
 				  ImGui::Checkbox( XorStr( "Friendly fire" ), &g_Vars.rage.team_check );
 				  ImGui::Checkbox( XorStr( "Visual resolver" ), &g_Vars.rage.visual_resolver );
-				  ImGui::Checkbox( XorStr( "Multithreading" ), &g_Vars.rage.rage_multithread );
+				  //ImGui::Checkbox( XorStr( "Multithreading" ), &g_Vars.rage.rage_multithread );
 
 			   } ImGui::EndChild( );
 
@@ -1211,7 +1211,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 
 				  ImGui::Checkbox( XorStr( "Enabled" ), &rbot->active );
 				  ImGui::Checkbox( XorStr( "Silent aim" ), &rbot->silent_aim );
-				  ImGui::Checkbox( XorStr( "On shot" ), &rbot->on_shot_aa );
+				 // ImGui::Checkbox( XorStr( "On shot" ), &rbot->on_shot_aa );
 				  //ImGui::Checkbox( XorStr( "Accurate shot" ), &rbot->improve_accuracy_on_shot );
 				  ImGui::Checkbox( XorStr( "Compensate spread" ), &rbot->no_spread );
 				  ImGui::Checkbox( XorStr( "Automatic penetration" ), &rbot->autowall );

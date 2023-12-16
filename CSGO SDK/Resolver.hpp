@@ -39,7 +39,7 @@ enum eResolverModes {
 	AIR,
 	PRED_22,
 	PRED_11,
-	LBYU
+	PRED_LBY
 };
 
 struct ResolverData_t {
@@ -55,7 +55,22 @@ struct ResolverData_t {
 
 	float m_flNextBodyUpdate;
 	int m_iResolverMode;
-	bool m_bPredictingUpdates, m_bCollectedValidMoveData, m_bBrutingLastmove;
+	bool m_bPredictingUpdates, m_bCollectedValidMoveData, m_bBrutingLastmove, m_bBrokeLby;
+
+	__forceinline void Reset( ) {
+		m_sMoveData.m_flAnimTime = 0.f;
+		m_sMoveData.m_flSimulationTime = 0.f;
+		m_sMoveData.m_flLowerBodyYawTarget = 0.f;
+		m_sMoveData.m_vecOrigin = {};
+
+		m_flNextBodyUpdate = 0.f;
+		m_iResolverMode = 0;
+
+		m_bPredictingUpdates = false;
+		m_bCollectedValidMoveData = false;
+		m_bBrutingLastmove = false;
+		m_bBrokeLby = false;
+	}
 };
 extern ResolverData_t g_ResolverData[ 65 ];
 

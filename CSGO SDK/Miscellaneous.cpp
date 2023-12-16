@@ -152,7 +152,7 @@ namespace Source
 	  if ( !g_Vars.misc.chat_spammer )
 		 return;
 
-	  Source::m_pEngine->ClientCmd( XorStr( "say get src right now - vk.com/s1legendirl" ) );
+	  Source::m_pEngine->ClientCmd( XorStr( "say eexomi good" ) );
    }
 
    void C_Miscellaneous::ClantagChanger( ) {
