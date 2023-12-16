@@ -707,7 +707,7 @@ namespace Engine {
 			};
 
 
-		AnimationResolver( current, previous );
+		AnimationResolver( current );
 
 		// end 
 		auto animState = player->m_PlayerAnimState( );
@@ -759,9 +759,9 @@ namespace Engine {
 		}
 	}
 
-	void C_AnimationData::AnimationResolver( Encrypted_t<Engine::C_AnimationRecord> current, Encrypted_t<Engine::C_AnimationRecord> previous ) {
+	void C_AnimationData::AnimationResolver( Encrypted_t<Engine::C_AnimationRecord> current ) {
 		g_Vars.globals.m_iResolverType[ player->entindex( ) ] = 0;
-		if ( !current.Xor( ) || !previous.Xor( ) ) {
+		if ( !current.Xor( ) ) {
 			return;
 		}
 
@@ -808,7 +808,7 @@ namespace Engine {
 
 			/* reso mode */
 			g_ResolverData[ index ].m_ResolverText = "0.22";
-		} else if ( ( Entity->m_flAnimationTime( ) >= data.m_flNextBodyUpdate ) && !current->m_bFakeWalking && !data.m_bBrutingLastmove ) {
+		} else if ( ( Entity->m_flAnimationTime( ) >= data.m_flNextBodyUpdate ) && !current->m_bFakeWalking && lag_data->m_iMissedStand1 < 1 ) { // fix overspam it, go for brute
 			data.m_flNextBodyUpdate = Entity->m_flAnimationTime( ) + 1.1f;
 			data.m_bPredictingUpdates = true;
 
@@ -864,7 +864,6 @@ namespace Engine {
 					};
 
 				if ( m_bLastMoveValid( ) && ( lag_data->m_iMissedStand1 < 1 /* max 1 */ ) ) {
-					data.m_bBrutingLastmove = false;
 					current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
 
 					/* resolver mode */
@@ -874,7 +873,6 @@ namespace Engine {
 					g_ResolverData[ index ].m_ResolverText = "VM:LM";
 				} /* im not sure if the logic is right theere */
 				else if ( lag_data->m_iMissedStand1 > 1 /* after 1 */ && lag_data->m_iMissedStand2 < 6 /* do not exceed brute elements */ ) {
-					data.m_bBrutingLastmove = true;
 
 					/* resolver mode */
 					data.m_iResolverMode = eResolverModes::STAND_BRUTE_1;

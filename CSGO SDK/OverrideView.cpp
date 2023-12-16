@@ -24,11 +24,20 @@ void __fastcall Hooked::OverrideView( void* ECX, int EDX, CViewSetup* vsView ) {
 		 vsView->origin = local->GetAbsOrigin( ) + offset;
 	  }
 
+	  static auto blur_overlay = Source::m_pMatSystem->FindMaterial( XorStr( "dev/scope_bluroverlay" ), "Other textures" );
+	  static auto scope_dirt = Source::m_pMatSystem->FindMaterial( XorStr( "models/weapons/shared/scope/scope_lens_dirt" ), "Other textures" );
+
+	  blur_overlay->SetMaterialVarFlag( MATERIAL_VAR_NO_DRAW, false );
+	  scope_dirt->SetMaterialVarFlag( MATERIAL_VAR_NO_DRAW, false );
+
 	  auto weapon = ( C_WeaponCSBaseGun* ) ( local->m_hActiveWeapon( ).Get( ) );
 	  if ( weapon ) {
 		 auto weapon_data = weapon->GetCSWeaponData( );
 		 if ( weapon_data.IsValid( ) ) {
 			if ( local->m_bIsScoped( ) ) {
+				blur_overlay->SetMaterialVarFlag( MATERIAL_VAR_NO_DRAW, true );
+				scope_dirt->SetMaterialVarFlag( MATERIAL_VAR_NO_DRAW, true );
+
 			   if ( g_Vars.esp.remove_scope_zoom ) {
 				  if ( weapon->m_zoomLevel( ) == 2 ) {
 					 vsView->fov = 45.0f;

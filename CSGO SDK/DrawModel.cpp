@@ -132,5 +132,9 @@ void __fastcall Hooked::DrawModelExecute( void* ECX, void* EDX, IMatRenderContex
 	  }
    }
 
+   // fuck a nigga named shadow
+   if ( strstr( RenderInfo.pModel->szName, XorStr( "shadow" ) ) != nullptr )
+	   return;
+
    Source::IChams::Get( )->DrawModel( ECX, MatRenderContext, DrawModelState, RenderInfo, pCustomBoneToWorld );
 }

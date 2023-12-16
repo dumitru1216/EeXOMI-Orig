@@ -29,7 +29,7 @@ namespace Source
 	  virtual float GetAntiAimY( Encrypted_t<CVariables::ANTIAIM_STATE> settings );
 
 	  // virtual void Shift( Encrypted_t<CUserCmd> cmd, Encrypted_t<CVariables::ANTIAIM_STATE> settings );
-	  virtual void DesyncAnimation( Encrypted_t<CUserCmd> cmd, bool* bSendPacket, Encrypted_t<CVariables::ANTIAIM_STATE> settings );
+	  // virtual void DesyncAnimation( Encrypted_t<CUserCmd> cmd, bool* bSendPacket, Encrypted_t<CVariables::ANTIAIM_STATE> settings );
 	  virtual bool AutoDirection( Encrypted_t<CUserCmd> cmd, Encrypted_t<CVariables::ANTIAIM_STATE> settings );
 	  virtual bool RunAutoDirection( Encrypted_t<CUserCmd> cmd, Encrypted_t<CVariables::ANTIAIM_STATE> settings, bool only_desync );
 	  virtual void AtTarget( Encrypted_t<CUserCmd> cmd, Encrypted_t<CVariables::ANTIAIM_STATE> settings );
@@ -125,12 +125,6 @@ namespace Source
 		 }
 	  }
 
-   #if 0
-	  if ( InputSys::Get( )->IsKeyDown( VirtualKeys::H ) ) {
-		 Source::m_pDebugOverlay->AddLineOverlay( start, plane_dir, 255, 255, 255, false, 4.0f );
-		 Source::m_pDebugOverlay->AddBoxOverlay( plane_dir, Vector( -2.0f, -2.0f, -2.0f ), Vector( 2.0f, 2.0f, 2.0f ), QAngle( 0.0f, 0.0f, 0.0f ), 255, 0, 0, 200, 4.0f );
-	  }
-   #endif
 	  const float MAX_EDGE = 48.0f;
 
 	  Vector v66 = Vector( plane_dir.x - ( best_plane.y * MAX_EDGE ), plane_dir.y - ( best_plane.x * MAX_EDGE ), plane_dir.z );
@@ -148,13 +142,6 @@ namespace Source
 	  else
 		 PlaneNormalZ_1 = trace.fraction;
 
-   #if 0
-	  if ( InputSys::Get( )->IsKeyDown( VirtualKeys::H ) ) {
-		 Source::m_pDebugOverlay->AddLineOverlay( v66, plane_dir, 255, 255, 255, false, 4.0f );
-		 Source::m_pDebugOverlay->AddBoxOverlay( v66, Vector( -2.0f, -2.0f, -2.0f ), Vector( 2.0f, 2.0f, 2.0f ), QAngle( 0.0f, 0.0f, 0.0f ), 0, 255, 0, 200, 4.0f );
-	  }
-   #endif
-
 	  Vector v67 = Vector( plane_dir.x + ( best_plane.y * MAX_EDGE ), plane_dir.y + ( best_plane.x * MAX_EDGE ), plane_dir.z );
 
 	  ray.Init( v67, plane_dir,
@@ -168,12 +155,6 @@ namespace Source
 	  if ( v37 == 0.0f && PlaneNormalZ_1 == 0.0f )
 		 return false;
 
-   #if 0
-	  if ( InputSys::Get( )->IsKeyDown( VirtualKeys::H ) ) {
-		 Source::m_pDebugOverlay->AddLineOverlay( v67, plane_dir, 255, 255, 255, false, 4.0f );
-		 Source::m_pDebugOverlay->AddBoxOverlay( v67, Vector( -2.0f, -2.0f, -2.0f ), Vector( 2.0f, 2.0f, 2.0f ), QAngle( 0.0f, 0.0f, 0.0f ), 0, 0, 255, 200, 4.0f );
-	  }
-   #endif
 
 	  float a1 = std::remainderf( cmd->viewangles.yaw - ( v66 - start ).ToEulerAngles( ).yaw, 360.0f );
 	  float a2 = std::remainderf( cmd->viewangles.yaw - ( v67 - start ).ToEulerAngles( ).yaw, 360.0f );
@@ -221,9 +202,6 @@ namespace Source
 	  if ( LocalPlayer->m_MoveType( ) == MOVETYPE_NOCLIP )
 		 return false;
 
-	  //if ( TickbaseShiftCtx.over_choke_nr )
-		 //return false;
-
 	  if ( g_Vars.antiaim.on_freeze_period ) {
 		 static auto g_GameRules = *( uintptr_t** ) ( Engine::Displacement.Data.m_GameRules );
 		 if ( *( bool* ) ( *( uintptr_t* ) g_GameRules + 0x20 ) )
@@ -251,7 +229,6 @@ namespace Source
 	  } else if ( cmd->buttons & IN_ATTACK ) {
 		 if ( LocalPlayer->CanShoot( 0 ) )
 			return false;
-		 //g_Vars.globals.DidTickbaseExploit ? g_Vars.globals.TickbaseAmount : 0
 	  }
 
 	  if ( WeaponInfo->m_iWeaponType == WEAPONTYPE_KNIFE && Weapon->m_iItemDefinitionIndex( ) != WEAPON_ZEUS && g_Vars.antiaim.on_knife ) {
@@ -299,9 +276,6 @@ namespace Source
 
 	  if ( !g_Vars.antiaim.enabled || g_Vars.globals.WasShootingInChokeCycle || ( g_Vars.globals.m_iServerType == 1 && g_Vars.globals.m_iGameMode == 1 ) )
 		 return;
-
-	  //if ( TickbaseShiftCtx.double_tapped )
-		 //return;
 
 	  Encrypted_t<CVariables::ANTIAIM_STATE> settings( &g_Vars.antiaim_stand );
 
@@ -445,10 +419,6 @@ namespace Source
 
 	  cmd->viewangles.Normalize( );
 
-	  ///if ( settings->desync ) {
-	//	 DesyncAnimation( cmd, bSendPacket, settings );
-	 // }
-
    #if 0
 	  if ( g_Vars.globals.TickbaseShift > 0 || ( *bSendPacket && g_Vars.antiaim.shift && ( settings->shift_pitch || settings->shift_yaw ) ) ) {
 		 Shift( cmd, settings );
@@ -482,40 +452,9 @@ namespace Source
 	  if ( !IsEnabled( cmd ) )
 		 return;
 
-	  auto exploits_enabled = [] ( ) {
-		 if ( !g_Vars.rage.exploit ) {
-			return false;
-		 }
-
-		 if ( g_Vars.globals.Fakeducking )
-			return false;
-
-		 if ( g_Vars.rage.exploit_type == 0 ) {
-			return g_Vars.rage.hide_shots_bind.enabled || g_Vars.rage.double_tap_bind.enabled;
-		 }
-
-		 return TickbaseShiftCtx.exploits_enabled;
-	  };
-
 	  float lbyUpdate = Source::Movement::Get( )->GetLBYUpdateTime( );
 
-	  if ( g_Vars.antiaim.mirco_move_type == 0 || exploits_enabled( ) ) { // eye yaw
-		 float move = ( local->m_vecViewOffset( ).z <= 63.0f ) ? 3.3f : 1.1f;
-		 if ( !( cmd->command_number & 1 ) )
-			move = move * -1.f;
-
-		 if ( g_Vars.antiaim.break_lby && Source::m_pClientState->m_nChokedCommands( ) <= TickbaseShiftCtx.ticks_allowed &&
-			  !exploits_enabled( ) ) {
-			if ( TICKS_TO_TIME( local->m_nTickBase( ) ) >= lbyUpdate ) {
-			   // force move, break lby, and then balance movement
-			   cmd->forwardmove = move;
-			   this->m_bForceBreakLBY = true;
-			   m_bBalanceMove = !m_bBalanceMove;
-			}
-		 } else {
-			cmd->forwardmove = move;
-		 }
-	  }
+	 
 
 	  if ( cmd->forwardmove != 0.0f ) {
 		 if ( !prev_state )
@@ -609,7 +548,7 @@ namespace Source
 	  }
    }
 #endif
-
+#if 0
    void C_AntiAimbot::DesyncAnimation( Encrypted_t<CUserCmd> cmd, bool* bSendPacket, Encrypted_t<CVariables::ANTIAIM_STATE> settings ) {
 	  enum DesyncAA {
 		 Static = 1,
@@ -780,6 +719,7 @@ namespace Source
 
 	  cmd->viewangles.Normalize( );
    }
+#endif
 
    bool C_AntiAimbot::AutoDirection( Encrypted_t<CUserCmd> cmd, Encrypted_t<CVariables::ANTIAIM_STATE> settings ) {
 	  struct edgy_sort {

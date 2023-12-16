@@ -2,6 +2,7 @@
 #include "Glow.hpp"
 #include "CChams.hpp"
 #include "CVariables.hpp"
+#include "player.hpp"
 
 namespace Hooked
 {
@@ -11,6 +12,19 @@ namespace Hooked
 		 GlowOutline::Get( )->Render( );
 
 	  Source::IChams::Get( )->OnPostScreenEffects( );
+
+	  bool prev_scoped;
+
+	 // C_CSPlayer* local = C_CSPlayer::GetLocalPlayer( );
+	 // if ( !local->IsDead( ) ) {
+	//	  prev_scoped = local->m_bIsScoped( );
+	 //
+	//	  local->m_bIsScoped( ) = false;
+	 //
+	//	  return oDoPostScreenEffects( Source::m_pClientMode.Xor( ), a1 );
+	 //
+	//	  local->m_bIsScoped( ) = prev_scoped;
+	 // }
 
 	  return oDoPostScreenEffects( Source::m_pClientMode.Xor( ), a1 );
    }

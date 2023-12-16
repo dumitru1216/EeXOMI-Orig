@@ -81,7 +81,7 @@ namespace Engine
 	  void Collect( C_CSPlayer* player );
 
 	  void SimulateAnimations( Encrypted_t<Engine::C_AnimationRecord> current, Encrypted_t<Engine::C_AnimationRecord> previous );
-	  void AnimationResolver( Encrypted_t<Engine::C_AnimationRecord> current, Encrypted_t<Engine::C_AnimationRecord> previous );
+	  void AnimationResolver( Encrypted_t<Engine::C_AnimationRecord> current );
 
 	  C_CSPlayer* player;
 	  int ent_index;

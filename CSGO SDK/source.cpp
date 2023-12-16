@@ -815,6 +815,7 @@ namespace Source
 	  oDoPostScreenEffects = Hooked::HooksManager.HookVirtual<decltype( oDoPostScreenEffects )>( m_pClientMode.Xor( ), &Hooked::DoPostScreenEffects, Index::CClientModeShared::DoPostScreenSpaceEffects );
 	  oOverrideView = Hooked::HooksManager.HookVirtual<decltype( oOverrideView )>( m_pClientMode.Xor( ), &Hooked::OverrideView, Index::CClientModeShared::OverrideView );
 	  oRenderView = Hooked::HooksManager.HookVirtual<decltype( oRenderView )>( m_pViewRender.Xor( ), &Hooked::hkRenderView, 6 );
+	  oPaintTraverse = Hooked::HooksManager.HookVirtual<decltype( oPaintTraverse )>( m_pPanel.Xor( ), &Hooked::PaintTraverse, Index::IPanel::PaintTraverse );
 
 	  oFrameStageNotify = Hooked::HooksManager.HookVirtual<decltype( oFrameStageNotify )>( m_pClient.Xor( ), &Hooked::FrameStageNotify, Index::IBaseClientDLL::FrameStageNotify );
 	  oRunCommand = Hooked::HooksManager.HookVirtual<decltype( oRunCommand )>( m_pPrediction.Xor( ), &Hooked::RunCommand, Index::IPrediction::RunCommand );

@@ -1499,9 +1499,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 					 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
 					 ImGui::KeyBox( XorStr( "Mouse override" ), &g_Vars.antiaim.mouse_override, KeyBindType::HOLD );
 				  }
-				  ImGui::Text( "Desync flip" );
-				  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-				  ImGui::KeyBox( XorStr( "Desync flip" ), &g_Vars.antiaim.desync_flip_bind, KeyBindType::TOGGLE );
+
 
 				  static bool* disable_conditions[] = {
 					 &g_Vars.antiaim.on_freeze_period 	,
@@ -1538,9 +1536,9 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 				  const char* yaw_base_move_str[] = { XorStr( "View" ), XorStr( "At targets" ), XorStr( "Movement direction" ) };
 				  const char* pitch_str[] = { XorStr( "Off" ), XorStr( "Down" ), XorStr( "Up" ), XorStr( "Zero" ) };
 				  const char* auto_dir[] = { XorStr( "Off" ), XorStr( "Hide Fake" ), XorStr( "Hide Real" ) };
-				  const char* desync_str[] = { XorStr( "Off" ), XorStr( "Static" ), XorStr( "Jitter" ) };
-				  const char* lby_str[] = { XorStr( "Off" ), XorStr( "On" ), XorStr( "Sway" ), XorStr( "Low delta" ) };
-				  const char* micro_move_str[] = { XorStr( "Eye yaw" ), XorStr( "Opposite" ) };
+				//  const char* desync_str[] = { XorStr( "Off" ), XorStr( "Static" ), XorStr( "Jitter" ) };
+				 // const char* lby_str[] = { XorStr( "Off" ), XorStr( "On" ), XorStr( "Sway" ), XorStr( "Low delta" ) };
+				//  const char* micro_move_str[] = { XorStr( "Eye yaw" ), XorStr( "Opposite" ) };
 
 				  auto str = antiaim_type == 0 ? yaw_base_str : yaw_base_move_str;
 				  auto str_size = antiaim_type == 0 ? 2 : 3;
@@ -1550,21 +1548,21 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 				  ImGui::ComboA( XorStr( "Pitch" ), &settings->pitch, pitch_str, ARRAYSIZE( pitch_str ) );
 				  ImGui::ComboA( XorStr( "Yaw" ), &settings->yaw, yaw_str, ARRAYSIZE( yaw_str ) );
 
-				  ImGui::ComboA( XorStr( "Desync" ), &settings->desync, desync_str, ARRAYSIZE( desync_str ) );
-
-				  if ( settings->desync > 2 )
-					 settings->desync = 2;
-
-				  if ( antiaim_type == 0 ) {
-					 ImGui::ComboA( XorStr( "Body yaw" ), &g_Vars.antiaim.mirco_move_type, micro_move_str, ARRAYSIZE( micro_move_str ) );
-					 if ( g_Vars.antiaim.mirco_move_type == 0 )
-						ImGui::ComboA( XorStr( "Break lower body" ), &g_Vars.antiaim.break_lby, lby_str, ARRAYSIZE( lby_str ) );
-				  }
-
-				  if ( settings->desync != 3 ) {
-					 ImGui::SliderFloatA( XorStr( "Desync offset" ), &settings->desync_amount, 0.0f, 100.0f, XorStr( "%.0f %%" ) );
-					 ImGui::SliderFloatA( XorStr( "Desync offset flipped" ), &settings->desync_amount_flipped, 0.0f, 100.0f, XorStr( "%.0f %%" ) );
-				  }
+				 // ImGui::ComboA( XorStr( "Desync" ), &settings->desync, desync_str, ARRAYSIZE( desync_str ) );
+				 //
+				 // if ( settings->desync > 2 )
+				//	 settings->desync = 2;
+				 //
+				 // if ( antiaim_type == 0 ) {
+				//	 ImGui::ComboA( XorStr( "Body yaw" ), &g_Vars.antiaim.mirco_move_type, micro_move_str, ARRAYSIZE( micro_move_str ) );
+				//	 if ( g_Vars.antiaim.mirco_move_type == 0 )
+				//		ImGui::ComboA( XorStr( "Break lower body" ), &g_Vars.antiaim.break_lby, lby_str, ARRAYSIZE( lby_str ) );
+				 // }
+				 //
+				 // if ( settings->desync != 3 ) {
+				//	 ImGui::SliderFloatA( XorStr( "Desync offset" ), &settings->desync_amount, 0.0f, 100.0f, XorStr( "%.0f %%" ) );
+				//	 ImGui::SliderFloatA( XorStr( "Desync offset flipped" ), &settings->desync_amount_flipped, 0.0f, 100.0f, XorStr( "%.0f %%" ) );
+				 // }
 
 				  ImGui::Checkbox( XorStr( "Jitter" ), &settings->jitter );
 				  if ( settings->jitter ) {
@@ -1587,7 +1585,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 					 ImGui::SliderIntA( XorStr( "Extrapolation##AutoDirExtrapolation" ), &settings->extrapolation_ticks, 0, 20, XorStr( "%d ticks" ) );
 					 ImGui::SliderFloatA( XorStr( "Range##AutoDirRange" ), &settings->autodirection_range, 24.0f, 64.0f, XorStr( "%.0f units" ) );
 
-					 ImGui::ComboA( XorStr( "Desync auto direction" ), &settings->desync_autodir, auto_dir, ARRAYSIZE( auto_dir ) );
+					// ImGui::ComboA( XorStr( "Desync auto direction" ), &settings->desync_autodir, auto_dir, ARRAYSIZE( auto_dir ) );
 				  }
 
 				  ImGui::Checkbox( XorStr( "Move sync" ), &g_Vars.antiaim.move_sync );
