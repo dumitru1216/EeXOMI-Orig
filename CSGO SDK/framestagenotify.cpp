@@ -149,23 +149,6 @@ namespace Hooked
 			g_Vars.globals.SpreadRandom[ i ].flRandPi2 = RandomFloat( 0.0f, DirectX::XM_2PI );
 		 }
 
-	  #if 0
-		 float flRandInaccuracy = g_Vars.globals.SpreadRandom[ i ].flRand1;
-		 float flRandSpread = g_Vars.globals.SpreadRandom[ i ].flRand2;
-
-		 float flRandPi1Cos, flRandPi1Sin;
-		 DirectX::XMScalarSinCos( &flRandPi1Sin, &flRandPi1Cos, g_Vars.globals.SpreadRandom[ i ].flRandPi1 );
-
-		 float flRandPi2Cos, flRandPi2Sin;
-		 DirectX::XMScalarSinCos( &flRandPi2Sin, &flRandPi2Cos, g_Vars.globals.SpreadRandom[ i ].flRandPi2 );
-
-		 float spread_x = flRandPi1Cos * flRandInaccuracy + flRandPi2Cos * flRandSpread;
-		 float spread_y = flRandPi1Sin * flRandInaccuracy + flRandPi2Sin * flRandSpread;
-
-		 biggsetPi1.push_back( std::make_pair( i, std::sqrtf( spread_x * spread_x + spread_y * spread_y ) ) );
-		 std::sort( biggsetPi1.begin( ), biggsetPi1.end( ), [] ( const std::pair<int, float>& a, const std::pair<int, float>& b ) { return a.second > b.second; } );
-	  #endif
-
 		 g_Vars.globals.RandomInit = true;
 	  }
 
