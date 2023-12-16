@@ -55,6 +55,7 @@ namespace Engine
 	  float m_flSimulationTime;
 	  float m_flShotTime;
 	  float m_flDuckAmount;
+	  float m_flLowerBodyYawTarget;
 
 	  float m_flFeetYawRate;
 	  float m_flFeetCycle;
