@@ -103,6 +103,8 @@ namespace Engine
 	  int m_iMissedStand1 = 0; // lm
 	  int m_iMissedStand2 = 0; // vm-brute
 	  int m_iMissedStand3 = 0; // side-lm
+	  int m_iMissedStand4 = 0; // bw
+	  int m_iMissedStand5 = 0; // vm-brute 2
 	  int m_iResolverMode = 0;
 
 	  bool m_bGotAbsYaw = false;

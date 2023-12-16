@@ -236,7 +236,13 @@ namespace Engine {
 						if ( lag_data->m_iResolverMode == eResolverModes::STAND_LM )
 							lag_data->m_iMissedStand1++;
 						else if ( lag_data->m_iResolverMode == eResolverModes::STAND_BRUTE_1 )
-							lag_data->m_iMissedStand2++;
+							lag_data->m_iMissedStand2++;						
+						else if ( lag_data->m_iResolverMode == eResolverModes::PRED_SIDE_LM )
+							lag_data->m_iMissedStand3++;						
+						else if ( lag_data->m_iResolverMode == eResolverModes::PRED_BW )
+							lag_data->m_iMissedStand4++;						
+						else if ( lag_data->m_iResolverMode == eResolverModes::STAND_BRUTE_2 )
+							lag_data->m_iMissedStand5++;
 
 						if ( snapshot->resolve_record.m_iRecordPriority == 3 )
 							anim_data->m_bSuppressAnimationResolver = true;
@@ -394,6 +400,9 @@ namespace Engine {
 						lagData->m_iMissedShots = 0;
 						lagData->m_iMissedStand1 = 0;
 						lagData->m_iMissedStand2 = 0;
+						lagData->m_iMissedStand3 = 0;
+						lagData->m_iMissedStand4 = 0;
+						lagData->m_iMissedStand5 = 0;
 
 						g_ResolverData[ i ].Reset( );
 
@@ -409,6 +418,9 @@ namespace Engine {
 						lagData->m_iMissedShots = 0;
 						lagData->m_iMissedStand1 = 0;
 						lagData->m_iMissedStand2 = 0;
+						lagData->m_iMissedStand3 = 0;
+						lagData->m_iMissedStand4 = 0;
+						lagData->m_iMissedStand5 = 0;
 
 						g_ResolverData[ i ].Reset( );
 

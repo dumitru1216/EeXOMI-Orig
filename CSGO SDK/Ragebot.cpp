@@ -2046,7 +2046,8 @@ namespace Source
 				  msg << XorStr( " | " );
 				  msg << XorStr( " rt: " ) << lagData->m_iResolverMode;
 				  msg << XorStr( " | " );
-				  msg << XorStr( " miss: " ) << lagData->m_iMissedShots << ":" << lagData->m_iMissedStand1 << ":" << lagData->m_iMissedStand2;
+				  msg << XorStr( " miss: " ) << lagData->m_iMissedShots << ":" << lagData->m_iMissedStand1 << ":" << lagData->m_iMissedStand2 << ":" << lagData->m_iMissedStand3 <<
+					  ":" << lagData->m_iMissedStand4 << ":" << lagData->m_iMissedStand5;
 
 				  ILoggerEvent::Get( )->PushEvent( msg.str( ), FloatColor( 0.5f, 0.5f, 0.5f ) );
 			   }

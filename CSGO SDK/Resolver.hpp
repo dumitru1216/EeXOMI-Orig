@@ -35,11 +35,14 @@ enum eResolverModes {
 	NONE,
 	STAND,
 	STAND_BRUTE_1,
+	STAND_BRUTE_2,
 	STAND_LM,
 	AIR,
 	PRED_22,
 	PRED_11,
-	PRED_LBY
+	PRED_LBY,
+	PRED_SIDE_LM,
+	PRED_BW
 };
 
 struct ResolverData_t {

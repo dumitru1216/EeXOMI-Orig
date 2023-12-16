@@ -880,6 +880,7 @@ namespace Engine {
 			bool m_bIsSideways_Lamb = m_bIsYawSideways1( data.m_sMoveData.m_flLowerBodyYawTarget );
 			bool m_bIsBackwards = !m_bIsSideways_Lamb || Math::AngleDiff( data.m_sMoveData.m_flLowerBodyYawTarget, angle_away.y + 180.f ) <= 60.f;
 
+			const float m_flMoveDelta = Math::AngleDiff( data.m_sMoveData.m_flLowerBodyYawTarget, current->m_flLowerBodyYawTarget );
 			float m_flAnimTime = player->m_flAnimationTime( ) - data.m_sMoveData.m_flAnimTime;
 
 			if ( data.m_bCollectedValidMoveData ) {
@@ -889,14 +890,14 @@ namespace Engine {
 					return fl_delta > 20.f && fl_delta < 160.f;
 					};
 
-				if ( m_bLastMoveValid( ) && ( lag_data->m_iMissedStand1 < 1 /* max 1 */ ) ) {
+				if ( ( m_bLastMoveValid( ) || m_flMoveDelta < 15.f ) && ( lag_data->m_iMissedStand1 < 1 /* max 1 */ ) ) {
 					current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
 
 					/* resolver mode */
 					data.m_iResolverMode = eResolverModes::STAND_LM;
 					lag_data->m_iResolverMode = eResolverModes::STAND_LM;
 
-					g_ResolverData[ index ].m_ResolverText = "VM:LM";
+					g_ResolverData[ index ].m_ResolverText = m_bLastMoveValid( ) ? "VM:LM" : "LM(0)";
 				} else if ( m_flAnimTime < 0.22 && !data.m_bBrokeLby ) {
 					current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
 
@@ -905,35 +906,65 @@ namespace Engine {
 					lag_data->m_iResolverMode = eResolverModes::PRED_LBY;
 
 					g_ResolverData[ index ].m_ResolverText = "LBY(22)";
-				} /* im not sure if the logic is right theere */
-				else if ( lag_data->m_iMissedStand1 > 1 /* after 1 */ && lag_data->m_iMissedStand2 < 6 /* do not exceed brute elements */ ) {
+				} else if ( lag_data->m_iMissedStand3 < 1 && m_bIsYawSideways1( data.m_sMoveData.m_flLowerBodyYawTarget ) && m_flMoveDelta < 12.5f ) {
+					/* in future add a check to see if we can hit valid lastmove */
+					/* resolver mode */
+					data.m_iResolverMode = eResolverModes::PRED_SIDE_LM;
+					lag_data->m_iResolverMode = eResolverModes::PRED_SIDE_LM;
+					
+					g_ResolverData[ index ].m_ResolverText = "LBY(SIDE)";
 
+					current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
+				} else if ( lag_data->m_iMissedStand4 < 1 && ( m_bIsBackwards && !m_bIsSideways_Lamb ) ) {
+					/* resolver mode */
+					data.m_iResolverMode = eResolverModes::PRED_BW;
+					lag_data->m_iResolverMode = eResolverModes::PRED_BW;
+
+					g_ResolverData[ index ].m_ResolverText = "PR(BW)";
+
+					current->m_angEyeAngles.y = angle_away.y + 180.0f;
+				}/* im not sure if the logic is right theere */
+				else if ( ( lag_data->m_iMissedStand1 > 1 /* lastmove > 1 */ || ( lag_data->m_iMissedStand4 > 1 && m_bIsBackwards ) )/* after 1 */ && lag_data->m_iMissedStand2 < 4 /* do not exceed brute elements */ ) {
 					/* resolver mode */
 					data.m_iResolverMode = eResolverModes::STAND_BRUTE_1;
 					lag_data->m_iResolverMode = eResolverModes::STAND_BRUTE_1;
 
 					/* brute */
-					switch ( lag_data->m_iMissedStand2 % 5 ) {
+					switch ( lag_data->m_iMissedStand2 % 3 ) {
 						case 0:
-							g_ResolverData[ index ].m_ResolverText = "BVM:LBY";
-							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
+							g_ResolverData[ index ].m_ResolverText = "CR(L)";
+							current->m_angEyeAngles.y = angle_away.y + 135.f;
 						break;
 						case 1:
-							g_ResolverData[ index ].m_ResolverText = "BVM:L+";
-							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget + 67.f;
+							g_ResolverData[ index ].m_ResolverText = "CR(R)";
+							current->m_angEyeAngles.y = angle_away.y + 225.f;
 						break;
 						case 2: 
-							g_ResolverData[ index ].m_ResolverText = "BVM:L-";
-							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget - 67.f;
+							g_ResolverData[ index ].m_ResolverText = "B(AWAY)";
+							current->m_angEyeAngles.y = angle_away.y;
 						break;
-						case 3: 
-							g_ResolverData[ index ].m_ResolverText = "BVM:RIGHT";
-							current->m_angEyeAngles.y = angle_away.y + 45.0f;
-						break;
-						case 4: 
-							g_ResolverData[ index ].m_ResolverText = "BVM:LEFT";
-							current->m_angEyeAngles.y = angle_away.y - 45.0f;
-						break;
+						default: break;
+					}
+				}
+				else if ( ( ( lag_data->m_iMissedStand3 > 1 && m_bIsSideways_Lamb ) && lag_data->m_iMissedStand5 < 9 ) ) {
+					/* resolver mode */
+					data.m_iResolverMode = eResolverModes::STAND_BRUTE_2;
+					lag_data->m_iResolverMode = eResolverModes::STAND_BRUTE_2;
+
+					/* brute */
+					switch ( lag_data->m_iMissedStand5 % 8 ) {
+						case 0:
+							g_ResolverData[ index ].m_ResolverText = "CR(L)";
+							current->m_angEyeAngles.y = angle_away.y + 135.f;
+							break;
+						case 1:
+							g_ResolverData[ index ].m_ResolverText = "CR(R)";
+							current->m_angEyeAngles.y = angle_away.y + 225.f;
+							break;
+						case 2:
+							g_ResolverData[ index ].m_ResolverText = "B(AWAY)";
+							current->m_angEyeAngles.y = angle_away.y;
+							break;
 						default: break;
 					}
 				}
