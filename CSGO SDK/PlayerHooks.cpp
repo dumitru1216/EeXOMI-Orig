@@ -120,25 +120,34 @@ namespace Hooked
 
 	  auto local = C_CSPlayer::GetLocalPlayer( );
 
+	  //if ( local == entity )
+		 //ISkinChanger::Get( )->OnNetworkUpdate( true );
+
+	  //orig( ecx, updateType );
+
+   //#if 0
+	  //Engine::UpdateContext * ctx = new Engine::UpdateContext( );
+	  //ctx->player = entity;
+	  //ctx->updateType = updateType;
+
+	  //auto updateMemes = [] ( void* ctx ) {
+		 //Engine::LagCompensation::Get( )->Update( ( Engine::UpdateContext* )ctx );
+	  //};
+
+	  //Threading::QueueJobRef( updateMemes, ctx, true );
+   //#endif
+
+	  //if ( local == entity )
+		 //ISkinChanger::Get( )->OnNetworkUpdate( false );
+
+
 	  if ( local == entity )
-		 ISkinChanger::Get( )->OnNetworkUpdate( true );
+		  ISkinChanger::Get( )->OnNetworkUpdate( true );
 
 	  orig( ecx, updateType );
 
-   #if 0
-	  Engine::UpdateContext * ctx = new Engine::UpdateContext( );
-	  ctx->player = entity;
-	  ctx->updateType = updateType;
-
-	  auto updateMemes = [] ( void* ctx ) {
-		 Engine::LagCompensation::Get( )->Update( ( Engine::UpdateContext* )ctx );
-	  };
-
-	  Threading::QueueJobRef( updateMemes, ctx, true );
-   #endif
-
 	  if ( local == entity )
-		 ISkinChanger::Get( )->OnNetworkUpdate( false );
+		  ISkinChanger::Get( )->OnNetworkUpdate( false );
    }
 
    IClientNetworkable* hkCreateCCSPlayer( int entnum, int serialNum ) {

@@ -100,7 +100,8 @@ namespace Engine
 	  int m_iResolverSide = 0;
 
 	  // resolver new
-	  int m_iMissedStand1 = 0;
+	  int m_iMissedStand1 = 0; // lm
+	  int m_iMissedStand2 = 0; // vm-brute
 	  int m_iResolverMode = 0;
 
 	  bool m_bGotAbsYaw = false;

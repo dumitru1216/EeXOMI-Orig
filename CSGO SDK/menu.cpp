@@ -776,7 +776,7 @@ namespace ImGui
 	  return ( g.FontSize + g.Style.ItemSpacing.y ) * items_count - g.Style.ItemSpacing.y + ( g.Style.WindowPadding.y * 2 );
    }
 
-#if 0
+#if 1
    bool MultiCombo( const char* label, bool* current_items[], const char* items[],
 					int items_count, int popup_max_height_in_items = -1, const char* default_preview = XorStr( "..." ) ) {
 	  using namespace ImGui;
@@ -801,7 +801,7 @@ namespace ImGui
 		 strcpy_s( preview_value, default_preview );
 
 	  // The old Combo() API exposed XorStr( "popup_max_height_in_items" ). The new more general BeginCombo() API doesn't have/need it, but we emulate it here.
-	  if ( popup_max_height_in_items != -1 && !( g.NextWindowData.SizeConstraintCond ) )
+	  if ( popup_max_height_in_items != -1 /*&& !( g.NextWindowData.SizeConstraintCond )*/ )
 		 SetNextWindowSizeConstraints( ImVec2( 0, 0 ), ImVec2( FLT_MAX, CalcMaxPopupHeightFromItemCount( popup_max_height_in_items ) ) );
 
 	  auto size = ImGui::GetContentRegionAvail( ).x;

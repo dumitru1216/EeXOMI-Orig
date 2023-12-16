@@ -235,7 +235,8 @@ namespace Engine {
 
 						if ( lag_data->m_iResolverMode == eResolverModes::STAND_LM )
 							lag_data->m_iMissedStand1++;
-
+						else if ( lag_data->m_iResolverMode == eResolverModes::STAND_BRUTE_1 )
+							lag_data->m_iMissedStand2++;
 
 						if ( snapshot->resolve_record.m_iRecordPriority == 3 )
 							anim_data->m_bSuppressAnimationResolver = true;
@@ -392,6 +393,15 @@ namespace Engine {
 					if ( lagData.IsValid( ) ) {
 						lagData->m_iMissedShots = 0;
 						lagData->m_iMissedStand1 = 0;
+						lagData->m_iMissedStand2 = 0;
+
+						g_ResolverData[ i ].m_bBrutingLastmove = false;
+						g_ResolverData[ i ].m_bCollectedValidMoveData = false;
+						g_ResolverData[ i ].m_bPredictingUpdates = false;
+
+						g_ResolverData[ i ].m_flNextBodyUpdate = 0.f;
+						g_ResolverData[ i ].m_sMoveData.m_flLowerBodyYawTarget = 0.f;
+
 						lagData->m_iResolverMode = eResolverModes::NONE;
 					}
 				}
@@ -403,6 +413,15 @@ namespace Engine {
 					if ( lagData.IsValid( ) ) {
 						lagData->m_iMissedShots = 0;
 						lagData->m_iMissedStand1 = 0;
+						lagData->m_iMissedStand2 = 0;
+
+						g_ResolverData[ i ].m_bBrutingLastmove = false;
+						g_ResolverData[ i ].m_bCollectedValidMoveData = false;
+						g_ResolverData[ i ].m_bPredictingUpdates = false;
+
+						g_ResolverData[ i ].m_flNextBodyUpdate = 0.f;
+						g_ResolverData[ i ].m_sMoveData.m_flLowerBodyYawTarget = 0.f;
+
 						lagData->m_iResolverMode = eResolverModes::NONE;
 					}
 				}

@@ -1069,6 +1069,7 @@ public:
    config_option( bool, event_misc, false );
    config_option( bool, event_exploits, false );
    config_option( bool, event_console, false );
+   config_option( bool, event_aimbot, false );
 
    config_option( bool, aa_indicator, false );
    config_option( int, aa_indicator_type, 0 );

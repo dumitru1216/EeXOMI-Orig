@@ -293,14 +293,6 @@ namespace Engine {
 		auto weapon = ( C_BaseAttributableItem* )player->m_hActiveWeapon( ).Get( );
 		auto weaponWorldModel = weapon ? ( C_CSPlayer* )( weapon )->m_hWeaponWorldModel( ).Get( ) : nullptr;
 
-		//bool should_calculate = g_Vars.rage.enabled && ( g_Vars.rage.team_check || !this->player->IsTeammate( C_CSPlayer::GetLocalPlayer( ) ) );
-		//if ( should_calculate ) {
-		   //player_info_t player_info;
-		   //if ( Source::m_pEngine->GetPlayerInfo( player->m_entIndex, &player_info ) ) {
-			  //should_calculate = !player_info.fakeplayer;
-		   //}
-		//}
-
 		if ( !animState )
 			return;
 
@@ -311,76 +303,6 @@ namespace Engine {
 
 		this->m_bBonesCalculated = false;
 		record->m_bNoFakeAngles = true;
-
-		/* if ( should_calculate ) {
-			AnimationBackup backup;
-			backup.Setup( player );
-
-			C_SetupBones* right = new C_SetupBones( );
-			C_SetupBones* left = new C_SetupBones( );
-			C_SetupBones* lowright = new C_SetupBones( );
-			C_SetupBones* lowleft = new C_SetupBones( );
-			server->m_boneMask = lowleft->m_boneMask = lowright->m_boneMask = left->m_boneMask = right->m_boneMask = BONE_USED_BY_HITBOX;
-			server->m_animating = lowleft->m_animating = lowright->m_animating = left->m_animating = right->m_animating = player;
-			server->m_vecOrigin = lowleft->m_vecOrigin = lowright->m_vecOrigin = left->m_vecOrigin = right->m_vecOrigin = player->m_vecOrigin( );
-			server->m_animLayers = lowleft->m_animLayers = lowright->m_animLayers = left->m_animLayers = right->m_animLayers = record->m_serverAnimOverlays;
-			server->m_pHdr = lowleft->m_pHdr = lowright->m_pHdr = left->m_pHdr = right->m_pHdr = player->m_pStudioHdr( );
-
-			auto setup_side = [&] ( C_SetupBones* bones, C_AnimationLayer* layers, float* abs_rotation, int side ) {
-			   this->m_Animations[ side ].Update( player );
-
-			   bones->m_nAnimOverlayCount = std::min( 13, player->m_AnimOverlay( ).Count( ) );
-			   bones->m_angAngles = QAngle( 0.0f, this->m_Animations[ side ].m_flAbsRotation, 0.0f );
-			   bones->m_boneMatrix = this->m_Animations[ side ].m_Bones;
-			   std::memcpy( bones->m_flPoseParameters, player->m_flPoseParameter( ), sizeof( bones->m_flPoseParameters ) );
-			   std::memcpy( layers, player->m_AnimOverlay( ).Base( ), 13 * sizeof( C_AnimationLayer ) );
-
-			   if ( weaponWorldModel ) {
-				  std::memcpy( bones->m_flWorldPoses, weaponWorldModel->m_flPoseParameter( ), sizeof( bones->m_flWorldPoses ) );
-			   }
-
-			   *abs_rotation = this->m_Animations[ side ].m_flAbsRotation;
-
-			   Threading::QueueJobRef( MultithreadedSetupBones, bones );
-
-			   backup.Apply( player );
-			};
-
-			if ( record->m_iChokeTicks == 1 ) {
-			   SimulateAnimations( record, previous_record, 1, max_desync_angle );
-			   setup_side( right, &record->fakeLayersRight[ 0 ], &record->m_flAbsRotationRight, 2 );
-
-			   SimulateAnimations( record, previous_record, -1, max_desync_angle );
-			   setup_side( left, &record->fakeLayersLeft[ 0 ], &record->m_flAbsRotationLeft, 1 );
-			} else {
-			   SimulateAnimations( record, previous_record, 1, max_desync_angle );
-
-			   auto delta = Math::AngleDiff( player->m_PlayerAnimState( )->m_flAbsRotation, record->m_angEyeAngles.yaw );
-			   bool negative_delta = delta < 0.0f;
-
-			   if ( delta < 0.0f )
-				  setup_side( left, &record->fakeLayersLeft[ 0 ], &record->m_flAbsRotationLeft, 1 );
-			   else
-				  setup_side( right, &record->fakeLayersRight[ 0 ], &record->m_flAbsRotationRight, 2 );
-
-			   SimulateAnimations( record, previous_record, -1, max_desync_angle );
-
-			   if ( negative_delta )
-				  setup_side( right, &record->fakeLayersRight[ 0 ], &record->m_flAbsRotationRight, 2 );
-			   else
-				  setup_side( left, &record->fakeLayersLeft[ 0 ], &record->m_flAbsRotationLeft, 1 );
-			}
-
-			this->m_bBonesCalculated = true;
-		 } else {*/
-		 // server->m_animating = player;
-			// server->m_vecOrigin = player->m_vecOrigin( );
-			// server->m_animLayers = record->m_serverAnimOverlays;
-			// server->m_pHdr = player->m_pStudioHdr( );
-			//
-			// this->m_bBonesCalculated = false;
-			// record->m_bNoFakeAngles = true;
-		  //}
 
 		SimulateAnimations( record, previous_record );
 
@@ -406,15 +328,7 @@ namespace Engine {
 		Threading::QueueJobRef( MultithreadedRenderSetupBonesGeneral, server );
 
 		this->m_vecSimulationData.clear( );
-
 		this->m_iResolverSide = record->m_iResolverSide;
-
-		//float delta_1 = std::fabsf( std::remainderf( this->m_Animations[ 2 ].m_flAbsRotation - this->m_Animations[ 0 ].m_flAbsRotation, 360.f ) );
-		//float delta_2 = std::fabsf( std::remainderf( this->m_Animations[ 1 ].m_flAbsRotation - this->m_Animations[ 0 ].m_flAbsRotation, 360.f ) );
-		//
-		//if ( g_Vars.rage.enabled ) {
-		  // record->m_bNoFakeAngles = delta_1 <= 0.1f && delta_2 <= 0.1f;
-		//}
 	}
 
 	void C_AnimationData::Collect( C_CSPlayer* player ) {
@@ -894,7 +808,7 @@ namespace Engine {
 
 			/* reso mode */
 			g_ResolverData[ index ].m_ResolverText = "0.22";
-		} else if ( ( Entity->m_flAnimationTime( ) >= data.m_flNextBodyUpdate ) && !current->m_bFakeWalking ) {
+		} else if ( ( Entity->m_flAnimationTime( ) >= data.m_flNextBodyUpdate ) && !current->m_bFakeWalking && !data.m_bBrutingLastmove ) {
 			data.m_flNextBodyUpdate = Entity->m_flAnimationTime( ) + 1.1f;
 			data.m_bPredictingUpdates = true;
 
@@ -943,17 +857,14 @@ namespace Engine {
 			Math::VectorAngles( local->m_vecOrigin( ) - current->m_vecOrigin, angle_away );
 
 			if ( data.m_bCollectedValidMoveData ) {
-				/* resolver mode */
-				data.m_iResolverMode = eResolverModes::STAND_VM;
-				lag_data->m_iResolverMode = eResolverModes::STAND_VM;
-
 				/* WE VE got lastmove */
 				auto m_bLastMoveValid = [ & ]( )-> bool {
 					const auto fl_delta = std::fabsf( Math::AngleNormalize( angle_away.y - data.m_sMoveData.m_flLowerBodyYawTarget ) );
 					return fl_delta > 20.f && fl_delta < 160.f;
 					};
 
-				if ( m_bLastMoveValid( ) && ( lag_data->m_iMissedStand1 < 2 ) ) {
+				if ( m_bLastMoveValid( ) && ( lag_data->m_iMissedStand1 < 1 /* max 1 */ ) ) {
+					data.m_bBrutingLastmove = false;
 					current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
 
 					/* resolver mode */
@@ -961,7 +872,40 @@ namespace Engine {
 					lag_data->m_iResolverMode = eResolverModes::STAND_LM;
 
 					g_ResolverData[ index ].m_ResolverText = "VM:LM";
+				} /* im not sure if the logic is right theere */
+				else if ( lag_data->m_iMissedStand1 > 1 /* after 1 */ && lag_data->m_iMissedStand2 < 6 /* do not exceed brute elements */ ) {
+					data.m_bBrutingLastmove = true;
+
+					/* resolver mode */
+					data.m_iResolverMode = eResolverModes::STAND_BRUTE_1;
+					lag_data->m_iResolverMode = eResolverModes::STAND_BRUTE_1;
+
+					/* brute */
+					switch ( lag_data->m_iMissedStand2 % 5 ) {
+						case 0:
+							g_ResolverData[ index ].m_ResolverText = "BVM:LBY";
+							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
+						break;
+						case 1:
+							g_ResolverData[ index ].m_ResolverText = "BVM:L+";
+							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget + 110.f;
+						break;
+						case 2: 
+							g_ResolverData[ index ].m_ResolverText = "BVM:L-";
+							current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget - 110.f;
+						break;
+						case 3: 
+							g_ResolverData[ index ].m_ResolverText = "BVM:RIGHT";
+							current->m_angEyeAngles.y = angle_away.y + 45.0f;
+						break;
+						case 4: 
+							g_ResolverData[ index ].m_ResolverText = "BVM:LEFT";
+							current->m_angEyeAngles.y = angle_away.y - 45.0f;
+						break;
+						default: break;
+					}
 				}
+
 			} else {
 				data.m_iResolverMode = eResolverModes::STAND;
 				lag_data->m_iResolverMode = eResolverModes::STAND;

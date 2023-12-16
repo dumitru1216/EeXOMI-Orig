@@ -2473,15 +2473,16 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 					 &g_Vars.esp.event_misc,
 					 &g_Vars.esp.event_exploits,
 					 &g_Vars.esp.event_console,
+					 &g_Vars.esp.event_aimbot,
 			   };
 
 			   const char* event_logger_cond_str[] = {
 				  XorStr( "Bomb" ), XorStr( "Damage" ), XorStr( "Buy" ), XorStr( "Resolver" ), XorStr( "Misc" ), XorStr( "Exploits" ),
-				  XorStr( "Console" )
+				  XorStr( "Console" ), XorStr( "Aimbot" )
 			   };
 
 			   ImGui::MultiCombo( XorStr( "Event logger" ),
-								  event_logger_cond, event_logger_cond_str, 7 );
+								  event_logger_cond, event_logger_cond_str, 8 );
 
 			   const char* logger_type[] = { XorStr( "Default" ), XorStr( "Nvidia" ) };
 
@@ -2927,108 +2928,6 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 						XorStr( "Animated" ),
 					 };
 
-					 const char* models_to_change[] = {
-						XorStr( "Local T Agent" ),
-					 XorStr( "Local CT Agent" ),
-					 XorStr( "Blackwolf | Sabre" ),
-					 XorStr( "Rezan The Ready | Sabre" ),
-					 XorStr( "Maximus | Sabre" ),
-					 XorStr( "Dragomir | Sabre" ),
-					 XorStr( "Lt. Commander Ricksaw | NSWC SEAL" ),
-					 XorStr( "'Two Times' McCoy | USAF TACP" ),
-					 XorStr( "Seal Team 6 Soldier | NSWC SEAL" ),
-					 XorStr( "3rd Commando Company | KSK" ),
-					 XorStr( "'The Doctor' Romanov | Sabre" ),
-					 XorStr( "Michael Syfers  | FBI Sniper" ),
-					 XorStr( "Markus Delrow | FBI HRT" ),
-					 XorStr( "Operator | FBI SWAT" ),
-					 XorStr( "Slingshot | Phoenix" ),
-					 XorStr( "Enforcer | Phoenix" ),
-					 XorStr( "Soldier | Phoenix" ),
-					 XorStr( "The Elite Mr. Muhlik | Elite Crew" ),
-					 XorStr( "Prof. Shahmat | Elite Crew" ),
-					 XorStr( "Osiris | Elite Crew" ),
-					 XorStr( "Ground Rebel  | Elite Crew" ),
-					 XorStr( "Special Agent Ava | FBI" ),
-					 XorStr( "B Squadron Officer | SAS" ),
-					 XorStr( "Anarchist" ),
-					 XorStr( "Anarchist (Variant A)" ),
-					 XorStr( "Anarchist (Variant B)" ),
-					 XorStr( "Anarchist (Variant C)" ),
-					 XorStr( "Anarchist (Variant D)" ),
-					 XorStr( "Pirate" ),
-					 XorStr( "Pirate (Variant A)" ),
-					 XorStr( "Pirate (Variant B)" ),
-					 XorStr( "Pirate (Variant C)" ),
-					 XorStr( "Pirate (Variant D)" ),
-					 XorStr( "Professional" ),
-					 XorStr( "Professional (Variant 1)" ),
-					 XorStr( "Professional (Variant 2)" ),
-					 XorStr( "Professional (Variant 3)" ),
-					 XorStr( "Professional (Variant 4)" ),
-					 XorStr( "Separatist" ),
-					 XorStr( "Separatist (Variant A)" ),
-					 XorStr( "Separatist (Variant B)" ),
-					 XorStr( "Separatist (Variant C)" ),
-					 XorStr( "Separatist (Variant D)" ),
-					 XorStr( "GIGN" ),
-					 XorStr( "GIGN (Variant A)" ),
-					 XorStr( "GIGN (Variant B)" ),
-					 XorStr( "GIGN (Variant C)" ),
-					 XorStr( "GIGN (Variant D)" ),
-					 XorStr( "GSG-9" ),
-					 XorStr( "GSG-9 (Variant A)" ),
-					 XorStr( "GSG-9 (Variant B)" ),
-					 XorStr( "GSG-9 (Variant C)" ),
-					 XorStr( "GSG-9 (Variant D)" ),
-					 XorStr( "IDF" ),
-					 XorStr( "IDF (Variant B)" ),
-					 XorStr( "IDF (Variant C)" ),
-					 XorStr( "IDF (Variant D)" ),
-					 XorStr( "IDF (Variant E)" ),
-					 XorStr( "IDF (Variant F)" ),
-					 XorStr( "SWAT" ),
-					 XorStr( "SWAT (Variant A)" ),
-					 XorStr( "SWAT (Variant B)" ),
-					 XorStr( "SWAT (Variant C)" ),
-					 XorStr( "SWAT (Variant D)" ),
-					 XorStr( "SAS (Variant A)" ),
-					 XorStr( "SAS (Variant B)" ),
-					 XorStr( "SAS (Variant C)" ),
-					 XorStr( "SAS (Variant D)" ),
-					 XorStr( "ST6" ),
-					 XorStr( "ST6 (Variant A)" ),
-					 XorStr( "ST6 (Variant B)" ),
-					 XorStr( "ST6 (Variant C)" ),
-					 XorStr( "ST6 (Variant D)" ),
-					 XorStr( "Balkan (Variant E)" ),
-					 XorStr( "Balkan (Variant A)" ),
-					 XorStr( "Balkan (Variant B)" ),
-					 XorStr( "Balkan (Variant C)" ),
-					 XorStr( "Balkan (Variant D)" ),
-					 XorStr( "Jumpsuit (Variant A)" ),
-					 XorStr( "Jumpsuit (Variant B)" ),
-					 XorStr( "Jumpsuit (Variant C)" ),
-					 XorStr( "Phoenix Heavy" ),
-					 XorStr( "Heavy" ),
-					 XorStr( "Leet (Variant A)" ),
-					 XorStr( "Leet (Variant B)" ),
-					 XorStr( "Leet (Variant C)" ),
-					 XorStr( "Leet (Variant D)" ),
-					 XorStr( "Leet (Variant E)" ),
-					 XorStr( "Phoenix" ),
-					 XorStr( "Phoenix (Variant A)" ),
-					 XorStr( "Phoenix (Variant B)" ),
-					 XorStr( "Phoenix (Variant C)" ),
-					 XorStr( "Phoenix (Variant D)" ),
-					 XorStr( "FBI" ),
-					 XorStr( "FBI (Variant A)" ),
-					 XorStr( "FBI (Variant C)" ),
-					 XorStr( "FBI (Variant D)" ),
-					 XorStr( "FBI (Variant E)" ),
-					 XorStr( "SAS" ),
-					 };
-
 					 static bool* indicator_conditions[] = {
 						&g_Vars.esp.indicator_side,
 						&g_Vars.esp.indicator_lc,
@@ -3045,13 +2944,6 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 
 					 ImGui::MultiCombo( XorStr( "Indicators" ),
 										indicator_conditions, indicator_conditions_str, 6 );
-
-					 ImGui::Checkbox( XorStr( "Models skin" ), &g_Vars.misc.skins_model );
-					 if ( g_Vars.misc.skins_model ) {
-						ImGui::ComboA( XorStr( "TT Local Model" ), &g_Vars.misc.tt_model_type, models_to_change, ARRAYSIZE( models_to_change ) );
-						ImGui::ComboA( XorStr( "CT Local Model" ), &g_Vars.misc.ct_model_type, models_to_change, ARRAYSIZE( models_to_change ) );
-					 }
-
 					 ImGui::Checkbox( XorStr( "Clan-tag" ), &g_Vars.misc.clantag_changer );
 					 ImGui::Checkbox( XorStr( "Name changer" ), &g_Vars.misc.name_changer );
 
@@ -3076,11 +2968,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 
 			   } ImGui::EndChild( );
 
-			#ifdef BETA_MODE
-			   ImGui::Text( XorStr( "eexomi.host [BETA] | %i:%i:%i | %s" ), timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, g_Vars.globals.c_login.c_str( ) );
-			#else 
 			   ImGui::Text( XorStr( "eexomi.host v2 | %i:%i:%i | %s" ), timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, g_Vars.globals.c_login.c_str( ) );
-			#endif
 
 			   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
 			   ImGui::NextColumn( );
@@ -3551,8 +3439,13 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 				  skin->m_enabled = true;
 
 				  ImGui::SliderFloatA( XorStr( "Quality" ), &skin->m_wear, 0.00000001f, 1.00f, XorStr( "%.8f %%" ) );
-				  ImGui::SliderIntA( XorStr( "Seed" ), &skin->m_seed, 1, 1000, XorStr( "%d" ) );
-				  ImGui::SliderIntA( XorStr( "Stat-trak" ), &skin->m_stat_trak, 1, 1000000, XorStr( "%d" ) );
+				  //ImGui::SliderIntA( XorStr( "Seed" ), &skin->m_seed, 1, 1000, XorStr( "%d" ) );
+				  //ImGui::SliderIntA( XorStr( "Stat-trak" ), &skin->m_stat_trak, 1, 1000000, XorStr( "%d" ) );
+
+				  if ( ImGui::Button( "Force update", ImVec2( -1.f, 22.f ) ) ) {
+					  g_Vars.m_global_skin_changer.m_update_skins = true;
+					  g_Vars.m_global_skin_changer.m_update_gloves = true;
+				  }
 				  static char buffer[ 128 ] = { ( '\0' ) };
 
 				  //ImGui::InputText( XorStr( "Name" ), buffer, 128 );

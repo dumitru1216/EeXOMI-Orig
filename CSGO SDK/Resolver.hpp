@@ -34,7 +34,7 @@ extern C_BruteforceData g_BruteforceData[ 65 ];
 enum eResolverModes {
 	NONE,
 	STAND,
-	STAND_VM,
+	STAND_BRUTE_1,
 	STAND_LM,
 	AIR,
 	PRED_22,
@@ -55,7 +55,7 @@ struct ResolverData_t {
 
 	float m_flNextBodyUpdate;
 	int m_iResolverMode;
-	bool m_bPredictingUpdates, m_bCollectedValidMoveData;
+	bool m_bPredictingUpdates, m_bCollectedValidMoveData, m_bBrutingLastmove;
 };
 extern ResolverData_t g_ResolverData[ 65 ];
 

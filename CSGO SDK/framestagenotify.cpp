@@ -86,6 +86,32 @@ auto GetEEdict( int index ) -> std::uint8_t* {
 
 namespace Hooked
 {
+	enum PostProcessParameterNames_t {
+		PPPN_FADE_TIME = 0,
+		PPPN_LOCAL_CONTRAST_STRENGTH,
+		PPPN_LOCAL_CONTRAST_EDGE_STRENGTH,
+		PPPN_VIGNETTE_START,
+		PPPN_VIGNETTE_END,
+		PPPN_VIGNETTE_BLUR_STRENGTH,
+		PPPN_FADE_TO_BLACK_STRENGTH,
+		PPPN_DEPTH_BLUR_FOCAL_DISTANCE,
+		PPPN_DEPTH_BLUR_STRENGTH,
+		PPPN_SCREEN_BLUR_STRENGTH,
+		PPPN_FILM_GRAIN_STRENGTH,
+
+		POST_PROCESS_PARAMETER_COUNT
+	};
+
+	struct PostProcessParameters_t {
+		PostProcessParameters_t( ) {
+			memset( m_flParameters, 0, sizeof( m_flParameters ) );
+			m_flParameters[ PPPN_VIGNETTE_START ] = 0.8f;
+			m_flParameters[ PPPN_VIGNETTE_END ] = 1.1f;
+		}
+
+		float m_flParameters[ POST_PROCESS_PARAMETER_COUNT ];
+	};
+
    struct clientanimating_t {
 	  C_BaseAnimating* pAnimating;
 	  unsigned int	flags;
@@ -101,6 +127,15 @@ namespace Hooked
 		 && Source::m_pEngine->IsInGame( )
 		 && Source::m_pClientState->m_nDeltaTick( ) > 0
 		 && local->m_flSpawnTime( ) > 0.f;
+
+	  if ( g_Vars.esp.remove_post_proccesing ) {
+		  static auto PostProcessParameters = *reinterpret_cast< PostProcessParameters_t** >( ( uintptr_t )Memory::Scan( ( "client.dll" ), ( "0F 11 05 ? ? ? ? 0F 10 87" ) ) + 3 );
+		  static float backupblur = PostProcessParameters->m_flParameters[ PPPN_VIGNETTE_BLUR_STRENGTH ];
+
+		  float blur = g_Vars.esp.remove_post_proccesing ? 0.f : backupblur;
+		  if ( PostProcessParameters->m_flParameters[ PPPN_VIGNETTE_BLUR_STRENGTH ] != blur )
+			  PostProcessParameters->m_flParameters[ PPPN_VIGNETTE_BLUR_STRENGTH ] = blur;
+	  }
 
 	  // cache random values cuz valve random system cause performance issues
 	  if ( !g_Vars.globals.RandomInit ) {

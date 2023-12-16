@@ -118,133 +118,6 @@ void CSkinChanger::PostDataUpdateStart( C_CSPlayer* local ) {
 
    auto& global = g_Vars.m_global_skin_changer;
 
-   if ( g_Vars.misc.skins_model ) {
-	  const char* models_to_change[] = {
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_sas.mdl" ),
-     XorStr( "models/player/custom_player/legacy/tm_balkan_variantj.mdl" ),
-     XorStr( "models/player/custom_player/legacy/tm_balkan_variantg.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_balkan_varianti.mdl" ),
-     XorStr( "models/player/custom_player/legacy/tm_balkan_variantf.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_varianti.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_variantm.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_variantg.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_variante.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_variantk.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_balkan_varianth.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi_varianth.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi_variantg.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi_variantf.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix_variantg.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix_variantf.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix_varianth.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_variantf.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_varianti.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_varianth.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_variantg.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_sas_variantf.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_anarchist.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_anarchist_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_anarchist_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_anarchist_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_anarchist_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_pirate.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_pirate_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_pirate_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_pirate_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_pirate_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_professional.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_professional_var1.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_professional_var2.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_professional_var3.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_professional_var4.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_separatist.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_separatist_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_separatist_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_separatist_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_separatist_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gign.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gign_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gign_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gign_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gign_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gsg9.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gsg9_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gsg9_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gsg9_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_gsg9_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_idf.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_idf_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_idf_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_idf_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_idf_variante.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_idf_variantf.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_swat.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_swat_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_swat_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_swat_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_swat_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_sas_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_sas_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_sas_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_sas_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_st6_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_balkan_variante.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_balkan_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_balkan_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_balkan_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_balkan_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_jumpsuit_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_jumpsuit_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_jumpsuit_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix_heavy.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_heavy.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_leet_variante.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix_variantb.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/tm_phoenix_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi_varianta.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi_variantc.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi_variantd.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_fbi_variante.mdl" ),
-	 XorStr( "models/player/custom_player/legacy/ctm_sas.mdl" )
-	  };
-
-	  for ( int i = 1; i <= Source::m_pGlobalVars->maxClients; i++ ) {
-		 auto entity = ( C_BaseEntity* ) Source::m_pEntList->GetClientEntity( i );
-
-		 if ( !entity )
-			continue;
-
-		 if ( entity->IsPlayer( ) ) {
-			auto TeroristModelIndex = Source::m_pModelInfo->GetModelIndex( models_to_change[ std::max( 0, g_Vars.misc.tt_model_type - 1 ) ] );
-			auto CTeroristModelIndex = Source::m_pModelInfo->GetModelIndex( models_to_change[ std::max( 0, g_Vars.misc.ct_model_type - 1 ) ] );
-			int iTeam = entity->m_iTeamNum( );
-
-			if ( entity == local ) {
-			   if ( iTeam == TEAM_TT && g_Vars.misc.tt_model_type != 0 ) {
-				  if ( TeroristModelIndex )
-					 entity->SetModelIndex( TeroristModelIndex );
-			   } else if ( iTeam == TEAM_CT && g_Vars.misc.ct_model_type != 0 ) {
-				  if ( CTeroristModelIndex )
-					 entity->SetModelIndex( CTeroristModelIndex );
-			   }
-			}
-		 }
-	  }
-   }
    // Handle weapon configs
    {
 	  auto weapons = local->m_hMyWeapons( );
@@ -464,23 +337,6 @@ void CSkinChanger::GloveChanger( C_CSPlayer* local ) {
 		 *( int* ) ( ( uintptr_t ) glove + 0x64 ) = -1;
 		 // *( int* ) ( ( uintptr_t ) local + 0xA20 ) = 1; // remove default arms in 3th person mode dword_15268230 = (int)"m_nBody";
 		 ApplyConfigOnAttributableItem( glove, glove_config, player_info.xuid_low );
-
-	  #if 0
-		 static auto fnEquip
-			= reinterpret_cast< int( __thiscall* )( void*, void* ) >(
-			Memory::Scan( XorStr( "client.dll" ), XorStr( "55 8B EC 83 EC 10 53 8B 5D 08 57 8B F9" ) )
-			);
-
-		 fnEquip( glove, local );
-
-		 auto CreateRenderableHandle = [&] ( ) -> void {
-			static auto adr = Memory::Scan( ( std::uintptr_t )GetModuleHandleA( XorStr( "client.dll" ) ), XorStr( "55 8B EC 51 53 8B C1 56 57 51" ) );
-			static auto fnCreateRenderableHandle = ( void( __thiscall* )( void*, int, int, char, signed int, char ) ) adr;
-			fnCreateRenderableHandle( Source::m_pClientLeafSystem, reinterpret_cast< uintptr_t >( glove->GetClientRenderable( ) ), 0, 0, 0xFFFFFFFF, 0xFFFFFFFF );
-		 };
-
-		 CreateRenderableHandle( );
-	  #endif 
 	  }
    }
 }
@@ -533,36 +389,37 @@ int CSkinChanger::GetNewAnimation( const uint32_t model, const int sequence, C_B
    // The best would be having a function that converts original knife's sequence
    // into some generic enum, then another function that generates a sequence
    // from the sequences of the new knife. I won't write that.
-   enum ESequence {
-	  SEQUENCE_DEFAULT_DRAW = 0,
-	  SEQUENCE_DEFAULT_IDLE1 = 1,
-	  SEQUENCE_DEFAULT_IDLE2 = 2,
-	  SEQUENCE_DEFAULT_LIGHT_MISS1 = 3,
-	  SEQUENCE_DEFAULT_LIGHT_MISS2 = 4,
-	  SEQUENCE_DEFAULT_HEAVY_MISS1 = 9,
-	  SEQUENCE_DEFAULT_HEAVY_HIT1 = 10,
-	  SEQUENCE_DEFAULT_HEAVY_BACKSTAB = 11,
-	  SEQUENCE_DEFAULT_LOOKAT01 = 12,
+	enum ESequence {
+		SEQUENCE_DEFAULT_DRAW = 0,
+		SEQUENCE_DEFAULT_IDLE1 = 1,
+		SEQUENCE_DEFAULT_IDLE2 = 2,
+		SEQUENCE_DEFAULT_LIGHT_MISS1 = 3,
+		SEQUENCE_DEFAULT_LIGHT_MISS2 = 4,
+		SEQUENCE_DEFAULT_HEAVY_MISS1 = 9,
+		SEQUENCE_DEFAULT_HEAVY_HIT1 = 10,
+		SEQUENCE_DEFAULT_HEAVY_BACKSTAB = 11,
+		SEQUENCE_DEFAULT_LOOKAT01 = 12,
 
-	  SEQUENCE_BUTTERFLY_DRAW = 0,
-	  SEQUENCE_BUTTERFLY_DRAW2 = 1,
-	  SEQUENCE_BUTTERFLY_LOOKAT01 = 13,
-	  SEQUENCE_BUTTERFLY_LOOKAT03 = 15,
+		SEQUENCE_BUTTERFLY_DRAW = 0,
+		SEQUENCE_BUTTERFLY_DRAW2 = 1,
+		SEQUENCE_BUTTERFLY_LOOKAT01 = 13,
+		SEQUENCE_BUTTERFLY_LOOKAT03 = 15,
 
-	  SEQUENCE_FALCHION_IDLE1 = 1,
-	  SEQUENCE_FALCHION_HEAVY_MISS1 = 8,
-	  SEQUENCE_FALCHION_HEAVY_MISS1_NOFLIP = 9,
-	  SEQUENCE_FALCHION_LOOKAT01 = 12,
-	  SEQUENCE_FALCHION_LOOKAT02 = 13,
+		SEQUENCE_FALCHION_IDLE1 = 1,
+		SEQUENCE_FALCHION_HEAVY_MISS1 = 8,
+		SEQUENCE_FALCHION_HEAVY_MISS1_NOFLIP = 9,
+		SEQUENCE_FALCHION_LOOKAT01 = 12,
+		SEQUENCE_FALCHION_LOOKAT02 = 13,
 
-	  SEQUENCE_DAGGERS_IDLE1 = 1,
-	  SEQUENCE_DAGGERS_LIGHT_MISS1 = 2,
-	  SEQUENCE_DAGGERS_LIGHT_MISS5 = 6,
-	  SEQUENCE_DAGGERS_HEAVY_MISS2 = 11,
-	  SEQUENCE_DAGGERS_HEAVY_MISS1 = 12,
+		SEQUENCE_DAGGERS_IDLE1 = 1,
+		SEQUENCE_DAGGERS_LIGHT_MISS1 = 2,
+		SEQUENCE_DAGGERS_LIGHT_MISS5 = 6,
+		SEQUENCE_DAGGERS_HEAVY_MISS2 = 11,
+		SEQUENCE_DAGGERS_HEAVY_MISS1 = 12,
 
-	  SEQUENCE_BOWIE_IDLE1 = 1,
-   };
+		SEQUENCE_BOWIE_IDLE1 = 1,
+	};
+
 
    auto random_sequence = [] ( const int low, const int high ) -> int {
 	  return rand( ) % ( high - low + 1 ) + low;
@@ -707,7 +564,6 @@ void CSkinChanger::ForceItemUpdate( C_CSPlayer* local ) {
 	  item->m_bCustomMaterialInitialized( ) = false;
 	  clearCustomMaterials( item->m_CustomMaterials( ) );
 	  clearCustomMaterials( view->m_CustomMaterials( ) );
-	  clearRefCountedVector( view->m_VisualsDataProcessors( ) );
 
 	  item->GetClientNetworkable( )->PostDataUpdate( 0 );
 	  item->GetClientNetworkable( )->OnDataChanged( 0 );
@@ -726,7 +582,7 @@ void CSkinChanger::ForceItemUpdate( C_CSPlayer* local ) {
 
 	  auto definition_index = weapon->m_Item( ).m_iItemDefinitionIndex( );
 	  if ( const auto active_conf = GetDataFromIndex( is_knife( definition_index ) ? global.m_knife_idx : definition_index ) ) {
-		 UpdateHud( );
+		// UpdateHud( );
 		 ForceUpdate( weapon );
 	  }
    }

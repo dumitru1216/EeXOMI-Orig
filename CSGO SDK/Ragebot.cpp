@@ -2005,8 +2005,8 @@ namespace Source
 
 			   player_info_t info;
 
-			#ifdef _DEBUG
-			   if ( Source::m_pEngine->GetPlayerInfo( best_point->target->player->entindex( ), &info ) ) {
+			//#ifdef _DEBUG
+			   if ( Source::m_pEngine->GetPlayerInfo( best_point->target->player->entindex( ), &info ) && g_Vars.esp.event_aimbot ) {
 				  int ping = 0;
 
 				  auto netchannel = Encrypted_t<INetChannel>( Source::m_pEngine->GetNetChannelInfo( ) );
@@ -2046,11 +2046,11 @@ namespace Source
 				  msg << XorStr( " | " );
 				  msg << XorStr( " rt: " ) << lagData->m_iResolverMode;
 				  msg << XorStr( " | " );
-				  msg << XorStr( " miss: " ) << lagData->m_iMissedShots << ":" << lagData->m_iMissedStand1;
+				  msg << XorStr( " miss: " ) << lagData->m_iMissedShots << ":" << lagData->m_iMissedStand1 << ":" << lagData->m_iMissedStand2;
 
 				  ILoggerEvent::Get( )->PushEvent( msg.str( ), FloatColor( 0.5f, 0.5f, 0.5f ) );
 			   }
-			#endif
+			//#endif
 
 
 			   Engine::C_Resolver::Get( )->CreateSnapshot( best_point->target->player, rageData->m_vecEyePos, best_point->point, best_point->target->record, best_point->target->side, best_point->hitgroup );

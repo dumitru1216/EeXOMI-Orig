@@ -81,7 +81,7 @@ namespace Engine
 
 		Displacement.DT_BaseCombatCharacter.m_hActiveWeapon = pPropManager->GetOffset( "DT_BaseCombatCharacter", "m_hActiveWeapon" );
 		Displacement.DT_BaseCombatCharacter.m_flNextAttack = pPropManager->GetOffset( "DT_BaseCombatCharacter", "m_flNextAttack" );
-		Displacement.DT_BaseCombatCharacter.m_hMyWeapons = pPropManager->GetOffset( "DT_BaseCombatCharacter", "m_hMyWeapons" ) / 2;
+		Displacement.DT_BaseCombatCharacter.m_hMyWeapons = pPropManager->GetOffset( XorStr( "DT_BaseCombatCharacter" ), XorStr( "m_hMyWeapons" ) ) / 2;
 		Displacement.DT_BaseCombatCharacter.m_hMyWearables = pPropManager->GetOffset( "DT_BaseCombatCharacter", "m_hMyWearables" );
 
 		Displacement.C_BasePlayer.m_pCurrentCommand = 0x3338;

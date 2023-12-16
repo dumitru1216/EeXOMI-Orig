@@ -99,13 +99,6 @@ void __fastcall Hooked::DrawModelExecute( void* ECX, void* EDX, IMatRenderContex
    if ( !local || !Source::m_pEngine->IsInGame( ) )
 	  return oDrawModelExecute( ECX, MatRenderContext, DrawModelState, RenderInfo, pCustomBoneToWorld );
 
-   static auto disable_post_processing_override = Source::m_pCvar->FindVar( XorStr( "mat_postprocess_enable" ) );
-
-   if ( g_Vars.esp.remove_post_proccesing && disable_post_processing_override )
-	  disable_post_processing_override->SetValue( 0 );
-   else
-	  disable_post_processing_override->SetValue( 1 );
-
    static bool run_once = false;
    static bool run_once2 = false;
 

@@ -11,24 +11,25 @@ std::vector< paint_kit > skin_kits; // knife skins
 std::vector< paint_kit > glove_kits;
 
 struct StickerData_t {
-   char viewmodel_geometry[ 128 ];
-   char viewmodel_material[ 128 ];
-   Vector worldmodel_decal_pos;
-   Vector worldmodel_decal_end;
-   char worldmodel_decal_bone[ 32 ];
+	char viewmodel_geometry[ 128 ];
+	char viewmodel_material[ 128 ];
+	Vector worldmodel_decal_pos;
+	Vector worldmodel_decal_end;
+	char worldmodel_decal_bone[ 32 ];
 };
 
 struct WeaponPaintableMaterial_t {
-   char Name[ 128 ];
-   char OrigMat[ 128 ];
-   char FolderName[ 128 ];
-   int ViewmodelDim;
-   int WorldDim;
-   float WeaponLength;
-   float UVScale;
-   bool BaseTextureOverride;
-   bool MirrorPattern;
+	char Name[ 128 ];
+	char OrigMat[ 128 ];
+	char FolderName[ 128 ];
+	int ViewmodelDim;
+	int WorldDim;
+	float WeaponLength;
+	float UVScale;
+	bool BaseTextureOverride;
+	bool MirrorPattern;
 };
+
 
 // We need these for overriding viewmodels and icons
 std::map< size_t, Item_t > k_weapon_info = {
@@ -103,212 +104,214 @@ struct static_attrib_t // Get a CEconItemAttributeDefinition* with m_Attributes[
     uint16_t id;  attribute_data_union_t value;  bool force_gc_to_generate;
 };
 
-class CCStrike15ItemDefinition
-{
+class CCStrike15ItemDefinition {
 public:
-    virtual uint16_t GetDefinitionIndex( ) const = 0;
-    virtual const char* GetPrefabName( ) const = 0;
-    virtual const char* GetItemBaseName( ) const = 0;
-    virtual const char* GetItemTypeName( ) const = 0;
-    virtual const char* GetItemDesc( ) const = 0;
-    virtual const char* GetInventoryImage( ) const = 0;
-    virtual const char* GetBasePlayerDisplayModel( ) const = 0;
-    virtual const char* GetWorldDisplayModel( ) const = 0;
-    virtual const char* GetExtraWearableModel( ) const = 0;
-    virtual int GetLoadoutSlot( ) const = 0;
-    virtual KeyValues* GetRawDefinition( ) const = 0;
-    virtual int GetHeroID( ) const = 0;
-    virtual int GetRarity( ) const = 0;
-    virtual CUtlVector<int>* GetItemSets( ) const = 0;
-    virtual int GetBundleItemCount( ) const = 0;
-    virtual void* GetBundleItem( int ) const = 0;
-    virtual bool IsBaseItem( ) const = 0;
-    virtual bool IsPublicItem( ) const = 0;
-    virtual bool IsBundle( ) const = 0;
-    virtual bool IsPackBundle( ) const = 0;
-    virtual bool IsPackItem( ) const = 0;
-    virtual void* BInitVisualBlockFromKV( KeyValues*, void*, void* ) = 0;
-    virtual void* BInitFromKV( KeyValues*, void*, void* ) = 0;
-    virtual void* BInitFromTestItemKVs( int, KeyValues*, void* ) = 0;
-    virtual void* GeneratePrecacheModelStrings( bool, void* ) const = 0;
-    virtual void* GeneratePrecacheSoundStrings( void* ) const = 0;
-    virtual void* GeneratePrecacheEffectStrings( void* ) const = 0;
-    virtual void* CopyPolymorphic( const CCStrike15ItemDefinition* ) = 0;
-    virtual int GetItemTypeID( ) const = 0;
-    virtual bool IsDefaultSlotItem( ) const = 0;
-    virtual bool IsPreviewableInStore( ) const = 0;
-    virtual int GetBundleItemPaintKitID( int ) const = 0;
-    virtual const char* GetWorldDroppedModel( ) const = 0;
-    virtual const char* GetHolsteredModel( ) const = 0;
-    virtual const char* GetZoomInSound( ) const = 0;
-    virtual const char* GetZoomOutSound( ) const = 0;
-    virtual const char* GetIconDisplayModel( ) const = 0;
-    virtual const char* GetBuyMenuDisplayModel( ) const = 0;
-    virtual const char* GetPedestalDisplayModel( ) const = 0;
-    virtual const char* GetMagazineModel( ) const = 0;
-    virtual const char* GetScopeLensMaskModel( ) const = 0;
-    virtual const char* GetUidModel( ) const = 0;
-    virtual const char* GetStatTrakModelByType( unsigned int ) const = 0;
-    virtual int GetNumSupportedStickerSlots( ) const = 0;
-    virtual const char* GetStickerSlotModelBySlotIndex( unsigned int ) const = 0;
-    virtual void* GetStickerSlotWorldProjectionStartBySlotIndex( unsigned int ) const = 0;
-    virtual void* GetStickerSlotWorldProjectionEndBySlotIndex( unsigned int ) const = 0;
-    virtual void* GetStickerWorldModelBoneParentNameBySlotIndex( unsigned int ) const = 0;
-    virtual void* GetStickerSlotMaterialBySlotIndex( unsigned int ) const = 0;
-    virtual const char* GetIconDefaultImage( ) const = 0;
-    virtual void* GetParticleFile( ) const = 0;
-    virtual void* GetParticleSnapshotFile( ) const = 0;
-    virtual bool IsRecent( ) const = 0;
-    virtual bool IsContentStreamable( ) const = 0;
-    virtual void* IgnoreInCollectionView( ) const = 0;
-    virtual void* GeneratePrecacheModelStrings( bool, void* ) = 0;
+	virtual uint16_t GetDefinitionIndex( ) const = 0;
+	virtual const char* GetPrefabName( ) const = 0;
+	virtual const char* GetItemBaseName( ) const = 0;
+	virtual const char* GetItemTypeName( ) const = 0;
+	virtual const char* GetItemDesc( ) const = 0;
+	virtual const char* GetInventoryImage( ) const = 0;
+	virtual const char* GetBasePlayerDisplayModel( ) const = 0;
+	virtual const char* GetWorldDisplayModel( ) const = 0;
+	virtual const char* GetExtraWearableModel( ) const = 0;
+	virtual int GetLoadoutSlot( ) const = 0;
+	virtual KeyValues* GetRawDefinition( ) const = 0;
+	virtual int GetHeroID( ) const = 0;
+	virtual int GetRarity( ) const = 0;
+	virtual CUtlVector<int>* GetItemSets( ) const = 0;
+	virtual int GetBundleItemCount( ) const = 0;
+	virtual void* GetBundleItem( int ) const = 0;
+	virtual bool IsBaseItem( ) const = 0;
+	virtual bool IsPublicItem( ) const = 0;
+	virtual bool IsBundle( ) const = 0;
+	virtual bool IsPackBundle( ) const = 0;
+	virtual bool IsPackItem( ) const = 0;
+	virtual void* BInitVisualBlockFromKV( KeyValues*, void*, void* ) = 0;
+	virtual void* BInitFromKV( KeyValues*, void*, void* ) = 0;
+	virtual void* BInitFromTestItemKVs( int, KeyValues*, void* ) = 0;
+	virtual void* GeneratePrecacheModelStrings( bool, void* ) const = 0;
+	virtual void* GeneratePrecacheSoundStrings( void* ) const = 0;
+	virtual void* GeneratePrecacheEffectStrings( void* ) const = 0;
+	virtual void* CopyPolymorphic( const CCStrike15ItemDefinition* ) = 0;
+	virtual int GetItemTypeID( ) const = 0;
+	virtual bool IsDefaultSlotItem( ) const = 0;
+	virtual bool IsPreviewableInStore( ) const = 0;
+	virtual int GetBundleItemPaintKitID( int ) const = 0;
+	virtual const char* GetWorldDroppedModel( ) const = 0;
+	virtual const char* GetHolsteredModel( ) const = 0;
+	virtual const char* GetZoomInSound( ) const = 0;
+	virtual const char* GetZoomOutSound( ) const = 0;
+	virtual const char* GetIconDisplayModel( ) const = 0;
+	virtual const char* GetBuyMenuDisplayModel( ) const = 0;
+	virtual const char* GetPedestalDisplayModel( ) const = 0;
+	virtual const char* GetMagazineModel( ) const = 0;
+	virtual const char* GetScopeLensMaskModel( ) const = 0;
+	virtual const char* GetUidModel( ) const = 0;
+	virtual const char* GetStatTrakModelByType( unsigned int ) const = 0;
+	virtual int GetNumSupportedStickerSlots( ) const = 0;
+	virtual const char* GetStickerSlotModelBySlotIndex( unsigned int ) const = 0;
+	virtual void* GetStickerSlotWorldProjectionStartBySlotIndex( unsigned int ) const = 0;
+	virtual void* GetStickerSlotWorldProjectionEndBySlotIndex( unsigned int ) const = 0;
+	virtual void* GetStickerWorldModelBoneParentNameBySlotIndex( unsigned int ) const = 0;
+	virtual void* GetStickerSlotMaterialBySlotIndex( unsigned int ) const = 0;
+	virtual const char* GetIconDefaultImage( ) const = 0;
+	virtual void* GetParticleFile( ) const = 0;
+	virtual void* GetParticleSnapshotFile( ) const = 0;
+	virtual bool IsRecent( ) const = 0;
+	virtual bool IsContentStreamable( ) const = 0;
+	virtual void* IgnoreInCollectionView( ) const = 0;
+	virtual void* GeneratePrecacheModelStrings( bool, void* ) = 0;
 
 public:
-    KeyValues* kv;
-    uint16_t id;
-    CUtlVector<uint16_t> associated_items;
+	KeyValues* kv;
+	uint16_t id;
+	CUtlVector<uint16_t> associated_items;
 
 private:
-    int32_t pad0 [ 2 ];
+	int32_t pad0[ 2 ];
 
 public:
-    uint8_t min_ilevel;
-    uint8_t max_ilevel;
-    uint8_t item_rarity;
-    uint8_t item_quality;
-    uint8_t forced_item_quality;
-    uint8_t default_drop_quality;
-    uint8_t default_drop_quantity;
-    CUtlVector<static_attrib_t> attributes;
-    uint8_t popularity_seed;
-    KeyValues* portraits;
-    char* item_name;
-    bool propername;
-    char* item_type_name;
-    int type_id; // crc32( item_type_name )
-    char* item_description;
-    int expiration_date;
-    int creation_date;
-    char* model_inventory;
-    char* image_inventory;
-    CUtlVector<const char*> image_inventory_overlay;
-    int image_inventory_pos_x;
-    int image_inventory_pos_y;
-    int image_inventory_size_w;
-    int image_inventory_size_h;
-    char* model_player;
+	uint8_t min_ilevel;
+	uint8_t max_ilevel;
+	uint8_t item_rarity;
+	uint8_t item_quality;
+	uint8_t forced_item_quality;
+	uint8_t default_drop_quality;
+	uint8_t default_drop_quantity;
+	CUtlVector<static_attrib_t> attributes;
+	uint8_t popularity_seed;
+	KeyValues* portraits;
+	char* item_name;
+	bool propername;
+	char* item_type_name;
+	int type_id; // crc32( item_type_name )
+	char* item_description;
+	int expiration_date;
+	int creation_date;
+	char* model_inventory;
+	char* image_inventory;
+	CUtlVector<const char*> image_inventory_overlay;
+	int image_inventory_pos_x;
+	int image_inventory_pos_y;
+	int image_inventory_size_w;
+	int image_inventory_size_h;
+	char* model_player;
 
 private:
-    bool pad1;
+	bool pad1;
 
 public:
-    bool hide_bodygroups_deployed_only;
-    char* model_world;
-    char* model_dropped;
-    char* model_holstered;
-    char* extra_wearable;
+	bool hide_bodygroups_deployed_only;
+	char* model_world;
+	char* model_dropped;
+	char* model_holstered;
+	char* extra_wearable;
 
 private:
-    int32_t pad2 [ 20 ];
+	int32_t pad2[ 20 ];
 
 public:
-    CUtlVector<StickerData_t> stickers;
-    char* icon_default_image;
-    bool attach_to_hands;
-    bool attach_to_hands_vm_only;
-    bool flip_viewmodel;
-    bool act_as_wearable;
-    CUtlVector<int> item_sets;
-    AssetInfo* visuals;
-
-public:
-    bool allow_purchase_standalone;
-    char* brass_eject_model;
-    char* zoom_in_sound;
-    char* zoom_out_sound;
-
-    IEconTool* tool;
+	CUtlVector<StickerData_t> stickers;
+	char* icon_default_image;
+	bool attach_to_hands;
+	bool attach_to_hands_vm_only;
+	bool flip_viewmodel;
+	bool act_as_wearable;
+	CUtlVector<int> item_sets;
+	AssetInfo* visuals;
 
 private:
-    int32_t pad4 [ 3 ];
+	int32_t pad3;
 
 public:
-    int sound_material;
-    bool disable_style_selector;
+	bool allow_purchase_standalone;
+	char* brass_eject_model;
+	char* zoom_in_sound;
+	char* zoom_out_sound;
+
+	IEconTool* tool;
 
 private:
-    int32_t pad5 [ 8 ];
+	int32_t pad4[ 3 ];
 
 public:
-    char* particle_file;
-    char* particle_snapshot;
-    char* loot_list_name;
+	int sound_material;
+	bool disable_style_selector;
 
 private:
-    int32_t pad6 [ 5 ];
+	int32_t pad5[ 8 ];
 
 public:
-    CUtlVector<WeaponPaintableMaterial_t> paint_data;
-
-    struct {
-        QAngle* camera_angles;
-        Vector* camera_offset;
-        float camera_fov;
-        void* lights [ 4 ];
-
-    private:
-        int32_t pad0;
-    } *inventory_image_data;
-
-    char* item_class;
-    char* item_logname;
-    char* item_iconname;
-    char* name;
-    bool hidden;
-    bool show_in_armory;
-    bool baseitem;
-    bool default_slot_item;
-    bool import;
-    bool one_per_account_cdkey;
+	char* particle_file;
+	char* particle_snapshot;
+	char* loot_list_name;
 
 private:
-    int32_t pad7;
+	int32_t pad6[ 5 ];
 
 public:
-    char* armory_desc;
-    CCStrike15ItemDefinition* armory_remapdef;
-    CCStrike15ItemDefinition* store_remapdef;
-    char* armory_remap;
-    char* store_remap;
-    char* class_token_id;
-    char* slot_token_id;
-    int drop_type;
-    int holiday_restriction;
-    int subtype;
+	CUtlVector<WeaponPaintableMaterial_t> paint_data;
+
+	struct {
+		QAngle* camera_angles;
+		Vector* camera_offset;
+		float camera_fov;
+		LightDesc_t* lights[ 4 ];
+
+	private:
+		int32_t pad0;
+	} *inventory_image_data;
+
+	char* item_class;
+	char* item_logname;
+	char* item_iconname;
+	char* name;
+	bool hidden;
+	bool show_in_armory;
+	bool baseitem;
+	bool default_slot_item;
+	bool import;
+	bool one_per_account_cdkey;
 
 private:
-    int32_t pad8 [ 4 ];
+	int32_t pad7;
 
 public:
-    CUtlMap<unsigned int, const char*, unsigned short> alternate_icons;
+	char* armory_desc;
+	CCStrike15ItemDefinition* armory_remapdef;
+	CCStrike15ItemDefinition* store_remapdef;
+	char* armory_remap;
+	char* store_remap;
+	char* class_token_id;
+	char* slot_token_id;
+	int drop_type;
+	int holiday_restriction;
+	int subtype;
 
 private:
-    int32_t pad9 [ 9 ];
+	int32_t pad8[ 4 ];
 
 public:
-    bool not_developer;
-    bool ignore_in_collection_view;
-
-    // This is where CCStrike15ItemDefinition begins
-    int item_sub_position;
-    int item_gear_slot;
-    int item_gear_slot_position;
-    int anim_slot;
-    char* model_player_per_class [ 4 ];
-    int class_usage [ 4 ];
+	CUtlMap<unsigned int, const char*, unsigned short> alternate_icons;
 
 private:
-    int32_t pad10 [ 2 ];
+	int32_t pad9[ 9 ];
+
+public:
+	bool not_developer;
+	bool ignore_in_collection_view;
+
+	// This is where CCStrike15ItemDefinition begins
+	int item_sub_position;
+	int item_gear_slot;
+	int item_gear_slot_position;
+	int anim_slot;
+	char* model_player_per_class[ 4 ];
+	int class_usage[ 4 ];
+
+private:
+	int32_t pad10[ 2 ];
 };
 
 template < typename Key, typename Value >
@@ -341,27 +344,27 @@ struct String_t {
 };               //Size=0x0010
 
 struct CPaintKit {
-   int id; //0x0000
+	int id; //0x0000
 
-   String_t name;            //0x0004
-   String_t description;     //0x0014
-   String_t item_name;       //0x0024
-   String_t material_name;   //0x0034
-   String_t image_inventory; //0x0044
+	String_t name;            //0x0004
+	String_t description;     //0x0014
+	String_t item_name;       //0x0024
+	String_t material_name;   //0x0034
+	String_t image_inventory; //0x0044
 
-   char pad_0x0054[ 0x8C ]; //0x0054
-};                       //Size=0x00E0
+	char pad_0x0054[ 0x8C ]; //0x0054
+};
 
 struct AlternateIconData_t {
 private:
-   int32_t pad0;
+	int32_t pad0;
 
 public:
-   String_t icon_path;
-   String_t icon_path_large;
+	String_t icon_path;
+	String_t icon_path_large;
 
 private:
-   String_t pad1[ 2 ];
+	String_t pad1[ 2 ];
 };
 
 struct item_list_entry_t {
@@ -374,19 +377,19 @@ private:
 
 class CEconItemSetDefinition {
 public:
-   virtual ~CEconItemSetDefinition( ) { };
+	virtual ~CEconItemSetDefinition( ) { };
 
-   char* key_name;
-   char* name;
-   char* unlocalized_name;
-   char* set_description;
-   CUtlVector< item_list_entry_t > items;
-   int store_bundle;
-   bool is_collection;
-   bool is_hidden_set;
-   CUtlVector< int > attributes;
+	char* key_name;
+	char* name;
+	char* unlocalized_name;
+	char* set_description;
+	CUtlVector< item_list_entry_t > items;
+	int store_bundle;
+	bool is_collection;
+	bool is_hidden_set;
+	CUtlVector< int > attributes;
 };
- 
+
 auto initialize_kits( ) -> void {
    const auto V_UCS2ToUTF8 = reinterpret_cast< int( * )( const wchar_t* ucs2, char* utf8, int len ) >( GetProcAddress( GetModuleHandleA( XorStr( "vstdlib.dll" ) ), XorStr( "V_UCS2ToUTF8" ) ) );
    const auto t = FIELD_OFFSET( CCStrike15ItemDefinition, model_player );
