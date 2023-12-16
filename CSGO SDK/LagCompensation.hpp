@@ -73,10 +73,10 @@ namespace Engine
 	  bool m_bSkipDueToResolver = false; // skip record in hitscan
 	  bool m_bTeleportDistance = false; // teleport distance was broken
 
-	  float GetAbsYaw( int matrixIdx );
-	  matrix3x4_t* GetBoneMatrix( int matrixIdx );
+	  float GetAbsYaw( /*int matrixIdx*/ );
+	  matrix3x4_t* GetBoneMatrix( /*int matrixIdx*/ );
 	  void Setup( C_CSPlayer* player );
-	  void Apply( C_CSPlayer* player, int matrixIdx = 0 );
+	  void Apply( C_CSPlayer* player /*, int matrixIdx = 0*/ );
    };
 
    class C_EntityLagData {
@@ -98,6 +98,9 @@ namespace Engine
 	  int m_iMissedShots = 0;
 	  int m_iResolverType = 0;
 	  int m_iResolverSide = 0;
+
+	  // resolver new
+	  int m_iMissedStand1 = 0;
 
 	  bool m_bGotAbsYaw = false;
 	  bool m_bGotAbsYawShot = false;

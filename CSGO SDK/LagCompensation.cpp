@@ -279,7 +279,7 @@ namespace Engine
 	  record->m_flEyePitch = anim_record->m_angEyeAngles.pitch;
 	  record->m_bIsShoting = anim_record->m_bIsShoting;
 	  record->m_bIsValid = !anim_record->m_bIsInvalid;
-	  record->m_bBonesCalculated = anim_data->m_bBonesCalculated;
+	//  record->m_bBonesCalculated = anim_data->m_bBonesCalculated;
 	  record->m_flAnimationVelocity = player->m_PlayerAnimState( )->m_velocity;
 	  record->m_bTeleportDistance = anim_record->m_bTeleportDistance;
 	  record->m_flAbsRotationLeft = anim_record->m_flAbsRotationLeft;
@@ -299,12 +299,12 @@ namespace Engine
 	  }
 
 	  std::memcpy( record->m_BoneMatrix, anim_data->m_Animations[ 0 ].m_Bones, player->m_CachedBoneData( ).m_Size * sizeof( matrix3x4_t ) );
-	  if ( record->m_bBonesCalculated ) {
+	  /*if ( record->m_bBonesCalculated ) {
 		 std::memcpy( record->m_BoneMatrixRight, anim_data->m_Animations[ 1 ].m_Bones, player->m_CachedBoneData( ).m_Size * sizeof( matrix3x4_t ) );
 		 std::memcpy( record->m_BoneMatrixLeft, anim_data->m_Animations[ 2 ].m_Bones, player->m_CachedBoneData( ).m_Size * sizeof( matrix3x4_t ) );
 		 std::memcpy( record->m_BoneMatrixLowRight, anim_data->m_Animations[ 3 ].m_Bones, player->m_CachedBoneData( ).m_Size * sizeof( matrix3x4_t ) );
 		 std::memcpy( record->m_BoneMatrixLowLeft, anim_data->m_Animations[ 4 ].m_Bones, player->m_CachedBoneData( ).m_Size * sizeof( matrix3x4_t ) );
-	  }
+	  }*/
 
 	  auto player_is_bot = false;
 	  player_info_t player_info;
@@ -531,25 +531,15 @@ namespace Engine
 	  return origin + player->m_vecVelocity( ) * ( curtime - lastRecord->m_flRealTime + lastRecord->m_flServerLatency );
    }
 
-   float C_LagRecord::GetAbsYaw( int matrixIdx ) {
-	  switch ( matrixIdx ) {
-		 case -1:
-		 return this->m_flAbsRotationRight;
-		 break;
-		 case 1:
-		 return this->m_flAbsRotationLeft;
-		 break;
-		 default:
-		 return this->m_angAngles.yaw;
-		 break;
-	  }
+   float C_LagRecord::GetAbsYaw( /*int matrixIdx*/ ) {
+	   return this->m_angAngles.yaw;
    }
 
-   matrix3x4_t* C_LagRecord::GetBoneMatrix( int matrixIdx ) {
+   matrix3x4_t* C_LagRecord::GetBoneMatrix( /*int matrixIdx*/ ) {
 	  if ( !this->m_bBonesCalculated )
 		 return this->m_BoneMatrix;
 
-	  switch ( matrixIdx ) {
+	  /*switch ( matrixIdx ) {
 		 case 0:
 		 return this->m_BoneMatrix;
 		 case -1:
@@ -567,7 +557,7 @@ namespace Engine
 		 default:
 		 return this->m_BoneMatrix;
 		 break;
-	  }
+	  }*/
    }
 
    void Engine::C_LagRecord::Setup( C_CSPlayer* player ) {
@@ -589,19 +579,19 @@ namespace Engine
 	  this->player = player;
    }
 
-   void Engine::C_LagRecord::Apply( C_CSPlayer* player, int matrixIdx ) {
+   void Engine::C_LagRecord::Apply( C_CSPlayer* player/*, int matrixIdx*/ ) {
 	  auto collidable = player->m_Collision( );
 	  collidable->SetCollisionBounds( this->m_vecMins, this->m_vecMaxs );
 
 	  player->m_flSimulationTime( ) = this->m_flSimulationTime;
 
 	  QAngle absAngles = this->m_angAngles;
-	  absAngles.yaw = this->GetAbsYaw( matrixIdx );
+	  absAngles.yaw = this->GetAbsYaw( /*matrixIdx*/ );
 
 	  player->SetAbsAngles( absAngles );
 	  player->SetAbsOrigin( this->m_vecOrigin );
 
-	  matrix3x4_t* matrix = GetBoneMatrix( matrixIdx );
+	  matrix3x4_t* matrix = GetBoneMatrix( /*matrixIdx*/ );
 
 	  std::memcpy( player->m_CachedBoneData( ).m_Memory.m_pMemory, matrix,
 				   player->m_CachedBoneData( ).m_Size * sizeof( matrix3x4_t ) );

@@ -254,10 +254,7 @@ namespace Hooked
 				  continue;
 			   if ( g_Vars.rage.enabled ) {
 				  auto& record = lagData->m_History.front( );
-				  int side = g_Vars.rage.visual_resolver ? g_BruteforceData[ player->m_entIndex ].GetYawSide( player->m_entIndex, record ) : 0;
-				  matrix3x4_t* matrix = record.GetBoneMatrix( side );
-
-				  g_Vars.globals.m_iResolverSide[ i ] = side;
+				  matrix3x4_t* matrix = record.GetBoneMatrix( );
 
 				  std::memcpy( player->m_CachedBoneData( ).Base( ), matrix,
 							   player->m_CachedBoneData( ).Count( ) * sizeof( matrix3x4_t ) );

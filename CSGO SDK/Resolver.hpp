@@ -35,6 +35,7 @@ enum eResolverModes {
 	NONE,
 	STAND,
 	STAND_VM,
+	STAND_LM,
 	AIR,
 	PRED_22,
 	PRED_11,

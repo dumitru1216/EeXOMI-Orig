@@ -18,7 +18,7 @@
 #endif
 
 #if 0
-#define USE_XOR
+
 #endif
 
 #include "XorStr.hpp"

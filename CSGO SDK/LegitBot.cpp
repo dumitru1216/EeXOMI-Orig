@@ -124,7 +124,7 @@ namespace Source
 		 pair.fov = AngleDistance( m_viewAngles, eyePos, lagRecord->m_vecOrigin + ( lagRecord->m_vecMins + lagRecord->m_vecMaxs ) * 0.5f );
 		 pair.tickCount = TIME_TO_TICKS( lagRecord->m_flSimulationTime + Engine::LagCompensation::Get( )->GetLerp( ) );
 
-		 lagRecord->Apply( player, 0 );
+		 lagRecord->Apply( player );
 	  }
 
 	  if ( m_restore.size( ) > 0 ) {

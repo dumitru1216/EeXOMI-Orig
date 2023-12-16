@@ -745,7 +745,7 @@ void CEsp::SpectatorList( ) {
 
 void CEsp::HitLogger( ) {
    const char* reasons_array[] = {
-	  XorStr( "Desync" ),
+	  XorStr( "Fakes" ),
 	  XorStr( "Spread" ),
 	  XorStr( "-" ),
 	  XorStr( "Server" ),

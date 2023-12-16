@@ -294,20 +294,26 @@ namespace Engine
 	  auto weapon = ( C_BaseAttributableItem* ) player->m_hActiveWeapon( ).Get( );
 	  auto weaponWorldModel = weapon ? ( C_CSPlayer* ) ( weapon )->m_hWeaponWorldModel( ).Get( ) : nullptr;
 
-	  bool should_calculate = g_Vars.rage.enabled && ( g_Vars.rage.team_check || !this->player->IsTeammate( C_CSPlayer::GetLocalPlayer( ) ) );
-	  if ( should_calculate ) {
-		 player_info_t player_info;
-		 if ( Source::m_pEngine->GetPlayerInfo( player->m_entIndex, &player_info ) ) {
-			should_calculate = !player_info.fakeplayer;
-		 }
-	  }
+	  //bool should_calculate = g_Vars.rage.enabled && ( g_Vars.rage.team_check || !this->player->IsTeammate( C_CSPlayer::GetLocalPlayer( ) ) );
+	  //if ( should_calculate ) {
+		 //player_info_t player_info;
+		 //if ( Source::m_pEngine->GetPlayerInfo( player->m_entIndex, &player_info ) ) {
+			//should_calculate = !player_info.fakeplayer;
+		 //}
+	  //}
 
 	  if ( !animState )
 		 return;
 
-	  float max_desync_angle = animState->GetDesyncDelta( );
+	  server->m_animating = player;
+	  server->m_vecOrigin = player->m_vecOrigin( );
+	  server->m_animLayers = record->m_serverAnimOverlays;
+	  server->m_pHdr = player->m_pStudioHdr( );
 
-	  if ( should_calculate ) {
+	  this->m_bBonesCalculated = false;
+	  record->m_bNoFakeAngles = true;
+
+	 /* if ( should_calculate ) {
 		 AnimationBackup backup;
 		 backup.Setup( player );
 
@@ -367,17 +373,17 @@ namespace Engine
 		 }
 
 		 this->m_bBonesCalculated = true;
-	  } else {
-		 server->m_animating = player;
-		 server->m_vecOrigin = player->m_vecOrigin( );
-		 server->m_animLayers = record->m_serverAnimOverlays;
-		 server->m_pHdr = player->m_pStudioHdr( );
+	  } else {*/
+	 // server->m_animating = player;
+		// server->m_vecOrigin = player->m_vecOrigin( );
+		// server->m_animLayers = record->m_serverAnimOverlays;
+		// server->m_pHdr = player->m_pStudioHdr( );
+		//
+		// this->m_bBonesCalculated = false;
+		// record->m_bNoFakeAngles = true;
+	  //}
 
-		 this->m_bBonesCalculated = false;
-		 record->m_bNoFakeAngles = true;
-	  }
-
-	  SimulateAnimations( record, previous_record, 0, max_desync_angle );
+	  SimulateAnimations( record, previous_record );
 
 	  this->m_Animations[ 0 ].Update( player );
 
@@ -737,7 +743,7 @@ namespace Engine
 	  } 
    }
 
-   void C_AnimationData::SimulateAnimations( Encrypted_t<Engine::C_AnimationRecord> current, Encrypted_t<Engine::C_AnimationRecord> previous, int resolverIndex, float angle ) {
+   void C_AnimationData::SimulateAnimations( Encrypted_t<Engine::C_AnimationRecord> current, Encrypted_t<Engine::C_AnimationRecord> previous ) {
 	  auto UpdateAnimations = [] ( C_CSPlayer* player, float time ) {
 		 auto curtime = Source::m_pGlobalVars->curtime;
 		 auto frametime = Source::m_pGlobalVars->frametime;
@@ -846,9 +852,12 @@ namespace Engine
 	  }
 
 	  auto AnimationData = Encrypted_t<C_AnimationData>( this );
-
 	  if ( !AnimationData.Xor( ) )
 		 return;
+
+	  auto& lag_data = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
+	  if ( !lag_data.IsValid( ) )
+		  return;
 
 	  player_info_t player_info;
 	  if ( !Source::m_pEngine->GetPlayerInfo( player->m_entIndex, &player_info ) ) {
@@ -954,7 +963,9 @@ namespace Engine
 			  Vector delta = vDormantOrigin - current->m_vecOrigin;
 			  if ( delta.Length( ) > 16.f ) {
 				  data.m_bCollectedValidMoveData = true;
-				  vDormantOrigin = Vector( );
+				  vDormantOrigin = Vector( ); /* keep this */
+			  } else if ( delta.Length( ) < 16.f ) { /* we weren't checking this */
+				  data.m_bCollectedValidMoveData = false;
 			  }
 		  }
 
@@ -973,10 +984,11 @@ namespace Engine
 			  auto m_bLastMoveValid = [ & ]( )-> bool {
 				  const auto fl_delta = std::fabsf( Math::AngleNormalize( angle_away.y - data.m_sMoveData.m_flLowerBodyYawTarget ) );
 				  return fl_delta > 20.f && fl_delta < 160.f;
-				  };
+			  };
 
-			  if ( m_bLastMoveValid( ) ) {
+			  if ( m_bLastMoveValid( ) && ( lag_data->m_iMissedStand1 < 2 ) ) {
 				  current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
+				  data.m_iResolverMode = eResolverModes::STAND_LM;
 
 				  g_ResolverData[ index ].m_ResolverText = "VM:LM";
 			  }

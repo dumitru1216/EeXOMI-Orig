@@ -1396,7 +1396,7 @@ namespace Source
    }
 
    void C_Ragebot::Multipoint( C_CSPlayer* player, Engine::C_LagRecord* record, int side, std::vector<Vector>& points, mstudiobbox_t* hitbox, mstudiohitboxset_t* hitboxSet, float pointScale ) {
-	  auto boneMatrix = record->GetBoneMatrix( side );
+	  auto boneMatrix = record->GetBoneMatrix( );
 
 	  if ( !hitbox )
 		 return;
@@ -1416,27 +1416,6 @@ namespace Source
 				centerTrans,
 				hitbox, hitboxSet, false
 	  );
-
-	  /*if ( hitbox == hitboxSet->pHitbox( HITBOX_NECK ) )
-		 return;
-
-	  if ( hitbox == hitboxSet->pHitbox( HITBOX_RIGHT_THIGH ) || hitbox == hitboxSet->pHitbox( HITBOX_LEFT_THIGH )
-		   || hitbox == hitboxSet->pHitbox( HITBOX_RIGHT_CALF ) || hitbox == hitboxSet->pHitbox( HITBOX_LEFT_CALF )
-		   || hitbox == hitboxSet->pHitbox( HITBOX_RIGHT_FOREARM ) || hitbox == hitboxSet->pHitbox( HITBOX_LEFT_FOREARM )
-		   || hitbox == hitboxSet->pHitbox( HITBOX_RIGHT_UPPER_ARM ) || hitbox == hitboxSet->pHitbox( HITBOX_LEFT_UPPER_ARM ) ) {
-		 auto min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
-		 auto max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
-
-		 if ( hitbox == hitboxSet->pHitbox( HITBOX_RIGHT_CALF ) || hitbox == hitboxSet->pHitbox( HITBOX_LEFT_CALF )
-			  || hitbox == hitboxSet->pHitbox( HITBOX_RIGHT_FOREARM ) || hitbox == hitboxSet->pHitbox( HITBOX_LEFT_FOREARM ) ) {
-
-		 } else {
-			AddPoint( player, record, side, points,
-					  max,
-					  hitbox, hitboxSet, false );
-		 }
-		 return;
-	  }*/
 
 	  auto local = C_CSPlayer::GetLocalPlayer( );
 	  if ( !local || local->IsDead( ) )
@@ -1470,35 +1449,6 @@ namespace Source
 	  };
 
 	  if ( hitbox->m_flRadius <= 0.0f ) {
-		 auto SetupBox = [] ( Vector* max, Vector* min, Vector* outPoints ) {
-			// todo: Refactoring
-			// anyway useless
-			outPoints[ 0 ].x = min->x;
-			outPoints[ 0 ].y = min->y;
-			outPoints[ 0 ].z = min->z;
-			outPoints[ 1 ].x = max->x;
-			outPoints[ 1 ].y = min->y;
-			outPoints[ 1 ].z = min->z;
-			outPoints[ 2 ].x = max->x;
-			outPoints[ 2 ].y = max->y;
-			outPoints[ 2 ].z = min->z;
-			outPoints[ 3 ].x = min->x;
-			outPoints[ 3 ].y = max->y;
-			outPoints[ 3 ].z = min->z;
-			outPoints[ 4 ].x = min->x;
-			outPoints[ 4 ].y = min->y;
-			outPoints[ 4 ].z = max->z;
-			outPoints[ 5 ].x = max->x;
-			outPoints[ 5 ].y = min->y;
-			outPoints[ 5 ].z = max->z;
-			outPoints[ 6 ].x = max->x;
-			outPoints[ 6 ].y = max->y;
-			outPoints[ 6 ].z = max->z;
-			outPoints[ 7 ].x = min->x;
-			outPoints[ 7 ].y = max->y;
-			outPoints[ 7 ].z = max->z;
-		 };
-
 		 if ( optimization ) {
 
 			AddPoint( player, record, side, points,
@@ -2090,11 +2040,11 @@ namespace Source
 				  msg << XorStr( " | " );
 				  msg << XorStr( " shot: " ) << int( best_point->target->record->m_bIsShoting );
 				  msg << XorStr( " | " );
-				  msg << XorStr( " miss: " ) << lagData->m_iMissedShots;
-				  msg << XorStr( " | " );
 				  msg << XorStr( " delay: " ) << rageData->m_iDelayTicksStored;
 				  msg << XorStr( " | " );
 				  msg << XorStr( " ping: " ) << int( ping );
+				  msg << XorStr( " | " );
+				  msg << XorStr( " miss: " ) << lagData->m_iMissedShots << ":" << lagData->m_iMissedStand1;
 
 				  ILoggerEvent::Get( )->PushEvent( msg.str( ), FloatColor( 0.5f, 0.5f, 0.5f ) );
 			   }
@@ -2104,10 +2054,10 @@ namespace Source
 			   Engine::C_Resolver::Get( )->CreateSnapshot( best_point->target->player, rageData->m_vecEyePos, best_point->point, best_point->target->record, best_point->target->side, best_point->hitgroup );
 
 			   if ( g_Vars.esp.esp_enable && g_Vars.esp.chams_enabled && g_Vars.esp.hitmatrix )
-				  IChams::Get( )->AddHitmatrix( best_point->target->player, best_point->target->record->GetBoneMatrix( best_point->target->side ) );
+				  IChams::Get( )->AddHitmatrix( best_point->target->player, best_point->target->record->GetBoneMatrix( /*best_point->target->side*/ ) );
 
 			   if ( g_Vars.esp.draw_hitboxes ) {
-				  auto matrix = best_point->target->record->GetBoneMatrix( best_point->target->side );
+				  auto matrix = best_point->target->record->GetBoneMatrix( /*best_point->target->side*/ );
 
 				  auto hdr = Source::m_pModelInfo->GetStudiomodel( best_point->target->player->GetModel( ) );
 				  auto hitboxSet = hdr->pHitboxSet( best_point->target->player->m_nHitboxSet( ) );
@@ -2461,9 +2411,9 @@ namespace Source
 	  static bool prev_left_side = false;
 
 	  float left_damage = 0.f, right_damage = 0.f;
-	  record->Apply( player, -1 );
-	  record->Apply( player, 1 );
 	  record->Apply( player );
+	 // record->Apply( player);
+	 // record->Apply( player );
 
 	  auto hitboxSet = hdr->pHitboxSet( player->m_nHitboxSet( ) );
 
@@ -2474,8 +2424,7 @@ namespace Source
 	  aim_target.player = player;
 	  aim_target.record = record;
 	  aim_target.side = GetResolverSide( player, record, aim_target.type );
-	  if ( !g_Vars.rage.visual_resolver )
-		 g_Vars.globals.m_iResolverSide[ aim_target.player->entindex( ) ] = aim_target.side;
+
 	  aim_target.backup = backup;
 	  aim_target.override_hitscan = false;
 	  if ( rageData->rbot->override_hitscan ) {
@@ -2486,7 +2435,7 @@ namespace Source
 		 }
 	  }
 
-	  record->Apply( player, aim_target.side );
+	  record->Apply( player/*, aim_target.side*/ );
 
 	  aim_target.prefer_safe = rageData->rbot->prefer_safety && ( g_Vars.rage.prefer_safe.enabled || this->OverrideHitscan( player, record, 1 ) );
 	  aim_target.prefer_body = rageData->rbot->prefer_body && ( g_Vars.rage.prefer_body.enabled || this->OverrideHitscan( player, record, 2 ) );
@@ -2657,9 +2606,7 @@ namespace Source
 
 			   g_Vars.globals.m_iRecordPriority[ player->entindex( ) ] = rec->m_iRecordPriority;
 
-			   auto side = this->GetResolverSide( player, rec, stub );
-
-			   rec->Apply( player, side );
+			   rec->Apply( player );
 
 			   auto pelvisDamage = check_hitbox( player, rec, HITBOX_PELVIS );
 			   auto headDamage = check_hitbox( player, rec, HITBOX_HEAD );
@@ -2745,24 +2692,24 @@ namespace Source
 
 	  if ( hitbox->m_flRadius <= 0.0f ) {
 		 if ( side > 0 || side < 0 ) {
-			auto boneMatrix = record->GetBoneMatrix( side );
+			auto boneMatrix = record->GetBoneMatrix( );
 			auto min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
 			auto max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
 			hits += Math::IntersectionBoundingBox( rageData->m_vecEyePos, end, min, max );
 
-			boneMatrix = record->GetBoneMatrix( 0 );
+			boneMatrix = record->GetBoneMatrix( );
 			min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
 			max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
 			hits += Math::IntersectionBoundingBox( rageData->m_vecEyePos, end, min, max );
 		 }
 	  } else {
 		 if ( side > 0 || side < 0 ) {
-			auto boneMatrix = record->GetBoneMatrix( side );
+			auto boneMatrix = record->GetBoneMatrix( );
 			auto min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
 			auto max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
 			hits += segment_to_segment( rageData->m_vecEyePos, end, min, max, hitbox->m_flRadius );
 
-			boneMatrix = record->GetBoneMatrix( 0 );
+			boneMatrix = record->GetBoneMatrix( );
 			min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
 			max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
 			hits += segment_to_segment( rageData->m_vecEyePos, end, min, max, hitbox->m_flRadius );
@@ -2781,14 +2728,14 @@ namespace Source
 	  if ( hitbox->m_flRadius <= 0.0f ) {
 		 Vector dir = point - rageData->m_vecEyePos;
 		 for ( int i = -1; i <= 1; ++i ) {
-			auto boneMatrix = record->GetBoneMatrix( i );
+			auto boneMatrix = record->GetBoneMatrix( );
 			auto min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
 			auto max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
 			hits += Math::IntersectionBoundingBox( rageData->m_vecEyePos, end, min, max );
 		 }
 	  } else {
 		 for ( int i = -1; i <= 1; ++i ) {
-			auto boneMatrix = record->GetBoneMatrix( i );
+			auto boneMatrix = record->GetBoneMatrix( );
 			auto min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
 			auto max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
 			hits += segment_to_segment( rageData->m_vecEyePos, end, min, max, hitbox->m_flRadius );

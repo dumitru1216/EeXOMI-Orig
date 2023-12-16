@@ -607,7 +607,11 @@ namespace Source
 
 					 const auto lerp = Math::Interpolate( next, first_invalid->m_vecOrigin, std::clamp( delta, 0.f, 1.f ) );
 
-					 auto matrix = g_Vars.rage.visual_resolver ? first_invalid->GetBoneMatrix( g_BruteforceData[ entity->m_entIndex ].GetYawSide( entity->m_entIndex, *first_invalid ) ) : &first_invalid->m_BoneMatrix[ 0 ];
+					 auto matrix =  &first_invalid->m_BoneMatrix[ 0 ];
+
+					 /*
+					 g_Vars.rage.visual_resolver ? first_invalid->GetBoneMatrix( g_BruteforceData[ entity->m_entIndex ].GetYawSide( entity->m_entIndex, *first_invalid ) ) :
+					 */
 
 					 matrix3x4_t ret[ 128 ];
 					 memcpy( ret, matrix, sizeof( matrix3x4_t[ 128 ] ) );

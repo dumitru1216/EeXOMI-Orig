@@ -79,7 +79,7 @@ namespace Engine
 	  void Update( );
 	  void Collect( C_CSPlayer* player );
 
-	  void SimulateAnimations( Encrypted_t<Engine::C_AnimationRecord> current, Encrypted_t<Engine::C_AnimationRecord> previous, int side, float angle );
+	  void SimulateAnimations( Encrypted_t<Engine::C_AnimationRecord> current, Encrypted_t<Engine::C_AnimationRecord> previous );
 	  void AnimationResolver( Encrypted_t<Engine::C_AnimationRecord> current, Encrypted_t<Engine::C_AnimationRecord> previous );
 
 	  C_CSPlayer* player;
