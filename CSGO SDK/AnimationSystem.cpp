@@ -890,7 +890,7 @@ namespace Engine {
 					return fl_delta > 20.f && fl_delta < 160.f;
 					};
 
-				if ( ( m_bLastMoveValid( ) || m_flMoveDelta < 15.f ) && ( lag_data->m_iMissedStand1 < 1 /* max 1 */ ) ) {
+				if ( ( /*m_bLastMoveValid( ) || */m_flMoveDelta < 15.f ) && ( lag_data->m_iMissedStand1 < 1 /* max 1 */ ) ) {
 					current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
 
 					/* resolver mode */
