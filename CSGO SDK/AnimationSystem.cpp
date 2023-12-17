@@ -857,15 +857,31 @@ namespace Engine {
 			current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
 
 			data.m_sMoveData.m_flLowerBodyYawTarget = current->m_flLowerBodyYawTarget;
+			data.m_sMoveData.m_flSimulationTime = current->m_flSimulationTime;
 			data.m_sMoveData.m_vecOrigin = current->m_vecOrigin;
 			data.m_sMoveData.m_flAnimTime = player->m_flAnimationTime( );
 
-			data.m_bCollectedValidMoveData = false;
+			data.m_bCollectedValidMoveData = true;
 			data.m_bBrokeLby = false;
 
 			g_ResolverData[ index ].m_ResolverText = "MOVING";
 		} else if ( ( current->m_fFlags & FL_ONGROUND ) ) {
 			/* we have a valid move record */
+			/* lets correct this */
+			if ( player->IsDormant( ) ) { /* store these shits */
+				data.m_bCollectedValidMoveData = false;
+			}
+			else {
+				Vector m_vDelta = data.m_sMoveData.m_vecOrigin - current->m_vecOrigin;
+				if ( m_vDelta.Length( ) <= 128.f ) {
+					data.m_bCollectedValidMoveData = true;
+
+					/* store it when we need it */
+					data.m_flAnimTime = player->m_flAnimationTime( ) - data.m_sMoveData.m_flAnimTime;
+				}
+			}
+
+#if 0
 			if ( player->IsDormant( ) ) { /* store these shits */
 				data.m_bCollectedValidMoveData = false;
 			} else {
@@ -876,29 +892,28 @@ namespace Engine {
 					data.m_bCollectedValidMoveData = false;
 				}
 			}
-
+#endif
 			bool m_bIsSideways_Lamb = m_bIsYawSideways1( data.m_sMoveData.m_flLowerBodyYawTarget );
 			bool m_bIsBackwards = !m_bIsSideways_Lamb || Math::AngleDiff( data.m_sMoveData.m_flLowerBodyYawTarget, angle_away.y + 180.f ) <= 60.f;
 
 			const float m_flMoveDelta = Math::AngleDiff( data.m_sMoveData.m_flLowerBodyYawTarget, current->m_flLowerBodyYawTarget );
-			float m_flAnimTime = player->m_flAnimationTime( ) - data.m_sMoveData.m_flAnimTime;
-
+	
 			if ( data.m_bCollectedValidMoveData ) {
 				/* WE VE got lastmove */
 				auto m_bLastMoveValid = [ & ]( )-> bool {
 					const auto fl_delta = std::fabsf( Math::AngleNormalize( angle_away.y - data.m_sMoveData.m_flLowerBodyYawTarget ) );
-					return fl_delta > 20.f && fl_delta < 160.f;
+					return ( fl_delta > 20.f && fl_delta < 160.f );
 					};
 
-				if ( ( /*m_bLastMoveValid( ) || */m_flMoveDelta < 15.f ) && ( lag_data->m_iMissedStand1 < 1 /* max 1 */ ) ) {
+				if ( ( m_bLastMoveValid( ) || m_flMoveDelta < 15.f ) && ( lag_data->m_iMissedStand1 < 1 /* max 1 */ ) ) {
 					current->m_angEyeAngles.y = data.m_sMoveData.m_flLowerBodyYawTarget;
 
 					/* resolver mode */
 					data.m_iResolverMode = eResolverModes::STAND_LM;
 					lag_data->m_iResolverMode = eResolverModes::STAND_LM;
 
-					g_ResolverData[ index ].m_ResolverText = ( m_flMoveDelta < 15.f ) ? "VM:LM" : "LM(0)";
-				} else if ( m_flAnimTime < 0.22 && !data.m_bBrokeLby ) {
+					g_ResolverData[ index ].m_ResolverText = ( m_flMoveDelta < 15.f ) ? "LM(1):A" : "LM(0):A";
+				} else if ( data.m_flAnimTime < 0.22 && !data.m_bBrokeLby ) {
 					current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
 
 					/* resolver mode */
@@ -906,7 +921,7 @@ namespace Engine {
 					lag_data->m_iResolverMode = eResolverModes::PRED_LBY;
 
 					g_ResolverData[ index ].m_ResolverText = "LBY(22)";
-				} else if ( lag_data->m_iMissedStand3 < 1 && m_bIsYawSideways1( data.m_sMoveData.m_flLowerBodyYawTarget ) && m_flMoveDelta < 12.5f ) {
+				} else if ( lag_data->m_iMissedStand3 < 1 && m_bIsYawSideways1( data.m_sMoveData.m_flLowerBodyYawTarget ) && fabs( m_flMoveDelta ) < 12.5f ) {
 					/* in future add a check to see if we can hit valid lastmove */
 					/* resolver mode */
 					data.m_iResolverMode = eResolverModes::PRED_SIDE_LM;
@@ -989,37 +1004,52 @@ namespace Engine {
 				}
 
 			} else {
-				data.m_iResolverMode = eResolverModes::STAND;
-				lag_data->m_iResolverMode = eResolverModes::STAND;
+				/* resolver mode */
+				data.m_iResolverMode = eResolverModes::STAND_BRUTE_2;
+				lag_data->m_iResolverMode = eResolverModes::STAND_BRUTE_2;
 
-				auto lby_delta = current->m_flLowerBodyYawTarget;
-				float angle_lby = 0.0f;
+				/* fast */
+				auto m_away_angle = angle_away.y;
 
-				if ( lby_delta < 85.f && lby_delta > -85.f ) {
-					angle_lby = lby_delta;
-				} else if ( lby_delta > 85.f ) {
-					if ( lby_delta < 180.f ) {
-						g_ResolverData[ index ].m_ResolverText = "NVM:110";
-						angle_lby = 110.f;
-					}
-				} else if ( lby_delta < 85.f ) {
-					if ( lby_delta > -180.f ) {
-						if ( lby_delta < -85.f ) {
-							angle_lby = -110.f;
-							g_ResolverData[ index ].m_ResolverText = "NVM:-110";
-						} else {
-							g_ResolverData[ index ].m_ResolverText = "NVM:LD:1";
-							angle_lby = lby_delta;
-						}
-					}
+				/* brute */
+				switch ( lag_data->m_iMissedStand5 % 7 ) {
+					case 0:
+						g_ResolverData[ index ].m_ResolverText = "S(BACK)";
+						current->m_angEyeAngles.y = m_away_angle + 180.f;
+						break;
+					case 1:
+						g_ResolverData[ index ].m_ResolverText = "S(C:L)";
+						current->m_angEyeAngles.y = m_away_angle - 135.f;
+						break;
+					case 2:
+						g_ResolverData[ index ].m_ResolverText = "S(C:R)";
+						current->m_angEyeAngles.y = m_away_angle + 225.f;
+						break;
+					case 3:
+						g_ResolverData[ index ].m_ResolverText = "S(L)";
+						current->m_angEyeAngles.y = m_away_angle + 90.f;
+						break;
+					case 4:
+						g_ResolverData[ index ].m_ResolverText = "S(R)";
+						current->m_angEyeAngles.y = m_away_angle - 90.f;
+						break;
+					case 5:
+						g_ResolverData[ index ].m_ResolverText = "S(HL)";
+						current->m_angEyeAngles.y = m_away_angle + 110.f;
+						break;
+					case 6:
+						g_ResolverData[ index ].m_ResolverText = "S(HR)";
+						current->m_angEyeAngles.y = m_away_angle - 110.f;
+						break;
+					default: break;
 				}
-
-				current->m_angEyeAngles.y = angle_lby;
 			}
 
 		} else {
 			current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
 			g_ResolverData[ index ].m_ResolverText = "AIR";
+
+			data.m_bCollectedValidMoveData = false;
 
 			data.m_iResolverMode = eResolverModes::AIR;
 			lag_data->m_iResolverMode = eResolverModes::AIR;

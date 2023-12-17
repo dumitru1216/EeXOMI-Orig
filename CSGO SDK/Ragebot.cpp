@@ -506,21 +506,7 @@ namespace Source {
 				rageData->m_pCmd->buttons &= ~IN_ATTACK;
 			}
 
-			/*if ( rageData->m_pLocal->CanShoot( 0, true )
-				 && !TickbaseShiftCtx.over_choke_nr
-				 && !unk_meme
-				 && !unk_rofl ) {
-			   if ( rageData->m_pWeapon->m_flPostponeFireReadyTime( ) <= Source::m_pGlobalVars->curtime ) {
-				  if ( rageData->m_pWeapon->m_flNextSecondaryAttack( ) > Source::m_pGlobalVars->curtime ) {
-					 rageData->m_pCmd->buttons |= IN_ATTACK2;
-				  }
-			   } else {
-				  rageData->m_pCmd->buttons |= IN_ATTACK;
-			   }
-			} else {
-			   rageData->m_pCmd->buttons &= ~IN_ATTACK;
-			}*/
-
+	
 			unk_rofl = unk_meme;
 			unk_meme = TickbaseShiftCtx.over_choke_nr > 0;
 		} else if ( !this->rageData->m_pLocal->CanShoot( ) ) {
@@ -600,13 +586,6 @@ namespace Source {
 	}
 
 	bool C_Ragebot::RunInternal( ) {
-#if 0
-		if ( rageData->m_pWeapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER ) {
-			if ( !AutoRevolver( ) )
-				return false;
-		}
-#endif
-
 		auto cmd_backup = *rageData->m_pCmd.Xor( );
 
 		bool reset_cmd = true;

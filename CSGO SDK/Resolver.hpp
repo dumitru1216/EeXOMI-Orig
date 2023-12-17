@@ -56,7 +56,7 @@ struct ResolverData_t {
 
 	std::string m_ResolverText;
 
-	float m_flNextBodyUpdate;
+	float m_flNextBodyUpdate, m_flAnimTime;
 	int m_iResolverMode;
 	bool m_bPredictingUpdates, m_bCollectedValidMoveData, m_bBrutingLastmove, m_bBrokeLby;
 
@@ -66,6 +66,7 @@ struct ResolverData_t {
 		m_sMoveData.m_flLowerBodyYawTarget = 0.f;
 
 		m_flNextBodyUpdate = 0.f;
+		m_flAnimTime = 0.f;
 		m_iResolverMode = 0;
 
 		m_bPredictingUpdates = false;
