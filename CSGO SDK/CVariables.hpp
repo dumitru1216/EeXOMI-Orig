@@ -559,6 +559,7 @@ public:
    group_begin( RAGE_GENERAL );
    config_option( bool, enabled, false );
    config_option( bool, visual_resolver, false );
+   config_option( bool, fix_velocity_modifier, false );
    config_option( bool, rage_multithread, false );
    config_option( bool, team_check, false );
    config_option( bool, experimental_resolver, false );

@@ -406,6 +406,8 @@ namespace Engine {
 
 						g_ResolverData[ i ].Reset( );
 
+						
+
 						lagData->m_iResolverMode = eResolverModes::NONE;
 					}
 				}

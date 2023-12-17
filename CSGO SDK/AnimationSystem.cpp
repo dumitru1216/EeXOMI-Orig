@@ -897,7 +897,7 @@ namespace Engine {
 					data.m_iResolverMode = eResolverModes::STAND_LM;
 					lag_data->m_iResolverMode = eResolverModes::STAND_LM;
 
-					g_ResolverData[ index ].m_ResolverText = m_bLastMoveValid( ) ? "VM:LM" : "LM(0)";
+					g_ResolverData[ index ].m_ResolverText = ( m_flMoveDelta < 15.f ) ? "VM:LM" : "LM(0)";
 				} else if ( m_flAnimTime < 0.22 && !data.m_bBrokeLby ) {
 					current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
 
@@ -946,24 +946,43 @@ namespace Engine {
 						default: break;
 					}
 				}
-				else if ( ( ( lag_data->m_iMissedStand3 > 1 && m_bIsSideways_Lamb ) && lag_data->m_iMissedStand5 < 9 ) ) {
+				else if ( ( ( lag_data->m_iMissedStand3 > 1 && m_bIsSideways_Lamb ) && lag_data->m_iMissedStand5 < 7 ) ) {
 					/* resolver mode */
 					data.m_iResolverMode = eResolverModes::STAND_BRUTE_2;
 					lag_data->m_iResolverMode = eResolverModes::STAND_BRUTE_2;
 
+					/* fast */
+					auto m_away_angle = angle_away.y;
+
 					/* brute */
-					switch ( lag_data->m_iMissedStand5 % 8 ) {
+					switch ( lag_data->m_iMissedStand5 % 7 ) {
 						case 0:
-							g_ResolverData[ index ].m_ResolverText = "CR(L)";
-							current->m_angEyeAngles.y = angle_away.y + 135.f;
+							g_ResolverData[ index ].m_ResolverText = "S(BACK)";
+							current->m_angEyeAngles.y = m_away_angle + 180.f;
 							break;
 						case 1:
-							g_ResolverData[ index ].m_ResolverText = "CR(R)";
-							current->m_angEyeAngles.y = angle_away.y + 225.f;
+							g_ResolverData[ index ].m_ResolverText = "S(C:L)";
+							current->m_angEyeAngles.y = m_away_angle - 135.f;
 							break;
 						case 2:
-							g_ResolverData[ index ].m_ResolverText = "B(AWAY)";
-							current->m_angEyeAngles.y = angle_away.y;
+							g_ResolverData[ index ].m_ResolverText = "S(C:R)";
+							current->m_angEyeAngles.y = m_away_angle + 225.f;
+							break;
+						case 3:
+							g_ResolverData[ index ].m_ResolverText = "S(L)";
+							current->m_angEyeAngles.y = m_away_angle + 90.f;
+							break;
+						case 4:
+							g_ResolverData[ index ].m_ResolverText = "S(R)";
+							current->m_angEyeAngles.y = m_away_angle - 90.f;
+							break;
+						case 5:
+							g_ResolverData[ index ].m_ResolverText = "S(HL)";
+							current->m_angEyeAngles.y = m_away_angle + 110.f;
+							break;
+						case 6:
+							g_ResolverData[ index ].m_ResolverText = "S(HR)";
+							current->m_angEyeAngles.y = m_away_angle - 110.f;
 							break;
 						default: break;
 					}

@@ -242,11 +242,11 @@ namespace Engine
 
    void Prediction::RunGamePrediction( ) {
 	   // force game to repredict data
-	   if ( g_Vars.globals.LastVelocityModifier < 1.0f ) {
+	   if ( ( g_Vars.globals.LastVelocityModifier < 1.0f ) && g_Vars.rage.fix_velocity_modifier ) {
 		   // https://github.com/pmrowla/hl2sdk-csgo/blob/49e950f3eb820d88825f75e40f56b3e64790920a/game/client/prediction.cpp#L1533
-		   *( uint8_t* )( uintptr_t( Source::m_pPrediction.Xor( ) ) + 0x24 ) = 1; // m_bPreviousAckHadErrors 
-		   *( uint32_t* )( uintptr_t( Source::m_pPrediction.Xor( ) ) + 0x1C ) = 0; // m_nCommandsPredicted 
-	   }
+		  *( uint8_t* )( uintptr_t( Source::m_pPrediction.Xor( ) ) + 0x24 ) = 1; // m_bPreviousAckHadErrors 
+		  *( uint32_t* )( uintptr_t( Source::m_pPrediction.Xor( ) ) + 0x1C ) = 0; // m_nCommandsPredicted 
+		}
 
 	  if ( Source::m_pClientState->m_nDeltaTick( ) > 0 ) {
 		 Source::m_pPrediction->Update( Source::m_pClientState->m_nDeltaTick( ), Source::m_pClientState->m_nDeltaTick( ) > 0,
@@ -463,7 +463,7 @@ namespace Engine
 			auto ack_cmd = *( int* )( uintptr_t( cl_state ) + 0x4D2C );
 	  */
 
-	  if ( *( int* ) ( uintptr_t( cl_state ) + 0x164 ) == *( int* ) ( uintptr_t( cl_state ) + 0x16C ) ) {
+	  if ( ( *( int* )( uintptr_t( cl_state ) + 0x164 ) == *( int* )( uintptr_t( cl_state ) + 0x16C ) ) && g_Vars.rage.fix_velocity_modifier ) {
 		 auto ack_cmd = *( int* ) ( uintptr_t( cl_state ) + 0x4D2C );
 		 auto correct = std::find_if( predictionData->m_CorrectionData.begin( ), predictionData->m_CorrectionData.end( ), [ack_cmd] ( const CorrectionData& a ) {
 			return a.command_nr == ack_cmd;

@@ -64,7 +64,6 @@ struct ResolverData_t {
 		m_sMoveData.m_flAnimTime = 0.f;
 		m_sMoveData.m_flSimulationTime = 0.f;
 		m_sMoveData.m_flLowerBodyYawTarget = 0.f;
-		m_sMoveData.m_vecOrigin = {};
 
 		m_flNextBodyUpdate = 0.f;
 		m_iResolverMode = 0;
