@@ -1565,17 +1565,18 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 				//	 ImGui::SliderFloatA( XorStr( "Desync offset flipped" ), &settings->desync_amount_flipped, 0.0f, 100.0f, XorStr( "%.0f %%" ) );
 				 // }
 
+#if 0
 				  ImGui::Checkbox( XorStr( "Jitter" ), &settings->jitter );
 				  if ( settings->jitter ) {
 					 ImGui::SliderFloatA( XorStr( "Range##Jitter range" ), &settings->jitter_range, 0.0f, 90.0f, XorStr( "%.0f degrees" ) );
 				  }
-
 				  ImGui::Checkbox( XorStr( "Spin" ), &settings->spin );
 				  if ( settings->spin ) {
 					 ImGui::Checkbox( XorStr( "Switch" ), &settings->spin_switch );
 					 ImGui::SliderFloatA( XorStr( "Speed##Spin" ), &settings->spin_speed, -50.0f, 50.0f, XorStr( "%.0f %%" ) );
 					 ImGui::SliderFloatA( XorStr( "Range##Spin" ), &settings->spin_range, 1.0f, 180.0f, XorStr( "%.0f degrees" ) );
 				  }
+#endif
 
 				  ImGui::Checkbox( XorStr( "Auto direction" ), &settings->autodirection );
 				  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
@@ -1589,9 +1590,52 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 					// ImGui::ComboA( XorStr( "Desync auto direction" ), &settings->desync_autodir, auto_dir, ARRAYSIZE( auto_dir ) );
 				  }
 
-				  ImGui::Checkbox( XorStr( "Move sync" ), &g_Vars.antiaim.move_sync );
-				  ImGui::Checkbox( XorStr( "Hide real on shot" ), &g_Vars.antiaim.hide_real_on_shot );
+				  //ImGui::Checkbox( XorStr( "Move sync" ), &g_Vars.antiaim.move_sync );
+				 // ImGui::Checkbox( XorStr( "Hide real on shot" ), &g_Vars.antiaim.hide_real_on_shot );
 				  ImGui::Checkbox( XorStr( "Twist speed" ), &g_Vars.antiaim.twist_speed );
+				  ImGui::Checkbox( XorStr( "Lby prediction" ), &g_Vars.antiaim.lbypred );
+
+				  /*
+				  GUI::Controls::Checkbox( XorStr( "Distortion###sse" ), &g_Vars.antiaim.distort );
+					GUI::Controls::Checkbox( XorStr( "Manual override" ), &g_Vars.antiaim.distort_manual_aa );
+					if( GUI::Controls::Checkbox( XorStr( "Twist" ), &g_Vars.antiaim.distort_twist ) )
+						GUI::Controls::Slider( XorStr( "Speed" ), &g_Vars.antiaim.distort_speed, 1.f, 10.f, XorStr( "%.1fs" ) );
+					GUI::Controls::Slider( XorStr( "Max time" ), &g_Vars.antiaim.distort_max_time, 0.f, 10.f );
+					GUI::Controls::Slider( XorStr( "Range" ), &g_Vars.antiaim.distort_range, -360.f, 360.f );
+
+					std::vector<MultiItem_t> distort_disablers = {
+						{ XorStr( "Fakewalking" ), &g_Vars.antiaim.distort_disable_fakewalk },
+						{ XorStr( "Running" ), &g_Vars.antiaim.distort_disable_run },
+						{ XorStr( "Airborne" ), &g_Vars.antiaim.distort_disable_air },
+					};
+
+					GUI::Controls::MultiDropdown( XorStr( "Distortion disablers" ), distort_disablers );
+				  
+				  */
+
+				  ImGui::Checkbox( XorStr( "Distortion" ), &g_Vars.antiaim.distort );
+				  ImGui::Checkbox( XorStr( "Manual override" ), &g_Vars.antiaim.distort_manual_aa );
+				  if ( ImGui::Checkbox( XorStr( "Twist" ), &g_Vars.antiaim.distort_twist ) )
+					  ImGui::SliderFloat( XorStr( "Speed" ), &g_Vars.antiaim.distort_speed, 1.f, 10.f, XorStr( "%.1fs" ) );
+
+				 ImGui::SliderFloat( XorStr( "Max time" ), &g_Vars.antiaim.distort_max_time, 0.f, 10.f );
+				 ImGui::SliderFloat( XorStr( "Range" ), &g_Vars.antiaim.distort_range, -360.f, 360.f );
+
+				 static bool* disable_distort[ ] = {
+					 &g_Vars.antiaim.distort_disable_fakewalk 	,
+					 & g_Vars.antiaim.distort_disable_run 	,
+					 & g_Vars.antiaim.distort_disable_air 	,
+				 };
+
+				 const char* disable_dir_str[ ] = {
+					XorStr( "Fakewalking ( wip )" ),
+					XorStr( "Running" ),
+					XorStr( "Airborne" ),
+				 };
+
+				 ImGui::MultiCombo( XorStr( "Disable distortion" ),
+									disable_distort, disable_dir_str, 3 );
+
 			   } ImGui::EndChild( );
 
 			#ifdef BETA_MODE

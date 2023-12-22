@@ -1118,6 +1118,7 @@ namespace Source
 
 	  movementData->m_pLocal->FixedAnimationsUpdate( );
 
+	  /* desync */
 	  if ( animState->m_velocity > 0.1f || std::fabsf( animState->flUpVelocity ) > 100.0f ) {
 		 movementData->m_flLowerBodyUpdateTime = Source::m_pGlobalVars->curtime + 0.22f;
 		 movementData->m_pLocal->m_flLowerBodyYawTarget( ) = animState->m_flEyeYaw;

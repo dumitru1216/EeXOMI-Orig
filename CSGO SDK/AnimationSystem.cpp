@@ -614,6 +614,8 @@ namespace Engine {
 			}
 
 			bool onGround = record->m_fFlags & FL_ONGROUND;
+
+			/* ok so this is for desync */
 			for ( int i = 1; i < record->m_iChokeTicks; i++ ) {
 				C_SimulationInfo& data = pThis->m_vecSimulationData.emplace_back( );
 				data.m_flTime = prev_simulation_time + TICKS_TO_TIME( i );

@@ -762,6 +762,19 @@ public:
    config_keybind( mouse_override );
    config_keybind( autodirection_override );
 
+   config_option( bool, distort, false );
+   config_option( bool, lbypred, false );
+   config_option( bool, distort_disable_fakewalk, false );
+   config_option( bool, distort_disable_run, false );
+   config_option( bool, distort_disable_air, false );
+   config_option( float, distort_max_time, 3.5f );
+   config_option( float, distort_speed, 5.0f );
+   config_option( float, distort_range, 180.0f );
+   config_option( bool, distort_manual_aa, false );
+   config_option( bool, distort_twist, false );
+   config_option( bool, distort_randomize, false );
+   config_option( bool, distort_lby_update, false );
+
    config_option( bool, on_knife, false );
    config_option( bool, on_freeze_period, false );
    config_option( bool, on_ladder, false );
