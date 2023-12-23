@@ -24,27 +24,35 @@ namespace Engine {
 
 	// C_BasePlayer::PhysicsSimulate & CPrediction::RunCommand rebuild
 	void Prediction::Begin( Encrypted_t<CUserCmd> _cmd, bool* send_packet ) {
+		// Prediction::Preprediction
+
+		/* store some shit */
 		predictionData->m_RestoreData.is_filled = false;
 		predictionData->m_pCmd = _cmd;
 		predictionData->m_pSendPacket = send_packet;
 
+		/* return if cmd doesnt match */
 		if ( !predictionData->m_pCmd.IsValid( ) )
 			return;
 
+		// return if player is invalid 
 		predictionData->m_pPlayer = C_CSPlayer::GetLocalPlayer( );
-
 		if ( !predictionData->m_pPlayer || predictionData->m_pPlayer->IsDead( ) )
 			return;
 
+		// return if weapon is invalid 
 		predictionData->m_pWeapon = ( C_WeaponCSBaseGun* )predictionData->m_pPlayer->m_hActiveWeapon( ).Get( );
-
 		if ( !predictionData->m_pWeapon )
 			return;
 
-		m_bInPrediction = true;
-
+		/* we are now in prediction */
+		this->m_bInPrediction = true;
+		this->RunGamePrediction( ); /* run game prediction */
+#if 0
 		Engine::Prediction::Instance( )->RunGamePrediction( );
+#endif 
 
+		/* player tickbase */
 		predictionData->m_nTickBase = predictionData->m_pPlayer->m_nTickBase( );
 
 #if 0
@@ -56,22 +64,29 @@ namespace Engine {
 
 		predictionData->m_nTickBase = MAX( predictionData->m_pPlayer->m_nTickBase( ), command_number - m_iSeqDiff );
 #endif
-
+		/* store */
 		predictionData->m_fFlags = predictionData->m_pPlayer->m_fFlags( );
 		predictionData->m_vecVelocity = predictionData->m_pPlayer->m_vecVelocity( );
 
+		/* store */
 		predictionData->m_flCurrentTime = Source::m_pGlobalVars->curtime;
 		predictionData->m_flFrameTime = Source::m_pGlobalVars->frametime;
 
+		/* store */
 		if ( Engine::Displacement.Function.m_MD5PseudoRandom ) {
 			predictionData->m_pCmd->random_seed = ( ( uint32_t( __thiscall* )( uint32_t ) )Displacement.Function.m_MD5PseudoRandom )( predictionData->m_pCmd->command_number ) & 0x7fffffff;
 		}
 
+		// rebuild
+		this->StartCommand( predictionData->m_pPlayer, predictionData->m_pCmd.Xor( ) );
+
+		// prediction::start
+#if 0
 		// StartCommand( player, ucmd ); 
 		predictionData->m_pPlayer->SetCurrentCommand( predictionData->m_pCmd.Xor( ) );
 		C_BaseEntity::SetPredictionRandomSeed( predictionData->m_pCmd.Xor( ) );
 		C_BaseEntity::SetPredictionPlayer( predictionData->m_pPlayer );
-
+#endif
 		/* set these shits */
 		*reinterpret_cast< CUserCmd** >( uint32_t( predictionData->m_pPlayer ) + 0x3314 ) = predictionData->m_pCmd.Xor( ); // m_pCurrentCommand
 		*reinterpret_cast< CUserCmd** >( uint32_t( predictionData->m_pPlayer ) + 0x326C ) = predictionData->m_pCmd.Xor( ); // unk01
