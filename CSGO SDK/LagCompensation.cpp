@@ -128,7 +128,7 @@ namespace Engine
 		 return true;
 
 	  // temprorary override
-	  tickbase_shift = 0; // shiuld be corr
+	  tickbase_shift = g_TickbaseController.m_charged_ticks; // should work fine now
 
 	  float outgoing = netchannel->GetLatency( FLOW_OUTGOING );
 

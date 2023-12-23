@@ -2713,93 +2713,6 @@ sup:
 		QAngle aimAngles = delta.ToEulerAngles( );
 		aimAngles.Normalize( );
 
-#if 0
-		if ( rageData->rbot->on_shot_aa ) {
-			bool tickbase_hide = g_Vars.rage.exploit && g_Vars.rage.exploit_type == 0 && ( g_Vars.rage.double_tap_bind.enabled || g_Vars.rage.hide_shots_bind.enabled );
-			bool can_hide_shot = false;
-			if ( g_Vars.globals.Fakeducking )
-				can_hide_shot = *rageData->m_pSendPacket == false;
-			else
-				can_hide_shot = Source::m_pClientState->m_nChokedCommands( ) < g_Vars.fakelag.lag_limit;
-
-			if ( !tickbase_hide && can_hide_shot ) {
-				auto animState = rageData->m_pLocal->m_PlayerAnimState( );
-				auto fraction = animState->GetMaxFraction( );
-				auto maxYawModifier = fraction * animState->m_flMaxBodyYaw;
-				auto minYawModifier = fraction * animState->m_flMinBodyYaw;
-
-				auto get_clamp = [ animState, maxYawModifier, minYawModifier ]( float yaw, float aim_angle ) {
-					auto eye_feet_delta = std::remainderf( aim_angle - yaw, 360.0f );
-					if ( eye_feet_delta <= maxYawModifier ) {
-						if ( minYawModifier > eye_feet_delta )
-							return 1;
-					} else {
-						return -1;
-					}
-
-					if ( eye_feet_delta == 0.0f ) {
-						return 0;
-					}
-
-					return 2 * ( eye_feet_delta <= 0.f ) - 1;
-					};
-
-				auto real_angle = std::remainderf( animState->m_flAbsRotation, 360.0f );
-				float aim_angle = std::remainderf( aimAngles.yaw, 360.0f );
-				int fake_side = get_clamp( std::remainderf( g_Vars.globals.m_FakeAngles.yaw, 360.0f ), aim_angle );
-				int real_side = get_clamp( real_angle, aim_angle );
-
-				if ( real_side == fake_side && real_side != 0 ) {
-#if 1
-					auto sequence_num = rageData->m_pCmd->command_number - 1;
-					auto prev_cmd = &Source::m_pInput->m_pCommands[ sequence_num % 150 ];
-
-					if ( Source::m_pClientState->m_nChokedCommands( ) > 0 && !( prev_cmd->buttons & IN_ATTACK ) ) {
-						auto backup_angle = prev_cmd->viewangles;
-						prev_cmd->viewangles.yaw = std::remainderf( aimAngles.yaw + 120.0f * real_side, 360.0f );
-
-						RotateMovement( prev_cmd, prev_cmd->viewangles, backup_angle );
-
-						auto verifed_prev_cmd = &Source::m_pInput->m_pVerifiedCommands[ sequence_num % 150 ];
-						verifed_prev_cmd->m_crc = prev_cmd->GetChecksum( );
-						verifed_prev_cmd->m_cmd = *prev_cmd;
-					}
-#endif
-
-					{
-#ifdef DEBUG_ONSHOT_AA
-						printf( XorStr( "real_side: %d | fake_side %d | real_yaw: %.1f | fake_yaw: %.1f | aim_yaw: %.1f" ), real_side, fake_side,
-								std::remainderf( animState->m_flAbsRotation, 360.0f ),
-								std::remainderf( g_Vars.globals.m_FakeAngles.yaw, 360.0f ), std::remainderf( aimAngles.yaw, 360.0f ) );
-#endif
-
-						real_side = -fake_side;
-
-#ifdef DEBUG_ONSHOT_AA
-						printf( " | inverted to %d", real_side );
-#endif
-						auto max_dsc = maxYawModifier + std::fabsf( minYawModifier );
-						auto target_angle = std::remainderf( aim_angle + max_dsc * real_side, 360.0f );
-
-#ifdef DEBUG_ONSHOT_AA
-						printf( " | %.1f", target_angle );
-#endif
-
-						rageData->m_pCmd->viewangles.yaw = target_angle;
-
-						*rageData->m_pSendPacket = false;
-						g_Vars.globals.HideShots = true;
-
-#ifdef DEBUG_ONSHOT_AA
-						printf( "\n" );
-#endif
-					}
-				}
-			}
-		}
-#endif
-
-
 		if ( !rageData->rbot->silent_aim )
 			Source::m_pEngine->SetViewAngles( aimAngles );
 
@@ -2823,12 +2736,6 @@ sup:
 			rageData->m_pCmd->viewangles.Normalize( );
 		}
 
-		// if ( !TickbaseShiftCtx.in_rapid ) {
-		// 	if ( best_point->target->record->m_bTeleportDistance || !g_Vars.globals.Fakeducking ) {
-		// 		*rageData->m_pSendPacket = true;
-		// 	}
-		// }
-
 		g_Vars.globals.CorrectShootPosition = true;
 		g_Vars.globals.AimPoint = best_point->point;
 		g_Vars.globals.ShootPosition = rageData->m_vecEyePos;
@@ -2838,17 +2745,8 @@ sup:
 
 
 		if ( result ) {
-			//if ( g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit ) {
-				//g_TickbaseController.m_bSupressRecharge = true;
-			//}
-
 			rageData->m_pCmd->buttons |= IN_ATTACK;
 		}
-
-#ifdef DEBUG_REPREDICT
-		std::get<0>( predicted_origins[ rageData->m_pCmd->command_number ] ) = rageData->m_pLocal->m_vecOrigin( );
-		std::get<1>( predicted_origins[ rageData->m_pCmd->command_number ] ) = rageData->m_pLocal->m_vecVelocity( );
-#endif
 
 		return result;
 	}

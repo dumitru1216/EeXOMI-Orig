@@ -758,6 +758,16 @@ void TickbaseSystem::tickbase_manipulation( Encrypted_t<CUserCmd> cmd, bool* sen
 	if ( !local || local->IsDead( ) )
 		return;
 
+	auto weapon = ( C_WeaponCSBaseGun* )local->m_hActiveWeapon( ).Get( );
+	if ( !weapon ) {
+		return;
+	}
+
+	auto weaponInfo = weapon->GetCSWeaponData( );
+	if ( !weaponInfo.IsValid( ) ) {
+		return;
+	}
+
 	auto m_double_tap = g_Vars.rage.double_tap_bind.enabled;
 	this->p_doubletap = m_double_tap;
 
@@ -765,7 +775,13 @@ void TickbaseSystem::tickbase_manipulation( Encrypted_t<CUserCmd> cmd, bool* sen
 		m_charge_timer = 0;
 		m_tick_to_shift = 14;
 	}
-	if ( !m_double_tap ) return;
+
+	/* do not run while this is false */
+	if ( !m_double_tap )
+		return;
+
+
+
 	if ( !m_charged ) {
 		if ( m_charge_timer > TIME_TO_TICKS( .5 ) ) { // .5 seconds after shifting, lets recharge
 			m_tick_to_recharge = 14;

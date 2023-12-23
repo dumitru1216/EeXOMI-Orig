@@ -1014,7 +1014,7 @@ namespace Engine {
 				auto m_away_angle = angle_away.y;
 
 				/* brute */
-				switch ( lag_data->m_iMissedStand5 % 7 ) {
+				switch ( lag_data->m_iMissedStand5 % 8 ) {
 					case 0:
 						g_ResolverData[ index ].m_ResolverText = "S(BACK)";
 						current->m_angEyeAngles.y = m_away_angle + 180.f;
@@ -1042,6 +1042,10 @@ namespace Engine {
 					case 6:
 						g_ResolverData[ index ].m_ResolverText = "S(HR)";
 						current->m_angEyeAngles.y = m_away_angle - 110.f;
+						break;
+					case 7:
+						g_ResolverData[ index ].m_ResolverText = "M(S)"; /* we missed too much */
+						data.m_bCollectedValidMoveData = true;
 						break;
 					default: break;
 				}
