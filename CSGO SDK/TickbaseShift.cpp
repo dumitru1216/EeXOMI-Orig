@@ -238,6 +238,61 @@ void C_TickbaseShift::OnNewPacket( int command_nr, int tickbase_from_server, int
 }
 #endif
 
+void TickbaseSystem::copy_command( CUserCmd* cmd, bool* v1 ) {
+	if ( !s_InMovePrediction )
+		return;
+
+	static auto cl_forwardspeed = Source::m_pCvar->FindVar( XorStr( "cl_forwardspeed" ) );
+	static auto cl_sidespeed = Source::m_pCvar->FindVar( XorStr( "cl_sidespeed" ) );
+
+	/* boost movement function */
+	auto BoostMovement = [ & ]( ) {
+		/* get cmd move data */
+		float& flForwardMove = cmd->forwardmove;
+		float& flSideMove = cmd->sidemove;
+		int& nButtons = cmd->buttons;
+
+		/* Force .y movement */
+		if ( flForwardMove > 5.0f ) {
+			/* force buttons */
+			nButtons |= IN_FORWARD;
+			nButtons &= ~IN_BACK;
+
+			/* force movement */
+			flForwardMove = 450.0f;
+		} else if ( flForwardMove < -5.0f ) {
+			/* force buttons */
+			nButtons |= IN_BACK;
+			nButtons &= ~IN_FORWARD;
+
+			/* force movement */
+			flForwardMove = -450.0f;
+		}
+
+		/* Force .x movement */
+		if ( flSideMove > 5.0f ) {
+			/* force buttons */
+			nButtons |= IN_MOVERIGHT;
+			nButtons &= ~IN_MOVELEFT;
+
+			/* force movement */
+			flSideMove = 450.0f;
+		} else if ( flSideMove < -5.0f ) {
+			/* force buttons */
+			nButtons |= IN_MOVELEFT;
+			nButtons &= ~IN_MOVERIGHT;
+
+			/* force movement */
+			flSideMove = -450.0f;
+		}
+
+		/* do not slowdown */
+		nButtons &= ~IN_SPEED;
+		};
+	BoostMovement( );
+	*v1 = false;
+	s_InMovePrediction = false;
+}
 void* g_pLocal = nullptr;
 TickbaseSystem g_TickbaseController;
 
@@ -278,12 +333,19 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 
 
 	const bool bStart = s_bBuilding;
-	s_bBuilding = g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit && !GetAsyncKeyState( VK_LBUTTON )
-#ifndef STANDALONE_CSGO
-		//	&& s_nTicksSinceUse >= s_nTicksRequired
-		&& !m_bSupressRecharge
-#endif
-		;
+	static bool doubleTapWasDisabled = false;
+	bool doubleTapEnabled = g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit;
+	s_bBuilding = g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit && s_nTicksSinceUse >= s_nTicksRequired && !m_bSupressRecharge;
+
+	if ( doubleTapEnabled && doubleTapWasDisabled ) {
+		s_flTime = 0.3f; /* apply fast recharge since this a desync hake for legacy lmao */
+		printf( "[ tickbase CLMove ] Double tap just got enabled after being disabled.\n" );
+		doubleTapWasDisabled = false;
+
+	} else if ( !doubleTapEnabled && !doubleTapWasDisabled ) {
+		printf( "[ tickbase CLMove ] Double tap just got disabled\n" );
+		doubleTapWasDisabled = true;
+	}
 
 	if ( bStart && !s_bBuilding && ( ( s_nExtraProcessingTicks > 0 && !s_bAckedBuild ) || ( int )s_nExtraProcessingTicks < s_iClockCorrectionTicks ) ) {
 		s_bBuilding = true;
@@ -313,8 +375,15 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 	if ( s_bBuilding ) {
 		s_nTicksSinceStarted++;
 		if ( s_nTicksSinceStarted <= s_nTicksDelay ) {
+			/*lmao*/
+			g_Vars.cl_interp->SetValue( 0 );
 			s_iServerIdealTick++;
+			charging = true;
+
 			Hooked::oCL_Move( bFinalTick, accumulated_extra_samples );
+			charging = false;
+
+			g_Vars.cl_interp->SetValue( 1 );
 			return;
 		}
 	}
@@ -322,6 +391,7 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 
 	if ( s_bBuilding && s_nExtraProcessingTicks < s_nSpeed ) {
 		s_bAckedBuild = false;
+
 
 		//keep track of the server's ideal tickbase
 		//note: should really do this once when host_currentframetick is 0 
@@ -332,7 +402,6 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 		s_nExtraProcessingTicks++;
 		return;
 	}
-
 	int cmdnumber = 1;
 	int choke = *( int* )( ( size_t )Source::m_pClientState.Xor( ) + OFFSET_CHOKED );
 	cmdnumber += *( int* )( ( size_t )Source::m_pClientState.Xor( ) + OFFSET_LASTOUTGOING );
@@ -342,7 +411,6 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 	int arrive = s_iServerIdealTick;
 
 	bool inya = false;
-
 	//if we charged eg 15 ticks, our client's tickbase will be 15 ticks behind
 	//and the next tick we send will cause our tickbase to be adjusted
 	//so account for that
@@ -371,7 +439,9 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 	else if ( !s_bBuilding && s_nExtraProcessingTicks > 0 ) {
 #ifndef STANDALONE_CSGO
 		jmpRunExtraCommands :
-#endif
+#endif			
+
+		allw = false;
 
 		//the + 1 is because of the real command we are due
 		int estimated = *( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) + **( int** )Engine::Displacement.Data.m_uHostFrameTicks + s_nExtraProcessingTicks + choke;
@@ -403,8 +473,10 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 		}
 
 		while ( s_nExtraProcessingTicks > 0 ) {
-			bFinalTick = s_nExtraProcessingTicks == 1;
+			allw = false;
 
+			bFinalTick = s_nExtraProcessingTicks == 1;
+			bAllow = false;
 			Hooked::oCL_Move( bFinalTick, 0.f );
 
 			if ( inya ) {
@@ -418,6 +490,7 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 			s_nExtraProcessingTicks--;
 		}
 
+
 		//keep track of time
 		s_iServerIdealTick++;
 
@@ -425,6 +498,7 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 		s_nTicksSinceUse = 0;
 #endif
 	} else {
+
 		//otherwise copy the 'prestine' server ideal tick (m_nTickBase)
 		//note that this will actually break on really low doubletap speeds 
 		//(ie <= sv_clockcorrection_msecs because the server won't adjust your tickbase) 
@@ -442,7 +516,7 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 			s_bInMove = true;
 			s_iMoveTickBase = start;
 
-			int estimated = start + s_nExtraProcessingTicks + **( int** )Engine::Displacement.Data.m_uHostFrameTicks + choke; // Engine::Displacement.DT_CSPlayer.m_bIsWalking
+			int estimated = start + s_nExtraProcessingTicks + **( int** )Engine::Displacement.Data.m_uHostFrameTicks + choke;
 			if ( estimated > arrive + s_iClockCorrectionTicks || estimated < arrive - s_iClockCorrectionTicks ) {
 				estimated = arrive - s_nExtraProcessingTicks - choke - **( int** )Engine::Displacement.Data.m_uHostFrameTicks + 1;
 
@@ -453,10 +527,14 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 			s_bInMove = false;
 		}
 #endif
+		if ( !s_nExtraProcessingTicks )
+			allw = true;
 
 		// not building or it's not time to send
 		Hooked::oCL_Move( bFinalTick, accumulated_extra_samples );
 
+		if ( !s_nExtraProcessingTicks )
+			allw = true;
 #ifndef STANDALONE_CSGO
 		if ( bPred ) {
 			s_bInMove = false;
@@ -468,10 +546,26 @@ void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples 
 				if ( fn ) {
 					CUserCmd* cmd = fn( Source::m_pInput.Xor( ), -1, cmdnumber );
 					if ( cmd ) {
-						if ( cmd->buttons & ( 1 << 0 ) ) {
+
+						auto local = C_CSPlayer::GetLocalPlayer( );
+
+						C_WeaponCSBaseGun* Weapon = ( C_WeaponCSBaseGun* )local->m_hActiveWeapon( ).Get( );
+
+						if ( !Weapon )
+							return;
+
+						auto weaponInfo = Weapon->GetCSWeaponData( );
+						if ( !weaponInfo.IsValid( ) )
+							return;
+
+						if ( cmd->buttons & ( 1 << 0 ) && weaponInfo->m_iWeaponType != WEAPONTYPE_GRENADE && Weapon->m_iItemDefinitionIndex( ) != WEAPON_REVOLVER && Weapon->m_iItemDefinitionIndex( ) != WEAPON_C4 && m_bForceUnChargeState ) {
+							s_InMovePrediction = true;//copy_command(cmd, s_nSpeed);
 							s_bBuilding = false;
 							inya = true;
+							m_bSupressRecharge = true;
+							allw = false;
 							goto jmpRunExtraCommands;
+
 						}
 					}
 				}
@@ -526,6 +620,7 @@ void TickbaseSystem::OnRunSimulation( void* this_, int iCommandNumber, CUserCmd*
 
 	//apply our new shifted tickbase 
 	if ( tickbase != -1 && local ) {
+
 		*( int* )( local + OFFSET_TICKBASE ) = tickbase;
 		curtime = tickbase * s_flTickInterval;
 	}
@@ -550,9 +645,15 @@ void TickbaseSystem::OnPredictionUpdate( void* prediction, void*, int startframe
 			const auto& elem = g_iTickbaseShifts[ i ];
 
 			if ( elem.cmdnum == ( outgoing_command + 1 ) ) {
-				*( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) = elem.tickbase;
+				//	*(int*)((size_t)g_pLocal + OFFSET_TICKBASE) = elem.tickbase;
 				break;
 			}
+
+			if ( elem.cmdnum == ( outgoing_command ) ) {
+				//*(int*)((size_t)g_pLocal + OFFSET_TICKBASE) = elem.tickbase;
+				break;
+			}
+
 		}
 	}
 }

@@ -1448,51 +1448,6 @@ void CEsp::Main( ) {
 	  }
    }
 
-#if 0
-   auto weapon = ( C_WeaponCSBaseGun* ) local->m_hActiveWeapon( ).Get( );
-   if ( weapon ) {
-	  float spread = weapon->GetSpread( ) + weapon->GetInaccuracy( );
-
-	  auto eye_pos = local->GetEyePosition( );
-
-	  QAngle viewangles;
-	  Source::m_pEngine->GetViewAngles( viewangles );
-
-	  Vector right, up;
-	  Vector forward = viewangles.ToVectors( &right, &up );
-
-	  for ( int i = 1; i <= 5; ++i ) {
-		 for ( int j = 0; j < i * 6; ++j ) {
-			float flSpread = spread * float( float( i ) / 5.f );
-
-			float flDirCos, flDirSin;
-			DirectX::XMScalarSinCos( &flDirCos, &flDirSin, DirectX::XM_2PI * float( float( j ) / float( i * 6 ) ) );
-
-			float spread_x = flDirCos * flSpread;
-			float spread_y = flDirSin * flSpread;
-
-			Vector direction;
-			direction.x = forward.x + ( spread_x * right.x ) + ( spread_y * up.x );
-			direction.y = forward.y + ( spread_x * right.y ) + ( spread_y * up.y );
-			direction.z = forward.z + ( spread_x * right.z ) + ( spread_y * up.z );
-
-			Ray_t ray;
-			ray.Init( eye_pos, eye_pos + direction * 400.0f );
-
-			CTraceFilterWorldOnly filt er;
-			CGameTrace trace;
-			Source::m_pEngineTrace->TraceRay( ray, MASK_PLAYERSOLID, &filter, &trace );
-
-			Source::m_pDebugOverlay->AddBoxOverlay( trace.endpos, Vector( -1.f, -1.f, -1.f ), Vector( 1.0f, 1.0f, 1.0f ), QAngle( ), 255, 255, 255, 125,
-													Source::m_pGlobalVars->frametime + Source::m_pGlobalVars->frametime / 2.0f );
-
-			//Source::m_pDebugOverlay->AddLineOverlay( eye_pos + forward * 2.f, eye_pos + direction * 400.0f, 255, 255, 255, true, Source::m_pGlobalVars->frametime +
-			//  Source::m_pGlobalVars->frametime / 4.0f );
-		 }
-	  }
-   }
-#endif
-
    DrawZeusDistance( );
 
    DrawAntiAimIndicator( );
@@ -1502,63 +1457,6 @@ void CEsp::Main( ) {
    if ( g_Vars.misc.lag_exploit && InputSys::Get( )->GetKeyState( g_Vars.misc.lag_exploit_key ) == KeyState::Down )
 	  Render::Get( )->AddText( Vector2D( 5.0f, 450.0f ), 0xFFFFFFFF, OUTLINED, XorStr( "LagExploit Power %d\n" ), Source::m_pClientState->m_nChokedCommands( ) );
 
-#if 0
-   static bool debug_state = false;
-   if ( InputSys::Get( )->WasKeyPressed( VirtualKeys::F ) )
-	  debug_state = !debug_state;
-
-   if ( debug_state ) {
-	  for ( auto [idx, player] : g_ServerSounds.m_Players ) {
-		 for ( auto sound : player.m_Sounds ) {
-			if ( Source::m_pGlobalVars->tickcount - sound.tickcount > 250 )
-			   continue;
-
-			Vector2D w2s;
-			if ( !WorldToScreen( sound.origin, w2s ) ) {
-			   continue;
-			}
-
-			Render::Get( )->AddCircle( w2s, 8.0f, 0xffffffff, 32, 2.0f );
-		 }
-
-	  }
-   }
-#endif
-
-#if 0
-   /* Render::Get( )->AddText( Vector2D( 5.0f, 400.0f ), Color::White( ).GetD3DColor( ), OUTLINED,
-							 XorStr( "angles delta %f" ), Math::AngleNormalize( std::fabsf( g_Vars.globals.flRealYaw - g_Vars.globals.m_FakeAngles.yaw ) ) );*/
-
-   if ( m_LocalPlayer && !m_LocalPlayer->IsDead( ) ) {
-	  Render::Get( )->SetTextFont( FONT_VERDANA );
-
-   #if 1
-	  static int m_iTicksAllowed = *( int* ) ( Engine::Displacement.Data.m_uTicksAllowed );
-
-	  auto simTime = TIME_TO_TICKS( m_LocalPlayer->m_flSimulationTime( ) - m_LocalPlayer->m_flOldSimulationTime( ) );
-
-	  //AutowallCalls %d\n IME_TO_TICKS( local->m_flNextAttack( ) ), TIME_TO_TICKS( weapon->m_flNextPrimaryAttack( )   TIME_TO_TICKS( Source::Movement::Get( )->GetLBYUpdateTime( ) 
-	  // rebuild %f memory %f", eyePosRebuild.z, eyePos.z eyePosRebuild.z, eyePosMemory.z utowallCalls %d\n
-	  auto weapon = ( C_WeaponCSBaseGun* ) ( m_LocalPlayer->m_hActiveWeapon( ).Get( ) );
-	  auto curtime = TICKS_TO_TIME( m_LocalPlayer->m_nTickBase( ) );
-
-	  auto ent = GetServerEdict( m_LocalPlayer->m_entIndex );
-	  if ( ent )
-		 Render::Get( )->AddText( Vector2D( 5.0f, 400.0f ), 0xFFFFFFFF, OUTLINED,
-								  XorStr( "chokedcommands %d\nticks allowed %d\ndelta %d\ntickbase %d\n" ),
-								  Source::m_pClientState->m_nChokedCommands( ), *( int* ) ( ent + m_iTicksAllowed ),
-								  simTime, m_LocalPlayer->m_nTickBase( )
-		 );
-   #else
-	  auto simTime = TIME_TO_TICKS( local->m_flSimulationTime( ) - local->m_flOldSimulationTime( ) );
-	  Render::Get( )->AddText( Vector2D( 5.0f, 400.0f ), simTime < 0 ? Color::Green( ).GetD3DColor( ) : Color::White( ).GetD3DColor( ), OUTLINED,
-							   XorStr( "tickbase delta %d" ), simTime );
-   #endif
-   }
-#endif
-
-   //DrawNetVars( local );
-
    auto absOrigin = m_LocalPlayer->GetAbsOrigin( );
    Vector2D w2sOrigin;
    if ( WorldToScreen( absOrigin, w2sOrigin ) && g_Vars.esp.vizualize_angles && !m_LocalPlayer->IsDead( ) ) {
@@ -1566,54 +1464,6 @@ void CEsp::Main( ) {
 	  drawAngleLine( absOrigin, w2sOrigin, m_LocalPlayer->m_flLowerBodyYawTarget( ), XorStr( "Lower Body" ), FloatColor( 0.0f, 0.0f, 1.0f, 1.0f ) );
 	  drawAngleLine( absOrigin, w2sOrigin, g_Vars.globals.flRealYaw, XorStr( "Real" ), FloatColor( 0.0f, 1.0f, 0.0f, 1.0f ) );
 	  drawAngleLine( absOrigin, w2sOrigin, g_Vars.globals.m_FakeAngles.yaw, XorStr( "Fake" ), FloatColor( 1.0f, 0.0f, 0.0f, 1.0f ) );
-   #if 0
-	  drawAngleLine( absOrigin, w2sOrigin, PreviousYaw, XorStr( "PreviousYaw" ), FloatColor( 1.0f, 1.0f, 1.0f, 1.0f ) );
-
-	  auto average = std::remainderf( ( g_Vars.globals.angViewangles.yaw + PreviousYaw ) * 0.5f, 360.0f );
-	  drawAngleLine( absOrigin, w2sOrigin, average, XorStr( "average" ), FloatColor( 1.0f, 0.0f, 0.0f, 1.0f ) );
-
-	  auto inversed = std::remainderf( average + 180.0f, 360.0f );
-	  drawAngleLine( absOrigin, w2sOrigin, inversed, XorStr( "inversed" ), FloatColor( 0.0f, 0.0f, 1.0f, 1.0f ) );
-
-	  auto delta = std::remainderf( inversed - g_Vars.globals.angViewangles.yaw, 360.0f );
-	  auto yaw = 58.0f * ( 2 * ( delta >= 0.0f ) - 1 );
-
-	  auto resolved = std::remainderf( yaw + g_Vars.globals.angViewangles.yaw, 360.0f );
-	  drawAngleLine( absOrigin, w2sOrigin, resolved, XorStr( "resolved" ), FloatColor( 1.0f, 0.0f, 1.0f, 1.0f ) );
-   #endif
-
-   #if 0
-	  Vector ang;
-	  if ( AutoDirection( &ang ) )
-		 drawAngleLine( absOrigin, w2sOrigin, ang.y, XorStr( "egde" ), FloatColor( 1.0f, 1.0f, 1.0f, 1.0f ) );
-   #endif
-
-   #if 0
-	  drawAngleLine( absOrigin, w2sOrigin, m_LocalPlayer->m_PlayerAnimState( )->m_flAbsRotation, XorStr( "Current Real" ), FloatColor( 0.0f, 1.0f, 0.0f, 1.0f ) );
-	  drawAngleLine( absOrigin, w2sOrigin, m_LocalPlayer->m_PlayerAnimState( )->m_flEyeYaw, XorStr( "Current View" ), FloatColor( 1.0f, 0.0f, 0.0f, 1.0f ) );
-   #endif
-
-   #if 0
-	  extern float fl_side;
-	  extern float fl_forward;
-	  extern QAngle q_viewAngles;
-
-	  if ( fl_forward != 0.0f || fl_side != 0.0f ) {
-		 Vector right;
-		 auto forward = q_viewAngles.ToVectors( &right );
-
-		 Vector wishvel;
-		 for ( int i = 0; i < 2; i++ )       // Determine x and y parts of velocity
-			wishvel[ i ] = forward[ i ] * fl_forward + right[ i ] * fl_side;
-
-		 QAngle wishdir = wishvel.ToEulerAngles( );
-		 Vector velocity = local->m_vecVelocity( );
-
-		 float direction = RAD2DEG( atan2( velocity.y, velocity.x ) );
-		 drawAngleLine( local->m_vecOrigin( ), w2sOrigin, wishdir.yaw, XorStr( "wishidr" ), FloatColor( 0.0f, 1.0f, 0.0f, 1.0f ) );
-		 drawAngleLine( local->m_vecOrigin( ), w2sOrigin, direction, XorStr( "velocity" ), FloatColor( 1.0f, 0.0f, 0.0f, 1.0f ) );
-	  }
-   #endif
    }
 
    IHitmarker::Get( )->Paint( );
@@ -1623,49 +1473,6 @@ void CEsp::Main( ) {
 
    Vector2D points[ 8 ];
    Vector2D center;
-
-#ifdef MT_TEST
-   struct traced_rays {
-	  CGameTrace trace;
-	  Ray_t ray;
-	  CTraceFilter filter;
-	  Vector2D w2s;
-	  bool success_w2s;
-   };
-
-   static traced_rays rays[ 720 ] = { };
-
-   static auto mt_traceray_lambda = [] ( void* _data ) {
-	  traced_rays* data = ( traced_rays* ) _data;
-
-	  Source::m_pEngineTrace->TraceRay( data->ray, MASK_SOLID, &data->filter, &data->trace );
-	  data->success_w2s = WorldToScreen( data->trace.endpos, data->w2s );
-	  };
-
-   Vector eye_pos = local->GetEyePosition( );
-
-   for ( int i = 0; i < 720; i++ ) {
-	  Vector end = Vector( cos( DEG2RAD( float( i ) * 0.5f ) ) * 550.0f + eye_pos.x,
-						   sin( DEG2RAD( float( i ) * 0.5f ) ) * 550.0f + eye_pos.y,
-						   eye_pos.z
-	  );
-
-	  rays[ i ].filter = CTraceFilter( );
-	  rays[ i ].filter.pSkip = local;
-	  rays[ i ].ray.Init( eye_pos, end );
-	  Threading::QueueJobRef( mt_traceray_lambda, &rays[ i ] );
-   }
-
-   Threading::FinishQueue( );
-
-   Vector2D w2s_eye;
-   if ( WorldToScreen( eye_pos, w2s_eye ) ) {
-	  for ( int i = 0; i < 720; i++ ) {
-		 if ( rays[ i ].success_w2s )
-			Render::Get( )->AddLine( w2s_eye, rays[ i ].w2s, 0xFFFFFFFF, 1.5f );
-	  }
-   }
-#endif
 
    QAngle angles;
    Source::m_pEngine->GetViewAngles( angles );
@@ -1714,276 +1521,69 @@ void CEsp::Main( ) {
 			if ( g_Vars.esp.snaplines_enalbed )
 			   RenderSnapline( Vector2D( ( m_Data.bbox.min.x + m_Data.bbox.max.x ) * 0.5f, m_Data.bbox.max.y ) );
 
-		 #if 0
-			auto lagData = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
-			if ( lagData.IsValid( ) && !lagData->m_History.empty( ) ) {
-			   auto record = lagData->m_History.front( );
-			   for ( int x = -1; x <= 1; ++x ) {
-				  auto boneMatrix = record.GetBoneMatrix( x );
-				  auto hdr = Source::m_pModelInfo->GetStudiomodel( player->GetModel( ) );
-				  auto hitboxSet = hdr->pHitboxSet( player->m_nHitboxSet( ) );
-				  for ( int i = 0; i < hitboxSet->numhitboxes; ++i ) {
-					 auto hitbox = hitboxSet->pHitbox( i );
-					 if ( hitbox->m_flRadius <= 0.f )
-						continue;
+		 #if 1
+			if ( g_Vars.esp.a1 ) {
+				auto lagData = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
+				if ( lagData.IsValid( ) && !lagData->m_History.empty( ) ) {
+					auto record = lagData->m_History.front( );
 
-					 auto min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
-					 auto max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
+					auto boneMatrix = record.GetBoneMatrix( );
+					auto hdr = Source::m_pModelInfo->GetStudiomodel( player->GetModel( ) );
+					auto hitboxSet = hdr->pHitboxSet( player->m_nHitboxSet( ) );
+					for ( int i = 0; i < hitboxSet->numhitboxes; ++i ) {
+						auto hitbox = hitboxSet->pHitbox( i );
+						if ( hitbox->m_flRadius <= 0.f )
+							continue;
 
-					 float frametime = std::fmaxf( Source::m_pGlobalVars->frametime, Source::m_pGlobalVars->absoluteframetime ) * 2.0f +
-						Source::m_pGlobalVars->absoluteframestarttimestddev * Source::m_pGlobalVars->absoluteframestarttimestddev;
+						auto min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
+						auto max = hitbox->bbmax.Transform( boneMatrix[ hitbox->bone ] );
 
-					 if ( x == -1 ) {
-						Source::m_pDebugOverlay->AddCapsuleOverlay( min, max, hitbox->m_flRadius, 255, 0, 0, 255,
-																	frametime );
+						float frametime = std::fmaxf( Source::m_pGlobalVars->frametime, Source::m_pGlobalVars->absoluteframetime ) * 2.0f +
+							Source::m_pGlobalVars->absoluteframestarttimestddev * Source::m_pGlobalVars->absoluteframestarttimestddev;
 
-					 } else if ( !x ) {
-						Source::m_pDebugOverlay->AddCapsuleOverlay( min, max, hitbox->m_flRadius, 0, 255, 0, 255,
-																	frametime );
-					 } else {
 						Source::m_pDebugOverlay->AddCapsuleOverlay( min, max, hitbox->m_flRadius, 0, 0, 255, 255,
 																	frametime );
-					 }
-				  }
-			   }
+					}
+				}
 			}
 		 #endif
 
-		 #if 0
-			auto hdr = Source::m_pModelInfo->GetStudiomodel( player->GetModel( ) );
-			auto hitboxSet = hdr->pHitboxSet( player->m_nHitboxSet( ) );
+		
+		 #if 1
+			if ( g_Vars.esp.a2 ) { 
+				// debug at target
+				auto lagdata = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
+				if ( lagdata.IsValid( ) && lagdata->m_History.size( ) > 0 ) {
+					auto record = &lagdata->m_History.at( 0 );
 
-			QAngle view;
-			Source::m_pEngine->GetViewAngles( view );
-			auto direction = view.ToVectors( ); // direction
-			direction.Normalize( );
+					Vector2D w2sOrigin;
+					if ( WorldToScreen( player->m_vecOrigin( ), w2sOrigin ) ) {
+						auto at_target = ToDegrees( atan2( record->m_vecOrigin.y - m_LocalPlayer->m_vecOrigin( ).y,
+														   record->m_vecOrigin.x - m_LocalPlayer->m_vecOrigin( ).x ) );
 
-			// hitboxSet->numhitboxes
-			for ( int i = 0; i < hitboxSet->numhitboxes; ++i ) {
-			   float frametime = std::fmaxf( Source::m_pGlobalVars->frametime, Source::m_pGlobalVars->absoluteframetime ) * 2.0f +
-				  Source::m_pGlobalVars->absoluteframestarttimestddev * Source::m_pGlobalVars->absoluteframestarttimestddev;
+						auto delta = std::remainderf( at_target - record->m_flEyeYaw, 360.0f );
+						at_target += ( delta <= 0.0f ) ? -10.0f : 10.0f;
 
-			   auto hitbox = hitboxSet->pHitbox( i );
-			   auto min = hitbox->bbmin.Transform( player->m_CachedBoneData( ).Element( hitbox->bone ) );
-			   auto max = hitbox->bbmax.Transform( player->m_CachedBoneData( ).Element( hitbox->bone ) );
+						delta = std::remainderf( at_target - record->m_flEyeYaw, 360.0f );
 
-			#if 0
-			   if ( hitbox->m_flRadius <= 0.f ) {
-				  bool hit = Math::IntersectionBoundingBox( local_eye_pos, end, min, max );
-				  Source::m_pDebugOverlay->AddBoxOverlay( ( min + max ) * 0.5f, hitbox->bbmin, hitbox->bbmax, QAngle( ), hit ? 0 : 255, 255, hit ? 0 : 255, 255,
-														  frametime );
-				  continue;
-			   }
-			#endif
+						auto min_dsc_delta = -58.0f;
+						auto max_dsc_delta = 58.0f;
+						delta = Math::Clamp( delta, min_dsc_delta, max_dsc_delta );
 
-			   RayTracer::Trace tr;
-			   tr.m_hit = false;
+						auto flGoalFeetYaw1 = std::remainderf( record->m_flEyeYaw + delta, 360.0f );
+						drawAngleLine( player->m_vecOrigin( ), w2sOrigin, at_target, XorStr( "at_target" ), FloatColor( 0.937f, 0.713f, 0.094f, 1.0f ) );
+						drawAngleLine( player->m_vecOrigin( ), w2sOrigin, flGoalFeetYaw1, XorStr( "resolved yaw" ), FloatColor( 0.1f, 0.8f, 0.1f, 1.0f ) );
 
-			   RayTracer::Ray ray = RayTracer::Ray( direction );
-			   ray.m_startPoint = local->GetEyePosition( );
-			   ray.m_length = 4096.0f;
+						Render::Get( )->AddText( Vector2D( 500.0f, 100.0f ), 0xFFFFFFFF, OUTLINED, XorStr( "%.2f delta\n%d side" ), delta, 2 * ( delta >= 0.0f ) - 1 );
+					}
 
-			   RayTracer::Hitbox capsule( min, max, hitbox->m_flRadius );
-
-			   RayTracer::TraceHitbox( ray, capsule, tr );
-			   Source::m_pDebugOverlay->AddCapsuleOverlay( min, max, hitbox->m_flRadius,
-														   tr.m_hit ? 0 : 255,
-														   255,
-														   tr.m_hit ? 0 : 255,
-														   255,
-														   frametime );
-			   continue;
+				}
 			}
+			
 		 #endif
-
-		 #if 0
-			auto hdr = Source::m_pModelInfo->GetStudiomodel( player->GetModel( ) );
-			auto hitboxSet = hdr->pHitboxSet( player->m_nHitboxSet( ) );
-
-			// hitboxSet->numhitboxes
-			for ( int i = 0; i < 1; ++i ) {
-			   float frametime = std::fmaxf( Source::m_pGlobalVars->frametime, Source::m_pGlobalVars->absoluteframetime ) * 2.0f +
-				  Source::m_pGlobalVars->absoluteframestarttimestddev * Source::m_pGlobalVars->absoluteframestarttimestddev;
-
-			   auto hitbox = hitboxSet->pHitbox( i );
-			   auto min = hitbox->bbmin.Transform( player->m_CachedBoneData( ).Element( hitbox->bone ) );
-			   auto max = hitbox->bbmax.Transform( player->m_CachedBoneData( ).Element( hitbox->bone ) );
-
-			   if ( hitbox->m_flRadius <= 0.f ) {
-				  bool hit = Math::IntersectionBoundingBox( local_eye_pos, end, min, max );
-				  Source::m_pDebugOverlay->AddBoxOverlay( ( min + max ) * 0.5f, hitbox->bbmin, hitbox->bbmax, hitbox->m_angAngles, hit ? 0 : 255, 255, hit ? 0 : 255, 255,
-														  frametime );
-				  continue;
-			   }
-
-			   auto center = ( min + max ) * 0.5f;
-
-			   RayTracer::Hitbox box( min, max, hitbox->m_flRadius );
-			   RayTracer::Ray ray( local_eye_pos, center );
-			   RayTracer::Trace trace;
-			   RayTracer::TraceFromCenter( ray, box, trace, RayTracer::Flags_RETURNEND );
-
-			   Vector points[ 7 ];
-			   points[ 0 ] = trace.m_traceEnd;
-
-			   auto delta = center - local_eye_pos;
-			   delta.Normalized( );
-
-			   Vector right, up;
-			   delta.GetVectors( right, up );
-
-			   Vector middle = ( up + right ) * 0.866f;
-			   Vector middle2 = ( up - right ) * 0.866f;
-
-			   ray = RayTracer::Ray( local_eye_pos, center - ( up * 1000.0f ) );
-			   RayTracer::TraceFromCenter( ray, box, trace, RayTracer::Flags_RETURNEND );
-			   points[ 1 ] = trace.m_traceEnd;
-
-			   ray = RayTracer::Ray( local_eye_pos, center + ( up * 1000.0f ) );
-			   RayTracer::TraceFromCenter( ray, box, trace, RayTracer::Flags_RETURNEND );
-			   points[ 2 ] = trace.m_traceEnd;
-
-			   ray = RayTracer::Ray( local_eye_pos, center + ( middle * 1000.0f ) );
-			   RayTracer::TraceFromCenter( ray, box, trace, RayTracer::Flags_RETURNEND );
-			   points[ 3 ] = trace.m_traceEnd;
-
-			   ray = RayTracer::Ray( local_eye_pos, center - ( middle * 1000.0f ) );
-			   RayTracer::TraceFromCenter( ray, box, trace, RayTracer::Flags_RETURNEND );
-			   points[ 4 ] = trace.m_traceEnd;
-
-			   ray = RayTracer::Ray( local_eye_pos, center - ( middle2 * 1000.0f ) );
-			   RayTracer::TraceFromCenter( ray, box, trace, RayTracer::Flags_RETURNEND );
-			   points[ 5 ] = trace.m_traceEnd;
-
-			   ray = RayTracer::Ray( local_eye_pos, center + ( middle2 * 1000.0f ) );
-			   RayTracer::TraceFromCenter( ray, box, trace, RayTracer::Flags_RETURNEND );
-			   points[ 6 ] = trace.m_traceEnd;
-
-			   for ( int x = 0; x < 7; ++x ) {
-				  Vector2D w2s;
-				  if ( !WorldToScreen( points[ x ], w2s ) ) {
-					 continue;
-				  }
-
-				  auto color = g_Vars.esp.aim_points_color;
-				  color.a = ( m_flAplha[ player->entindex( ) ] / 255.f );
-
-				  Render::Get( )->SetTextFont( 0 );
-				  Render::Get( )->AddText( w2s, color, OUTLINED | CENTER_X | CENTER_Y, XorStr( "%d" ), x );
-			   }
-
-			   if ( InputSys::Get( )->IsKeyDown( VirtualKeys::F ) ) {
-				  //Source::m_pDebugOverlay->AddBoxOverlay( trace.m_traceEnd, Vector( -2.0f, -2.0f, -2.0f ), Vector( 1.0f, 1.0f, 1.0f ), QAngle( ), 255, 0, 0, 255, 1.0f );
-			   }
-
-			#if 0
-			   RayTracer::TraceHitbox( ray, box, trace );
-			   if ( !trace.m_hit ) {
-				  Source::m_pDebugOverlay->AddCapsuleOverlay( min, max, hitbox->m_flRadius, 255, 255, 255, 255,
-															  frametime );
-			   } else {
-				  Source::m_pDebugOverlay->AddCapsuleOverlay( min, max, hitbox->m_flRadius, 0, 255, 0, 255,
-															  frametime );
-			   }
-			#endif
-
-			#if 0
-			   Math::CapsuleCollider collide;
-			   collide.min = min;
-			   collide.max = max;
-			   collide.radius = hitbox->m_flRadius;
-
-			   bool hit = collide.Intersect( local_eye_pos, end );
-			   if ( !hit ) {
-				  Source::m_pDebugOverlay->AddCapsuleOverlay( min, max, hitbox->m_flRadius, 255, 255, 255, 255,
-															  frametime );
-			   } else {
-				  Source::m_pDebugOverlay->AddCapsuleOverlay( min, max, hitbox->m_flRadius, 0, 255, 0, 255,
-															  frametime );
-			   }
-			#endif
-
-			}
-		 #endif
-
-		 #if 0
-			// debug at target
-			auto lagdata = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
-			if ( lagdata.IsValid( ) && lagdata->m_History.size( ) > 0 ) {
-			   auto record = &lagdata->m_History.at( 0 );
-
-			   Vector2D w2sOrigin;
-			   if ( WorldToScreen( player->m_vecOrigin( ), w2sOrigin ) ) {
-				  auto at_target = ToDegrees( atan2( record->m_vecOrigin.y - m_LocalPlayer->m_vecOrigin( ).y,
-											  record->m_vecOrigin.x - m_LocalPlayer->m_vecOrigin( ).x ) );
-
-				  auto delta = std::remainderf( at_target - record->m_flEyeYaw, 360.0f );
-				  at_target += ( delta <= 0.0f ) ? -10.0f : 10.0f;
-
-				  delta = std::remainderf( at_target - record->m_flEyeYaw, 360.0f );
-
-				  auto min_dsc_delta = -58.0f;
-				  auto max_dsc_delta = 58.0f;
-				  delta = Math::Clamp( delta, min_dsc_delta, max_dsc_delta );
-
-				  auto flGoalFeetYaw1 = std::remainderf( record->m_flEyeYaw + delta, 360.0f );
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, at_target, XorStr( "at_target" ), FloatColor( 0.937f, 0.713f, 0.094f, 1.0f ) );
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, flGoalFeetYaw1, XorStr( "resolved yaw" ), FloatColor( 0.1f, 0.8f, 0.1f, 1.0f ) );
-
-				  Render::Get( )->AddText( Vector2D( 500.0f, 100.0f ), 0xFFFFFFFF, OUTLINED, XorStr( "%.2f delta\n%d side" ), delta, 2 * ( delta >= 0.0f ) - 1 );
-			   }
-
-			}
-		 #endif
-
-		 #if 0
-			auto lagdata = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
-			if ( lagdata.IsValid( ) && lagdata->m_History.size( ) > 0 ) {
-			   bool result = lagdata->DetectAutoDirerction( lagdata, player );
-
-			   Vector2D w2sOrigin;
-			   if ( lagdata->m_flDirection != FLT_MAX && WorldToScreen( player->m_vecOrigin( ), w2sOrigin ) ) {
-				  float dir = RAD2DEG( atan2( lagdata->m_flEdges[ 3 ] - lagdata->m_flEdges[ 1 ], lagdata->m_flEdges[ 2 ] - lagdata->m_flEdges[ 0 ] ) );
-
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, player->m_angEyeAngles( ).yaw, XorStr( "Viewangles" ), FloatColor( 0.937f, 0.713f, 0.094f, 1.0f ) );
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, lagdata->m_flDirection, XorStr( "flDirection" ), FloatColor( 0.0f, 0.0f, 1.0f, 1.0f ) );
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, dir, XorStr( "dir" ), FloatColor( 1.0f, 1.0f, 1.0f, 1.0f ) );
-
-				  dir += lagdata->m_flDirection;
-				  dir = std::remainderf( dir, 360.0f );
-
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, dir, XorStr( "dir at target" ), FloatColor( 1.0f, 0.f, 1.0f, 1.0f ) );
-
-				  float delta = std::remainderf( player->m_angEyeAngles( ).yaw - dir, 360.0f );
-				  Render::Get( )->AddText( Vector2D( 500.0f, 100.0f ), 0xFFFFFFFF, OUTLINED, XorStr( "%.2f delta\n%d side" ), delta, 2 * ( delta <= 0.0f ) - 1 );
-				  if ( !result )
-					 Render::Get( )->AddText( Vector2D( 500.0f, 125.0f ), FloatColor( 0.0f, 1.0f, 0.0f ), OUTLINED, XorStr( "HISTORY!" ) );
+ 		
 		 }
-
 	  }
-		 #endif   
-
-		 #if 0
-			auto lagdata = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
-			if ( lagdata.IsValid( ) && lagdata->m_History.size( ) > 0 ) {
-			   Vector2D w2sOrigin;
-			   if ( WorldToScreen( player->m_vecOrigin( ), w2sOrigin ) ) {
-				  float dir1 = lagdata->m_Animations[ 0 ].m_animLayers[ 6 ].m_flPlaybackRate * 36000.0f;
-				  float dir2 = lagdata->m_Animations[ 1 ].m_animLayers[ 6 ].m_flPlaybackRate * 36000.0f;
-				  float dir3 = lagdata->m_Animations[ 2 ].m_animLayers[ 6 ].m_flPlaybackRate * 36000.0f;
-				  float dir4 = lagdata->m_serverAnimLayers[ 6 ].m_flPlaybackRate * 36000.0f;
-
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, dir1, XorStr( "0" ), FloatColor( 0.0f, 1.0f, 0.0f, 1.0f ) );
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, dir2, XorStr( "1" ), FloatColor( 1.0f, 0.0f, 1.0f, 1.0f ) );
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, dir3, XorStr( "2" ), FloatColor( 0.0f, 1.0f, 1.0f, 1.0f ) );
-				  drawAngleLine( player->m_vecOrigin( ), w2sOrigin, dir4, XorStr( "server" ), FloatColor( 0.0f, 0.0f, 1.0f, 1.0f ) );
-			   }
-			}
-		 #endif
-   }
-   }
-
-
 
 	  if ( !entity->GetClientClass( ) || !entity->GetClientClass( )->m_ClassID )
 		 continue;
@@ -2225,75 +1825,79 @@ void CEsp::Main( ) {
    //if ( g_Vars.esp.extended_esp )
 	 // IExtendedEsp::Get( )->Finish( );
 
-#if 0
-   extern Engine::C_LagRecord extrapolated;
-   extern C_CSPlayer* extrapolatedPlayer;
-   if ( extrapolated.m_bExtrapolated && extrapolatedPlayer ) {
-	  auto model = extrapolatedPlayer->GetModel( );
-	  if ( !model )
-		 return;
+#if 1
+   if ( g_Vars.esp.a3 ) {
+	   extern Engine::C_LagRecord extrapolated;
+	   extern C_CSPlayer* extrapolatedPlayer;
+	   if ( extrapolated.m_bExtrapolated && extrapolatedPlayer ) {
+		   auto model = extrapolatedPlayer->GetModel( );
+		   if ( !model )
+			   return;
 
-	  auto hdr = Source::m_pModelInfo->GetStudiomodel( model );
-	  if ( !hdr )
-		 return;
+		   auto hdr = Source::m_pModelInfo->GetStudiomodel( model );
+		   if ( !hdr )
+			   return;
 
-	  auto set = hdr->pHitboxSet( extrapolatedPlayer->m_nHitboxSet( ) );
+		   auto set = hdr->pHitboxSet( extrapolatedPlayer->m_nHitboxSet( ) );
 
-	  std::pair< Vector2D, Vector2D > positions[ 32 ];
-	  int point_count = 0;
+		   std::pair< Vector2D, Vector2D > positions[ 32 ];
+		   int point_count = 0;
 
-	  auto chest = set->pHitbox( HITBOX_UPPER_CHEST );
-	  auto neck = set->pHitbox( HITBOX_NECK );
+		   auto chest = set->pHitbox( HITBOX_UPPER_CHEST );
+		   auto neck = set->pHitbox( HITBOX_NECK );
 
-	  auto middle = extrapolated.m_BoneMatrix[ chest->bone ].at( 3 ) +
-		 extrapolated.m_BoneMatrix[ neck->bone ].at( 3 );
-	  middle *= 0.5f;
+		   auto middle = extrapolated.m_BoneMatrix[ chest->bone ].at( 3 ) +
+			   extrapolated.m_BoneMatrix[ neck->bone ].at( 3 );
+		   middle *= 0.5f;
 
-	  auto upperarm_left = set->pHitbox( HITBOX_LEFT_UPPER_ARM );
-	  auto upperarm_right = set->pHitbox( HITBOX_RIGHT_UPPER_ARM );
+		   auto upperarm_left = set->pHitbox( HITBOX_LEFT_UPPER_ARM );
+		   auto upperarm_right = set->pHitbox( HITBOX_RIGHT_UPPER_ARM );
 
-	  for ( int i = 0; i < hdr->numbones; ++i ) {
-		 auto bone = hdr->pBone( i );
-		 if ( ( bone->flags & BONE_USED_BY_ANYTHING ) == 0 || bone->parent < 0 )
-			continue;
+		   for ( int i = 0; i < hdr->numbones; ++i ) {
+			   auto bone = hdr->pBone( i );
+			   if ( ( bone->flags & BONE_USED_BY_ANYTHING ) == 0 || bone->parent < 0 )
+				   continue;
 
-		 if ( bone->parent == chest->bone && i != neck->bone )
-			continue;
+			   if ( bone->parent == chest->bone && i != neck->bone )
+				   continue;
 
-		 Vector parentBone;
-		 if ( i == upperarm_left->bone || i == upperarm_right->bone ) {
-			parentBone = middle;
-		 } else {
-			parentBone = extrapolated.m_BoneMatrix[ bone->parent ].at( 3 );
-		 }
+			   Vector parentBone;
+			   if ( i == upperarm_left->bone || i == upperarm_right->bone ) {
+				   parentBone = middle;
+			   } else {
+				   parentBone = extrapolated.m_BoneMatrix[ bone->parent ].at( 3 );
+			   }
 
-		 Vector2D parentPos;
-		 if ( !WorldToScreen( parentBone, parentPos ) )
-			continue;
+			   Vector2D parentPos;
+			   if ( !WorldToScreen( parentBone, parentPos ) )
+				   continue;
 
-		 Vector2D childPos;
-		 if ( !WorldToScreen( extrapolated.m_BoneMatrix[ i ].at( 3 ), childPos ) )
-			continue;
+			   Vector2D childPos;
+			   if ( !WorldToScreen( extrapolated.m_BoneMatrix[ i ].at( 3 ), childPos ) )
+				   continue;
 
-		 positions[ point_count ].first = parentPos;
-		 positions[ point_count ].second = childPos;
-		 point_count++;
+			   positions[ point_count ].first = parentPos;
+			   positions[ point_count ].second = childPos;
+			   point_count++;
 
-		 if ( point_count > 31 )
-			break;
-		 }
+			   if ( point_count > 31 )
+				   break;
+		   }
 
-	  if ( point_count <= 0 )
-		 return;
+		   if ( point_count <= 0 )
+			   return;
 
-	  for ( const auto& pos : positions ) {
-		 Render::Get( )->AddLine( pos.first, pos.second, FloatColor( 0.0f, 0.0f, 0.0f, 0.4f ), 2.5f );
-	  }
+		   for ( const auto& pos : positions ) {
+			   Render::Get( )->AddLine( pos.first, pos.second, FloatColor( 0.0f, 0.0f, 0.0f, 0.4f ), 2.5f );
+		   }
 
-	  for ( const auto& pos : positions ) {
-		 Render::Get( )->AddLine( pos.first, pos.second, FloatColor( 1.0f, 0.0f, 0.0f, 1.0f ), 1.0f );
-	  }
-	  }
+		   for ( const auto& pos : positions ) {
+			   Render::Get( )->AddLine( pos.first, pos.second, FloatColor( 1.0f, 0.0f, 0.0f, 1.0f ), 1.0f );
+		   }
+	   }
+   }
+
+   
 #endif
 }
 

@@ -1042,6 +1042,31 @@ public:
    config_option( float, preserve_killfeed_time, 1.0f );
 
    config_option( bool, snaplines_enalbed, false );
+
+   config_option( bool, a1, false );
+   config_option( bool, a2, false );
+   config_option( bool, a3, false );
+   config_option( bool, a4, false );
+   config_option( bool, a5, false );
+   config_option( bool, a6, false );
+   config_option( bool, a7, false );
+   config_option( bool, a8, false );
+   config_option( bool, a9, false );
+   config_option( bool, a10, false );
+   config_option( bool, a11, false );
+   config_option( bool, a12, false );
+   config_option( bool, a13, false );
+   config_option( bool, a14, false );
+   config_option( bool, a15, false );
+   config_option( bool, a16, false );
+   config_option( bool, a17, false );
+   config_option( bool, a18, false );
+   config_option( bool, a19, false );
+   config_option( bool, a20, false );
+
+
+
+
    config_option( int, snaplines_pos, 0 );
    config_option( FloatColor, snaplines_color, FloatColor( 1.0f, 1.0f, 1.0f, 1.0f ) );
    config_option( bool, draw_c4_bar, false );

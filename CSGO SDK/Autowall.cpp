@@ -63,6 +63,19 @@ bool Autowall::IsArmored( C_CSPlayer* player, int hitgroup ) {
 }
 
 float Autowall::ScaleDamage( C_CSPlayer* player, float damage, float weapon_armor_ratio, int hitgroup ) {
+   if ( !player )
+	   return -1.f;
+
+   C_CSPlayer* pLocal = C_CSPlayer::GetLocalPlayer( );
+
+   if ( !pLocal )
+	   return -1.f;
+
+   C_WeaponCSBaseGun* pWeapon = ( C_WeaponCSBaseGun* )pLocal->m_hActiveWeapon( ).Get( );
+
+   if ( !pWeapon )
+	   return -1.f;
+
    auto team = player->m_iTeamNum( );
    auto head_scale = team == TEAM_CT ? g_Vars.mp_damage_scale_ct_head->GetFloat( ) : g_Vars.mp_damage_scale_t_head->GetFloat( );
    auto body_scale = team == TEAM_CT ? g_Vars.mp_damage_scale_ct_body->GetFloat( ) : g_Vars.mp_damage_scale_t_body->GetFloat( );

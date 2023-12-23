@@ -2040,6 +2040,9 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 					 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) * 0.5f );
 					 ImGui::ColorEdit4( XorStr( "##Aim points Color" ), g_Vars.esp.aim_points_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
 
+					 ImGui::Checkbox( XorStr( "Draw anim-syncronization" ), &g_Vars.esp.a1 );
+					 ImGui::Checkbox( XorStr( "Draw target debug" ), &g_Vars.esp.a2 );
+					 ImGui::Checkbox( XorStr( "Draw extrapolated origin" ), &g_Vars.esp.a3 );
 					 ImGui::Checkbox( XorStr( "Draw hitboxes" ), &g_Vars.esp.draw_hitboxes );
 					 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) * 0.5f );
 					 ImGui::ColorEdit4( XorStr( "##Draw hitboxes color" ), g_Vars.esp.hitboxes_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );

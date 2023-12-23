@@ -341,6 +341,7 @@ namespace Source {
 
 	class C_Ragebot : public Ragebot {
 	public:
+		void StripAttack( Encrypted_t<CUserCmd> cmd );
 		// only sanity checks, etc.
 		virtual bool Run( Encrypted_t<CUserCmd> cmd, C_CSPlayer* local, bool* sendPacket );
 
@@ -445,6 +446,27 @@ namespace Source {
 		Encrypted_t<RagebotData> rageData;
 	};
 
+	void C_Ragebot::StripAttack( Encrypted_t<CUserCmd> cmd ) {
+
+		auto local = C_CSPlayer::GetLocalPlayer( );
+
+		auto weapon = ( C_WeaponCSBaseGun* )local->m_hActiveWeapon( ).Get( );
+		if ( !weapon ) {
+			return;
+		}
+
+		auto weaponInfo = weapon->GetCSWeaponData( );
+		if ( !weaponInfo.IsValid( ) ) {
+			return;
+		}
+
+		if ( weapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER )
+			cmd->buttons &= ~IN_ATTACK2;
+
+		else
+			cmd->buttons &= ~IN_ATTACK;
+	}
+
 	bool C_Ragebot::Run( Encrypted_t<CUserCmd> cmd, C_CSPlayer* local, bool* sendPacket ) {
 #if 0
 		if ( !InputSys::Get( )->IsKeyDown( VirtualKeys::F ) )
@@ -481,11 +503,27 @@ namespace Source {
 		if ( !local || local->IsDead( ) )
 			return false;
 
+		if ( !local->CanShoot( ) )
+			StripAttack( cmd );
+
+		// we have a normal weapon or a non cocking revolver
+		// choke if its the processing tick.
+		bool revolver = weapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER;
+		if ( local->CanShoot( ) && !Source::m_pClientState->m_nChokedCommands( ) && !revolver && !( g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit ) ) {
+			*sendPacket = false;
+			StripAttack( cmd );
+			return false;
+		}
+
 		rageData->m_pLocal = local;
 		rageData->m_pWeapon = weapon;
 		rageData->m_pWeaponInfo = weaponInfo;
 		rageData->m_pSendPacket = sendPacket;
 		rageData->m_pCmd = cmd;
+
+		/* maybe this shit is still unavaible */
+		if ( !rageData->m_pCmd.IsValid( ) || !rageData->m_pLocal || !rageData->m_pWeapon || !rageData->m_pWeaponInfo.IsValid( ) )
+			return false;
 
 		if ( weapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER ) {
 			static bool unk_meme = false;
@@ -1837,6 +1875,9 @@ namespace Source {
 					/* if ( TIME_TO_TICKS( lagData->m_History.front( ).m_flSimulationTime - best_point->target->record->m_flSimulationTime ) > 0 )
 						TickbaseShiftCtx.AdjustPlayerTimeBaseFix( Source::m_pClientState->m_nChokedCommands( ) + TickbaseShiftCtx.will_shift_tickbase + 1 );*/
 
+					g_TickbaseController.m_bSupressRecharge = false; // suppress recharge
+
+
 					rageData->m_pCmd->tick_count = TIME_TO_TICKS( best_point->target->record->m_flSimulationTime + Engine::LagCompensation::Get( )->GetLerp( ) );
 
 					// ch ck for animation fix accuracy 
@@ -1973,10 +2014,13 @@ namespace Source {
 					}
 
 					result = true;
+				} else {
+					g_TickbaseController.m_bSupressRecharge = false;
 				}
 			} else {
 				this->rageData->m_bFailedHitchance = true;
 				this->rageData->m_bPrepareAim = false;
+				g_TickbaseController.m_bSupressRecharge = false;
 			}
 		}
 
@@ -2398,6 +2442,7 @@ namespace Source {
 		if ( !record.m_bIsValid )
 			return nullptr;
 
+
 		if ( record.m_bTeleportDistance ) {
 			int latency_ticks = 0;
 			auto netchannel = Encrypted_t<INetChannel>( Source::m_pEngine->GetNetChannelInfo( ) );
@@ -2414,6 +2459,8 @@ namespace Source {
 
 			return &record;
 		}
+
+		bool doubleTapEnabled = g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit;
 
 		int recordsCount = 0;
 		Engine::C_LagRecord* arrRecords[ 64 ] = { nullptr };
@@ -2784,8 +2831,14 @@ sup:
 		rageData->m_iChokedCommands = -1;
 		rageData->m_bFailedHitchance = false;
 
-		if ( result )
+
+		if ( result ) {
+			if ( g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit ) {
+				g_TickbaseController.m_bSupressRecharge = true;
+			}
+
 			rageData->m_pCmd->buttons |= IN_ATTACK;
+		}
 
 #ifdef DEBUG_REPREDICT
 		std::get<0>( predicted_origins[ rageData->m_pCmd->command_number ] ) = rageData->m_pLocal->m_vecOrigin( );

@@ -47,6 +47,11 @@ class TickbaseSystem {
 public:
 	size_t s_nSpeed = 14;
 
+	bool m_didFakeFlick;
+	bool ignoreallcmds;
+	int lastShiftedCmdNr;
+	int m_nServerTick;
+	int m_nCompensatedServerTick;
 	size_t s_nTickRate = 64;
 	float s_flTickInterval = 1.f / ( float )s_nTickRate;
 
@@ -55,33 +60,43 @@ public:
 
 	int s_iClockCorrectionTicks = ( int )( s_flClockCorrectionSeconds * s_flTickInterval + 0.5f );
 	int s_iNetBackup = 64;
-
+	int m_nSimulationTicks = 0;
 	bool s_bFreshFrame = false;
 	bool s_bAckedBuild = true;
-
+	bool s_bShiftedBullet = false;
 	bool m_bSupressRecharge = false;
-
-	float s_flTimeRequired = 0.4f;
-	size_t s_nTicksRequired = ( int )( s_flTimeRequired / s_flTickInterval + 0.5f );
+	bool m_bForceUnChargeState = true;
+	bool allw = false;
+	float s_flTimeRequired = 0.5f;
+	float s_flTime = 0.5f;
+	size_t s_nTicksRequired = ( int )( s_flTimeRequired / s_flTickInterval + s_flTime );
 	size_t s_nTicksDelay = 32u;
 
 	bool s_bInMove = false;
 	int s_iMoveTickBase = 0;
+	int s_FinalTickbase = 0;
+	int s_PostTickBase = 0;
+	int s_PreTickBase = 0;
+	int s_PredCurtime = 0;
+	int estimated_tb = 0;
 	size_t s_nTicksSinceUse = 0u;
 	size_t s_nTicksSinceStarted = 0u;
-
+	bool s_InMovePrediction = false;
 	int s_iServerIdealTick = 0;
 	bool s_bBuilding = false;
-
+	bool bShifting = false;
+	bool charging = false;
+	bool bAllow = false;
 	size_t s_nExtraProcessingTicks = 0;
 	std::vector<TickbaseShift_t> g_iTickbaseShifts;
 
 	bool IsTickcountValid( int nTick );
-
+	int AdjustPlayerTimeBase( int nSimulationTicks );
+	//void OnFrameStageNotify(ClientFrameStage_t Stage);
 	void OnRunSimulation( void* this_, int iCommandNumber, CUserCmd* pCmd, size_t local );
 	void OnPredictionUpdate( void* prediction, void*, int startframe, bool validframe, int incoming_acknowledged, int outgoing_command );
 	void OnCLMove( bool bFinalTick, float unk );
-
+	void copy_command( CUserCmd* pCmd, bool* v1 );
 	bool Building( ) const;
 	bool Using( ) const;
 };

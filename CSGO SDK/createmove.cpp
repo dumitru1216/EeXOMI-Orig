@@ -203,6 +203,7 @@ namespace Hooked {
   //}
 
 			movement->PostPrediction( );
+			g_TickbaseController.copy_command( cmd.Xor( ), bSendPacket );
 
 			if ( cmd->buttons & IN_ATTACK
 				 && weapon->m_iItemDefinitionIndex( ) != WEAPON_C4
@@ -323,6 +324,11 @@ namespace Hooked {
 		auto result = CreateMoveHandler( ft, _cmd, bSendPacket );
 
 		Engine::Prediction::Instance( )->KeepCommunication( bSendPacket );
+
+		if ( g_TickbaseController.Using( ) ) {
+			*bSendPacket = g_TickbaseController.s_nExtraProcessingTicks == 1; // Only send on the last shifted tick
+			_cmd->buttons &= ~( IN_ATTACK | IN_ATTACK2 );
+		}
 
 		auto pLocal = C_CSPlayer::GetLocalPlayer( );
 		if ( !g_Vars.globals.HackIsReady || !pLocal || !Source::m_pEngine->IsInGame( ) ) {
