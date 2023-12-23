@@ -9,7 +9,7 @@
 #include "imgui_impl_win32.h"
 
 #include "InputSys.hpp"
-#include "Menu.hpp"
+#include "MenuV2.hpp"
 #include "source.hpp"
 
 #include "CVariables.hpp"
@@ -168,7 +168,7 @@ LRESULT __stdcall Win32InputSys::WndProc( HWND hWnd, UINT msg, WPARAM wParam, LP
 	  win32input->m_ScrollMouse += ( float ) GET_WHEEL_DELTA_WPARAM( wParam ) / ( float ) WHEEL_DELTA;
    }
 
-   IMenu::Get( )->WndProcHandler( );
+   MenuV2::Get( )->WndProcHandler( );
 
    if ( g_Vars.globals.menuOpen && ImGui_ImplWin32_WndProcHandler( hWnd, msg, wParam, lParam ) ) {
 	 /* if ( !InputSys::Get( )->IsKeyDown( VK_LBUTTON )

@@ -1,5 +1,5 @@
 #include "Hooked.hpp"
-#include "Menu.hpp"
+#include "MenuV2.hpp"
 #include <intrin.h>
 #include "imgui_impl_win32.h"
 #include "InputSys.hpp"
@@ -80,7 +80,7 @@ HRESULT __stdcall Hooked::EndScene( IDirect3DDevice9* pDevice ) {
 
    ImGui::GetIO( ).MouseDrawCursor = g_Vars.globals.menuOpen;
 
-   IMenu::Get( )->Main( pDevice );
+   MenuV2::Get( )->MenuRender( pDevice );
 
    //IMenu::Get( )->Main( pDevice );
 

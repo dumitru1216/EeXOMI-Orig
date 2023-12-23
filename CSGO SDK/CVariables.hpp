@@ -1095,6 +1095,7 @@ public:
    config_option( bool, vizualize_hitmarker, false );
    config_option( bool, vizualize_hitmarker_damage, false );
    config_option( bool, vizualize_angles, false );
+   config_option( bool, vis_pen_dmg, false );
 
    config_option( bool, angle_lines, false );
 

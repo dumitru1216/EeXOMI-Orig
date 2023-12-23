@@ -1,4 +1,4 @@
-#if 0
+#if 1
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "Render.hpp"
@@ -2772,6 +2772,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 
 				  ImGui::Checkbox( XorStr( "Penetrate crosshair" ), &g_Vars.esp.autowall_crosshair );
 				  if ( g_Vars.esp.autowall_crosshair ) {
+					  ImGui::Checkbox( XorStr( "Show damage" ), &g_Vars.esp.autowall_crosshair );
 					 ImGui::SliderFloatA( XorStr( "Size##iOff" ), &g_Vars.esp.autowall_crosshair_height, 1.f, 30.0f, XorStr( "%.0f px" ) );
 				  }
 

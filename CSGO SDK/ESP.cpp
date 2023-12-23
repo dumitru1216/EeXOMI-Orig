@@ -1150,8 +1150,8 @@ void CEsp::PenetrateCrosshair( Vector2D center ) {
 	  Vector2D{ center.x + ( g_Vars.esp.autowall_crosshair_height + 2 ), center.y + ( g_Vars.esp.autowall_crosshair_height + 2 ) },
 	  FloatColor( 0.0f, 0.0f, 0.0f, 0.0f ) );
 
-#if 0
-   if ( dmg > 0.f ) {
+#if 1
+   if ( ( dmg > 0.f ) && g_Vars.esp.vis_pen_dmg ) {
 	  Render::Get( )->SetTextFont( FONT_VISITOR );
 	  Render::Get( )->AddText( { center.x, center.y + g_Vars.esp.autowall_crosshair_height + 3.0f }, FloatColor::White, CENTER_X, XorStr( "%i Damage" ), ( int ) dmg );
    }
@@ -1251,7 +1251,7 @@ void DrawNetVars( C_CSPlayer* player ) {
 		 }
 	  }
    }
-}÷
+}
 #endif
 
 void CEsp::DrawZeusDistance( ) {
