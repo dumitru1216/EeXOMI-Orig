@@ -236,7 +236,7 @@ void C_TickbaseShift::OnNewPacket( int command_nr, int tickbase_from_server, int
 	  Memory::VCall<void( __thiscall* )( void* )>( Source::m_pPrediction.Xor( ), 5 )( Source::m_pPrediction.Xor( ) );
    }
 }
-#endif
+
 
 void TickbaseSystem::copy_command( CUserCmd* cmd, bool* v1 ) {
 	if ( !s_InMovePrediction )
@@ -664,4 +664,165 @@ bool TickbaseSystem::Building( ) const {
 
 bool TickbaseSystem::Using( ) const {
 	return !s_bBuilding && s_nExtraProcessingTicks;
+}
+#endif
+
+#include "displacement.hpp"
+#include "Exploits.hpp"
+#include "hooked.hpp"
+
+void* g_pLocal = nullptr;
+TickbaseSystem g_TickbaseController;
+
+#define OFFSET_LASTOUTGOING 0x4CAC
+#define OFFSET_CHOKED 0x4CB0
+#define OFFSET_TICKBASE 0x3404
+
+#define PI2			3.14159265358979323846
+#define DEG2RAD2(x) ((float)(x) * (float)((float)(PI2) / 180.0f))
+#define RAD2DEG2(x) ((float)(x) * (float)(180.0f / (float)(PI2)))
+
+
+void WriteUsercmdD( void* buf, CUserCmd* incmd, CUserCmd* outcmd ) {
+	__asm
+	{
+		mov     ecx, buf
+		mov     edx, incmd
+		push    outcmd
+		call    Engine::Displacement.Function.m_WriteUsercmd
+		add     esp, 4
+	}
+}
+
+bool __fastcall Hooked::WriteUsercmdDeltaToBuffer( void* ECX, void* EDX, int nSlot, void* buffer, int o_from, int o_to, bool isnewcommand ) {
+	if ( Source::m_pEngine->IsInGame( ) && Source::m_pEngine->IsConnected( ) ) {
+		auto local = C_CSPlayer::GetLocalPlayer( );
+		if ( local && !local->IsDead( ) ) {
+			if ( g_TickbaseController.m_tick_to_shift_alternate > 0 ) {
+				if ( o_from != -1 )
+					return true;
+
+				// clmove
+				uintptr_t stackbase;
+				__asm mov stackbase, ebp;
+				CCLCMsg_Move_t* msg = reinterpret_cast< CCLCMsg_Move_t* >( stackbase + 0xFCC );
+
+				// tickbase
+				int m_nTickbase = g_TickbaseController.m_tick_to_shift;
+
+				int32_t new_commands = msg->m_nNewCommands;
+				int Next_Command = Source::m_pClientState->m_nLastOutgoingCommand( ) + Source::m_pClientState->m_nChokedCommands( ) + 1;
+				int CommandsToAdd = std::min( new_commands + abs( m_nTickbase ), 16 );
+
+				g_TickbaseController.m_tick_to_shift_alternate = 0;
+				msg->m_nNewCommands = CommandsToAdd;
+				msg->m_nBackupCommands = 0;
+
+				o_from = -1;
+
+				for ( o_to = Next_Command - new_commands + 1; o_to <= Next_Command; o_to++ ) {
+					if ( !Hooked::oWriteUsercmdDeltaToBuffer( ECX, nSlot, buffer, o_from, o_to, isnewcommand ) )
+						return false;
+
+					o_from = o_to;
+				}
+
+				CUserCmd* last_command = Source::m_pInput->GetUserCmdMasin( nSlot, o_from );
+				CUserCmd nullcmd;
+				CUserCmd ShiftCommand;
+
+				if ( last_command )
+					nullcmd = *last_command;
+
+				ShiftCommand = nullcmd;
+				ShiftCommand.command_number++;
+				ShiftCommand.tick_count += 100;
+
+				for ( int i = new_commands; i <= CommandsToAdd; i++ ) {
+					WriteUsercmdD( buffer, &ShiftCommand, &nullcmd );
+
+					// // // // // // // // // // // //
+					nullcmd = ShiftCommand;
+					ShiftCommand.command_number++;
+					ShiftCommand.tick_count++;
+				}
+			}
+		}
+	}
+	return Hooked::oWriteUsercmdDeltaToBuffer( ECX, nSlot, buffer, o_from, o_to, isnewcommand );
+}
+
+// im not sure if that necrypted is going to work as i plan
+void TickbaseSystem::tickbase_manipulation( Encrypted_t<CUserCmd> cmd, bool* sendPacket ) {
+	C_CSPlayer* local = C_CSPlayer::GetLocalPlayer( );
+	if ( !local || local->IsDead( ) )
+		return;
+
+	auto m_double_tap = g_Vars.rage.double_tap_bind.enabled;
+	this->p_doubletap = m_double_tap;
+
+	if ( !m_double_tap && m_charged ) {
+		m_charge_timer = 0;
+		m_tick_to_shift = 14;
+	}
+	if ( !m_double_tap ) return;
+	if ( !m_charged ) {
+		if ( m_charge_timer > TIME_TO_TICKS( .5 ) ) { // .5 seconds after shifting, lets recharge
+			m_tick_to_recharge = 14;
+
+			// ILoggerEvent::Get( )->PushEvent( "ticks charged", FloatColor( 158, 158, 158 ), XorStr( "[ tickbase ] " ) );
+			printf( "[dt] charged" );
+		} else {
+			m_charge_timer++;
+			if ( cmd->buttons & IN_ATTACK  /*g_cl.m_weapon_fire*/ ) {
+				m_charge_timer = 0;
+
+				printf( "reseted" );
+			}
+		}
+	}
+
+	if ( cmd->buttons & IN_ATTACK && m_charged ) {
+		m_charge_timer = 0;
+		m_tick_to_shift = 14;
+		m_shift_cmd = cmd->command_number;
+		m_shift_tickbase = local->m_nTickBase( );
+
+		*sendPacket = false;
+	}
+	if ( !m_charged ) {
+		m_charged_ticks = 0;
+	}
+}
+
+void CL_Move( float accumulated_extra_samples, bool bFinalTick ) {
+	if ( g_TickbaseController.m_tick_to_recharge > 0 ) {
+		g_TickbaseController.m_tick_to_recharge--;
+		g_TickbaseController.m_charged_ticks++;
+		if ( g_TickbaseController.m_tick_to_recharge == 0 ) {
+			g_TickbaseController.m_charged = true;
+		}
+		return; // increment ticksforprocessing by not creating any usercmd's
+	}
+
+	o_CLMove( accumulated_extra_samples, bFinalTick );
+	g_TickbaseController.m_shifted = false;
+	if ( g_TickbaseController.m_tick_to_shift > 0 ) {
+		g_TickbaseController.m_shifting = true;
+		for ( ; g_TickbaseController.m_tick_to_shift > 0; g_TickbaseController.m_tick_to_shift-- ) {
+			o_CLMove( accumulated_extra_samples, bFinalTick );
+			g_TickbaseController.m_charged_ticks--;
+		}
+		g_TickbaseController.m_charged = false; // were just going to assume. not correct.
+		g_TickbaseController.m_shifting = false;
+		g_TickbaseController.m_shifted = true;
+	}
+}
+
+bool TickbaseSystem::Building( ) const {
+	return this->m_shifting;
+}
+
+bool TickbaseSystem::Using( ) const {
+	return this->p_doubletap;
 }

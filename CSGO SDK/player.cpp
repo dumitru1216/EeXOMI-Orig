@@ -345,8 +345,8 @@ bool C_CSPlayer::CanShoot( int tickbase_shift, bool skip_revolver ) {
 
    auto tickbase = this->m_nTickBase( );
    if ( tickbase_shift == 0 ) {
-	  if ( g_TickbaseController.s_nExtraProcessingTicks > 0 ) /* should be cor */
-		 tickbase += -1 - g_TickbaseController.s_nExtraProcessingTicks;
+	  if ( g_TickbaseController.m_tick_to_shift > 0 ) /* should be cor */
+		 tickbase += -1 - g_TickbaseController.m_tick_to_shift;
    } else {
 	  tickbase -= tickbase_shift;
    }

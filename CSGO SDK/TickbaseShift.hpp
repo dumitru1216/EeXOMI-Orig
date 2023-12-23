@@ -33,7 +33,6 @@ struct C_TickbaseShift {
 };
 
 extern C_TickbaseShift TickbaseShiftCtx;
-#endif 
 
 struct TickbaseShift_t {
 	TickbaseShift_t( ) = delete;
@@ -99,6 +98,45 @@ public:
 	void copy_command( CUserCmd* pCmd, bool* v1 );
 	bool Building( ) const;
 	bool Using( ) const;
+};
+
+extern TickbaseSystem g_TickbaseController;
+#endif 
+
+typedef void( *CLMove_t )( float accumulated_extra_samples, bool bFinalTick );
+inline CLMove_t o_CLMove;
+void CL_Move( float accumulated_extra_samples, bool bFinalTick );
+
+class TickbaseSystem {
+public:
+
+	void tickbase_manipulation( Encrypted_t<CUserCmd> pCmd, bool* sendPacket );
+	bool Building( ) const;
+	bool Using( ) const;
+
+	bool p_doubletap;
+	bool p_shifting;
+	bool p_charged_dt;
+	int p_shift_commands;
+	int p_shift_tickbase;
+	int p_charged_ticks;
+	int p_charge_timer;
+	int p_ticks_to_shift;
+	int p_alternate_ticks;
+	int recharge_to_ticks;
+	bool p_shifted;
+
+	//bool m_double_tap;
+	bool m_shifting;
+	bool m_charged;
+	int m_shift_cmd;
+	int m_shift_tickbase;
+	int m_charged_ticks;
+	int m_charge_timer;
+	int m_tick_to_shift;
+	int m_tick_to_shift_alternate;
+	int m_tick_to_recharge;
+	bool m_shifted;
 };
 
 extern TickbaseSystem g_TickbaseController;

@@ -21,7 +21,7 @@
 #include "hooker.hpp"
 
 #include "CChams.hpp"
-
+#include "TickbaseShift.hpp"
 #include "Prediction.hpp"
 
 #include <fstream>
@@ -805,6 +805,7 @@ namespace Source
 
 	  MH_Initialize( );
 
+#if 0
 	  RunSimulationDetor.m_nAddress = Engine::Displacement.Function.m_RunSimulation;
 	  if ( RunSimulationDetor.m_nAddress ) {
 		  if ( !RunSimulationDetor.Hook( ) ) {
@@ -818,6 +819,7 @@ namespace Source
 			  return false;
 		  }
 	  }
+#endif
 
 	  oGetScreenAspectRatio = Hooked::HooksManager.HookVirtual<decltype( oGetScreenAspectRatio )>( m_pEngine.Xor( ), &Hooked::hkGetScreenAspectRatio, Index::EngineClient::GetScreenAspectRatio );
 	  oFireEvents = Hooked::HooksManager.HookVirtual<decltype( oFireEvents )>( m_pEngine.Xor( ), &hkFireEvents, 59 );
@@ -877,7 +879,9 @@ namespace Source
 	  // oOnSoundStarted = Hooked::HooksManager.HookVirtual<decltype( oOnSoundStarted )>( soundservice, &Hooked::OnSoundStarted, 27 );
 
 	  oProcessInterpolatedList = Hooked::HooksManager.CreateHook<decltype( oProcessInterpolatedList ) >( &hkProcessInterpolatedList, ( void* )process_interpolated_list );
-	  oCL_Move = Hooked::HooksManager.CreateHook<decltype( oCL_Move ) >( &CL_Move, ( void* )cl_move );
+	  o_CLMove = Hooked::HooksManager.CreateHook<decltype( o_CLMove ) >( &CL_Move, ( void* )cl_move );
+	  oWriteUsercmdDeltaToBuffer = Hooked::HooksManager.HookVirtual<decltype( oWriteUsercmdDeltaToBuffer )>( m_pClient.Xor( ), &Hooked::WriteUsercmdDeltaToBuffer, 23 );
+
 
 	 //auto modify_eye_pos = Memory::Scan( XorStr( "client.dll" ), XorStr( "E8 ? ? ? ? 8B 06 8B CE FF 90 ? ? ? ? 85 C0 74 4E" ) );//Engine::Displacement.Data.m_ModifyEyePos;
 	 //oModifyEyePoisition = Hooked::HooksManager.CreateHook<decltype( oModifyEyePoisition ) >( &hkModifyEyePosition, ( void* )modify_eye_pos );

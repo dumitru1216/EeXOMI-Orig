@@ -113,10 +113,10 @@ bool __stdcall TickbaseManipulation( CCLCMsg_Move_t* msg, int tickbase_shift, vo
    return true;
 }
 #endif
+#if 0
 
 bool __fastcall Hooked::WriteUsercmdDeltaToBuffer( void* ECX, void* EDX, int nSlot, void* buffer, int o_from, int o_to, bool isnewcommand ) {
    g_Vars.globals.szLastHookCalled = XorStr( "37" );
-#if 0
    static auto ret = Source::m_pClientSwap->VCall<WriteUsercmdDeltaToBufferFn>( 24 );
 
    uintptr_t framePtr;
@@ -169,6 +169,7 @@ bool __fastcall Hooked::WriteUsercmdDeltaToBuffer( void* ECX, void* EDX, int nSl
 		 goto LABEL_12;
 	  }
    }
-#endif
+
    return 0;
 }
+#endif

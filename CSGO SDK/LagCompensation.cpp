@@ -128,7 +128,7 @@ namespace Engine
 		 return true;
 
 	  // temprorary override
-	  tickbase_shift = g_TickbaseController.s_nExtraProcessingTicks; // shiuld be corr
+	  tickbase_shift = 0; // shiuld be corr
 
 	  float outgoing = netchannel->GetLatency( FLOW_OUTGOING );
 

@@ -88,7 +88,6 @@ namespace Source
 	 if ( g_Vars.rage.exploit && g_Vars.rage.double_tap_bind.enabled || !( *bSendPacket ) ) //  we use dt
 		 return;
 
-
 	  if ( !g_Vars.fakelag.enabled || HideRealAfterShot )
 		 return;
 

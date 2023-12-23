@@ -401,7 +401,7 @@ void C_GameEvent::FireGameEvent( IGameEvent* pEvent ) {
 		 if ( !g_Vars.esp.event_misc )
 			return;
 
-		 g_TickbaseController.m_bSupressRecharge = false;
+		/// g_TickbaseController.m_bSupressRecharge = false;
 
 		 std::stringstream msg;
 		 msg << XorStr( "new round ! " );

@@ -71,10 +71,11 @@ namespace Hooked
 		 return;
 	  }
 
-	  if ( g_TickbaseController.IsTickcountValid( ucmd->tick_count ) ) {
-		 ucmd->hasbeenpredicted = true;
-		 return;
+	  if ( ucmd->tick_count >= ( Source::m_pGlobalVars->tickcount + int( 1 / Source::m_pGlobalVars->interval_per_tick ) + 8 ) ) {
+		  ucmd->hasbeenpredicted = true;
+		  return;
 	  }
+
 
 	  auto weapon = ( C_WeaponCSBaseGun* ) local->m_hActiveWeapon( ).Get( );
 

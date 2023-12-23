@@ -536,13 +536,11 @@ namespace Source
 	  // Source::FakeLag::Get( )->Main( movementData->m_pSendPacket, movementData->m_pCmd );
 
 
-	  if ( g_TickbaseController.Using( ) ) {
-		  bool bShouldLag = g_TickbaseController.s_nExtraProcessingTicks > 1;
-		  *movementData->m_pSendPacket = !bShouldLag;
-	  } else if ( !g_TickbaseController.Building( ) && g_Vars.fakelag.enabled ) {
-		  Source::FakeLag::Get( )->Main( movementData->m_pSendPacket, movementData->m_pCmd );
-	  }
+	  Source::FakeLag::Get( )->Main( movementData->m_pSendPacket, movementData->m_pCmd );
 
+	  if ( Source::m_pClientState->m_nChokedCommands( ) >= 14 ) {
+		  *movementData->m_pSendPacket = true;
+	  }
 
 	 // if ( Source::m_pClientState->m_nChokedCommands( ) >= TickbaseShiftCtx.lag_limit ) {
 	//	 *movementData->m_pSendPacket = true;

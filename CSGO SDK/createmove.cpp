@@ -198,12 +198,12 @@ namespace Hooked {
 			//else
 #endif
 
-  //if ( Source::m_pClientState->m_nChokedCommands( ) >= TickbaseShiftCtx.lag_limit ) {
-  //	*bSendPacket = true;
-  //}
+			if ( Source::m_pClientState->m_nChokedCommands( ) >= 14 ) {
+				*bSendPacket = true;
+			}
 
 			movement->PostPrediction( );
-			g_TickbaseController.copy_command( cmd.Xor( ), bSendPacket );
+			// g_TickbaseController.copy_command( cmd.Xor( ), bSendPacket );
 
 			if ( cmd->buttons & IN_ATTACK
 				 && weapon->m_iItemDefinitionIndex( ) != WEAPON_C4
@@ -246,6 +246,10 @@ namespace Hooked {
 			Engine::C_Resolver::Get( )->CorrectSnapshots( *bSendPacket );
 		}
 		prediction.End( );
+
+		if ( !g_TickbaseController.m_shifting ) {
+			g_TickbaseController.tickbase_manipulation( cmd.Xor( ), bSendPacket );
+		}
 
 		if ( g_Vars.antiaim.enabled && g_Vars.antiaim.manual && g_Vars.antiaim.mouse_override.enabled ) {
 			pLocal->pl( ).v_angle = globals->PreviousViewangles;
@@ -325,10 +329,10 @@ namespace Hooked {
 
 		Engine::Prediction::Instance( )->KeepCommunication( bSendPacket );
 
-		if ( g_TickbaseController.Using( ) ) {
-			*bSendPacket = g_TickbaseController.s_nExtraProcessingTicks == 1; // Only send on the last shifted tick
-			_cmd->buttons &= ~( IN_ATTACK | IN_ATTACK2 );
-		}
+		//if ( g_TickbaseController.Using( ) ) {
+		//	*bSendPacket = g_TickbaseController.m_tick_to_shift == 1; // Only send on the last shifted tick
+		//	_cmd->buttons &= ~( IN_ATTACK | IN_ATTACK2 );
+		//}
 
 		auto pLocal = C_CSPlayer::GetLocalPlayer( );
 		if ( !g_Vars.globals.HackIsReady || !pLocal || !Source::m_pEngine->IsInGame( ) ) {
@@ -339,6 +343,7 @@ namespace Hooked {
 		return result;
 	}
 
+#if 0
 	void __vectorcall CL_Move( float accumulated_extra_samples, bool bFinalTick ) {
 		g_TickbaseController.OnCLMove( bFinalTick, accumulated_extra_samples );
 	}
@@ -351,7 +356,6 @@ namespace Hooked {
 		g_TickbaseController.OnPredictionUpdate( prediction, nullptr, startframe, validframe, incoming_acknowledged, outgoing_command );
 	}
 
-#if 0
 	void __vectorcall CL_Move( float accumulated_extra_samples, bool bFinalTick ) {
 		g_Vars.globals.szLastHookCalled = XorStr( "3" );
 		auto local = C_CSPlayer::GetLocalPlayer( );

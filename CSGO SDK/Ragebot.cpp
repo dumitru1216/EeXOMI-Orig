@@ -1525,7 +1525,7 @@ namespace Source {
 		rageData->m_bFailedHitchance = false;
 		rageData->m_bPrepareAim = false;
 
-		g_TickbaseController.m_bSupressRecharge = false; // suppress recharge
+		//g_TickbaseController.m_bSupressRecharge = false; // suppress recharge
 
 		// IProfiler::ProfileData_t ProfileData = IProfiler::Get( )->GetData( 0 ); 
 		std::vector<C_AimPoint> aim_points;
@@ -1875,7 +1875,7 @@ namespace Source {
 					/* if ( TIME_TO_TICKS( lagData->m_History.front( ).m_flSimulationTime - best_point->target->record->m_flSimulationTime ) > 0 )
 						TickbaseShiftCtx.AdjustPlayerTimeBaseFix( Source::m_pClientState->m_nChokedCommands( ) + TickbaseShiftCtx.will_shift_tickbase + 1 );*/
 
-					g_TickbaseController.m_bSupressRecharge = false; // suppress recharge
+					//g_TickbaseController.m_bSupressRecharge = false; // suppress recharge
 
 
 					rageData->m_pCmd->tick_count = TIME_TO_TICKS( best_point->target->record->m_flSimulationTime + Engine::LagCompensation::Get( )->GetLerp( ) );
@@ -2014,13 +2014,13 @@ namespace Source {
 					}
 
 					result = true;
-				} else {
-					g_TickbaseController.m_bSupressRecharge = false;
-				}
+				} //else {
+					//g_TickbaseController.m_bSupressRecharge = false;
+				//}
 			} else {
 				this->rageData->m_bFailedHitchance = true;
 				this->rageData->m_bPrepareAim = false;
-				g_TickbaseController.m_bSupressRecharge = false;
+				//g_TickbaseController.m_bSupressRecharge = false;
 			}
 		}
 
@@ -2465,6 +2465,11 @@ namespace Source {
 		int recordsCount = 0;
 		Engine::C_LagRecord* arrRecords[ 64 ] = { nullptr };
 		for ( auto it = lagData->m_History.begin( ); it != lagData->m_History.end( ); ++it ) {
+
+			//if ( doubleTapEnabled ) {
+			//	return &record;
+			//}
+
 			// breaking teleport distance
 			if ( it->m_bSkipDueToResolver ) {
 				continue;
@@ -2833,9 +2838,9 @@ sup:
 
 
 		if ( result ) {
-			if ( g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit ) {
-				g_TickbaseController.m_bSupressRecharge = true;
-			}
+			//if ( g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit ) {
+				//g_TickbaseController.m_bSupressRecharge = true;
+			//}
 
 			rageData->m_pCmd->buttons |= IN_ATTACK;
 		}

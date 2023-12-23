@@ -106,6 +106,8 @@ namespace Hooked
    inline DrawModelExecuteFn oDrawModelExecute;
    void __fastcall DrawModelExecute( void* ECX, void* EDX, IMatRenderContext* MatRenderContext, DrawModelState_t& DrawModelState, ModelRenderInfo_t& RenderInfo, matrix3x4_t* pCustomBoneToWorld );
 
+   using WriteUsercmdDeltaToBufferFn = bool( __thiscall* )( void*, int, void*, int, int, bool );
+   inline WriteUsercmdDeltaToBufferFn oWriteUsercmdDeltaToBuffer;
    bool __fastcall WriteUsercmdDeltaToBuffer( void* ECX, void* EDX, int nSlot, void* buf, int from, int to, bool isnewcommand );
 
    IClientNetworkable* hkCreateCCSPlayer( int entnum, int serialNum );
@@ -151,15 +153,15 @@ namespace Hooked
    inline FnIsPlayingDemo oIsPlayingDemo;
    bool __fastcall hkIsPlayingDemo( void* ECX, void* EDX );
 
-   using FnCL_Move = void( __vectorcall* )( float accumulated_extra_samples, bool bFinalTick );
-   inline FnCL_Move oCL_Move;
-   void __vectorcall CL_Move( float accumulated_extra_samples, bool bFinalTick );
-
-   void __fastcall RunSimulation( void* this_, void*, int iCommandNumber, CUserCmd* pCmd, size_t local );
-   inline Memory::DetourHook_t RunSimulationDetor( RunSimulation );
-
-   void __fastcall PredictionUpdate( void* prediction, void*, int startframe, bool validframe, int incoming_acknowledged, int outgoing_command );
-   inline Memory::DetourHook_t PredictionUpdateDetor( PredictionUpdate );
+  //using FnCL_Move = void( __vectorcall* )( float accumulated_extra_samples, bool bFinalTick );
+  //inline FnCL_Move oCL_Move;
+  //void __vectorcall CL_Move( float accumulated_extra_samples, bool bFinalTick );
+  //
+   //void __fastcall RunSimulation( void* this_, void*, int iCommandNumber, CUserCmd* pCmd, size_t local );
+   //inline Memory::DetourHook_t RunSimulationDetor( RunSimulation );
+   //
+   //void __fastcall PredictionUpdate( void* prediction, void*, int startframe, bool validframe, int incoming_acknowledged, int outgoing_command );
+   //inline Memory::DetourHook_t PredictionUpdateDetor( PredictionUpdate );
 
    using FnIsConnected = bool( __thiscall* ) ( void );
    inline FnIsConnected oIsConnected;
