@@ -1508,6 +1508,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 					 &g_Vars.antiaim.on_grenade 	,
 					 &g_Vars.antiaim.on_ladder 	,
 					 &g_Vars.antiaim.on_dormant 	,
+					 &g_Vars.antiaim.on_manual_shot 	,
 				  };
 
 				  const char* disable_conditions_str[] = {
@@ -1516,10 +1517,11 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 					 XorStr( "On grenade" ),
 					 XorStr( "On ladder" ),
 					 XorStr( "On dormant" ),
+					 XorStr( "On manual shot" ),
 				  };
 
 				  ImGui::MultiCombo( XorStr( "Disable condition" ),
-									 disable_conditions, disable_conditions_str, 5 );
+									 disable_conditions, disable_conditions_str, 6 );
 
 				  const char* antiaim_type_str[] = { XorStr( "Stand" ), XorStr( "Move" ), XorStr( "Air" ) };
 

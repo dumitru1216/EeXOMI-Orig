@@ -253,6 +253,7 @@ namespace ImGui
    IMGUI_API bool          Begin( const char* name, bool* p_open = NULL, ImGuiWindowFlags flags = 0 );
    IMGUI_API void          End( );
 
+
    // Child Windows
    // - Use child windows to begin into a self-contained independent scrolling/clipping regions within a host window. Child windows can embed their own child.
    // - For each independent axis of 'size': ==0.0f: use remaining host window size / >0.0f: fixed size / <0.0f: use remaining window size minus abs(size) / Each axis can use a different mode, e.g. ImVec2(0,400).

@@ -780,6 +780,7 @@ public:
    config_option( bool, on_ladder, false );
    config_option( bool, on_grenade, false );
    config_option( bool, on_dormant, false );
+   config_option( bool, on_manual_shot, false );
 
    config_option( int, break_lby, 0 );
    config_option( int, mirco_move_type, 0 );

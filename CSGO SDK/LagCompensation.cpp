@@ -99,7 +99,7 @@ namespace Engine
 
 	  for ( int i = 1; i <= Source::m_pGlobalVars->maxClients; ++i ) {
 		 auto player = C_CSPlayer::GetPlayerByIndex( i );
-		 if ( !player || player == local || !player->IsPlayer( ) || player->IsTeammate( local ) )
+		 if ( !player || player == local || !player->IsPlayer( ) )
 			continue;
 
 		 player_info_t player_info;
@@ -279,7 +279,6 @@ namespace Engine
 	  record->m_flEyePitch = anim_record->m_angEyeAngles.pitch;
 	  record->m_bIsShoting = anim_record->m_bIsShoting;
 	  record->m_bIsValid = !anim_record->m_bIsInvalid;
-	//  record->m_bBonesCalculated = anim_data->m_bBonesCalculated;
 	  record->m_flAnimationVelocity = player->m_PlayerAnimState( )->m_velocity;
 	  record->m_bTeleportDistance = anim_record->m_bTeleportDistance;
 	  record->m_flAbsRotationLeft = anim_record->m_flAbsRotationLeft;

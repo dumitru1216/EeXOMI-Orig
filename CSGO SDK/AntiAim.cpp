@@ -324,6 +324,12 @@ namespace Source {
 				return false;
 		}
 
+		if ( g_Vars.antiaim.on_manual_shot ) {
+			if ( ( cmd->buttons & IN_ATTACK ) ) {
+				return false;
+			}
+		}
+
 		if ( LocalPlayer->m_MoveType( ) == MOVETYPE_LADDER )
 			if ( g_Vars.antiaim.on_ladder )
 				return false;
@@ -481,28 +487,20 @@ namespace Source {
 
 		//cmd->viewangles.Normalize( );
 
-		// bFinalPacket not rlly needed
-		//if ( !*bSendPacket /* || !*bFinalPacket */ ) {
-			/* this should be ran here */
-			float yaw_backup = cmd->viewangles.yaw;
-			if ( g_Vars.antiaim.manual && g_Vars.globals.MouseOverrideEnabled ) {
-				RunAutoDirection( cmd, settings, true );
-				cmd->viewangles.yaw = std::remainderf( g_Vars.globals.MouseOverrideYaw + 180.0f, 360.0f );
-			} else {
-				if ( yaw != FLT_MAX ) {
-					cmd->viewangles.y += yaw;
-				}
-
-				RunAutoDirection( cmd, settings, false );
+		float yaw_backup = cmd->viewangles.yaw;
+		if ( g_Vars.antiaim.manual && g_Vars.globals.MouseOverrideEnabled ) {
+			RunAutoDirection( cmd, settings, true );
+			cmd->viewangles.yaw = std::remainderf( g_Vars.globals.MouseOverrideYaw + 180.0f, 360.0f );
+		} else {
+			if ( yaw != FLT_MAX ) {
+				cmd->viewangles.y += yaw;
 			}
 
-			/* run this shit */
-			Distort( cmd );
-		//} else {
-			/* run fake yaw */
+			RunAutoDirection( cmd, settings, false );
+		}
 
-			// local view
-		//}
+		/* run this shit */
+		Distort( cmd );
 
 		// gheto
 		const float CSGO_ANIM_LOWER_REALIGN_DELAY = 1.1f;
@@ -510,15 +508,17 @@ namespace Source {
 		// bodypred: g_Vars.globals.m_flAnimTime + ( CSGO_ANIM_LOWER_REALIGN_DELAY * 0.2f );
 		float m_flBodyPred = LocalPlayer->m_flAnimationTime( ) + ( CSGO_ANIM_LOWER_REALIGN_DELAY * 0.2f );
 
+		float lbyUpdate = Source::Movement::Get( )->GetLBYUpdateTime( );
+
 		// lby upd
 		if ( g_Vars.antiaim.lbypred ) {
 			if ( !Source::m_pClientState->m_nChokedCommands( ) &&
-				 TICKS_TO_TIME( LocalPlayer->m_nTickBase( ) ) >= m_flBodyPred && ( LocalPlayer->m_fFlags( ) & FL_ONGROUND ) ) {
-				cmd->viewangles.y = yaw + -119.f;
+				 TICKS_TO_TIME( LocalPlayer->m_nTickBase( ) ) >= lbyUpdate && ( LocalPlayer->m_fFlags( ) & FL_ONGROUND ) ) {
+				cmd->viewangles.y = yaw + 119.f;
 
 				m_flLowerBodyUpdateYaw = LocalPlayer->m_flLowerBodyYawTarget( );
 			}
-		}	
+		}
 #if 0
 		if ( g_Vars.globals.TickbaseShift > 0 || ( *bSendPacket && g_Vars.antiaim.shift && ( settings->shift_pitch || settings->shift_yaw ) ) ) {
 			Shift( cmd, settings );
@@ -553,16 +553,6 @@ namespace Source {
 
 		if ( !IsEnabled( cmd ) )
 			return;
-
-		float lbyUpdate = Source::Movement::Get( )->GetLBYUpdateTime( );
-
-
-
-		if ( cmd->forwardmove != 0.0f ) {
-			if ( !prev_state )
-				JitterOrigin = local->m_vecOrigin( );
-			MoveJitter = true;
-		}
 	}
 
 	float C_AntiAimbot::GetAntiAimX( Encrypted_t<CVariables::ANTIAIM_STATE> settings ) {
@@ -609,219 +599,6 @@ namespace Source {
 
 		return 180.0f;
 	}
-
-#if 0
-	void C_AntiAimbot::Shift( Encrypted_t<CUserCmd> cmd, Encrypted_t<CVariables::ANTIAIM_STATE> settings ) {
-		if ( g_Vars.globals.TickbaseShift == 0 ) {
-			if ( m_bDoShift && cmd->command_number % 10 < 5 ) {
-				return;
-			} else if ( !m_bDoShift ) {
-				return;
-			}
-
-			g_Vars.globals.TickbaseShift = std::max( 6, Source::m_pClientState->m_nChokedCommands( ) + 4 );
-		}
-
-		g_Vars.globals.DoTickbaseShift = true;
-
-		switch ( settings->shift_pitch ) {
-			case 1: // inverse
-				cmd->viewangles.pitch -= 180.0f;
-				cmd->viewangles.pitch = std::remainderf( cmd->viewangles.pitch, 360.0f );
-				break;
-			case 2: // forward
-				cmd->viewangles.pitch = 0.0f;
-				break;
-		}
-
-		static float spin = 0.0f;
-
-		switch ( settings->shift_yaw ) {
-			case 1: // inverse
-				cmd->viewangles.yaw -= 180.0f;
-				cmd->viewangles.yaw = std::remainderf( cmd->viewangles.yaw, 360.0f );
-				break;
-			case 2: // static
-				break;
-			case 3: // spin
-				spin = std::remainderf( spin + settings->spin_speed, 360.0f );
-				cmd->viewangles.yaw = spin;
-				break;
-		}
-	}
-#endif
-#if 0
-	void C_AntiAimbot::DesyncAnimation( Encrypted_t<CUserCmd> cmd, bool* bSendPacket, Encrypted_t<CVariables::ANTIAIM_STATE> settings ) {
-		enum DesyncAA {
-			Static = 1,
-			Jitter,
-		};
-
-		static bool force_choke = false;
-		float lbyUpdate = Source::Movement::Get( )->GetLBYUpdateTime( );
-
-		auto local = C_CSPlayer::GetLocalPlayer( );
-		if ( !local )
-			return;
-
-		auto animState = local->m_PlayerAnimState( );
-		if ( !animState )
-			return;
-
-		if ( !m_bAutomaticDir ) {
-			if ( g_Vars.antiaim.move_sync && local->m_vecVelocity( ).Length2DSquared( ) > 135.f ) {
-				float time = Source::m_pGlobalVars->curtime;
-				static float last_switch_time = 0.f;
-
-				if ( time > last_switch_time + 0.2f ) {
-					last_switch_time = time;
-					m_bInverted = !m_bInverted;
-				}
-			} else
-				m_bInverted = g_Vars.antiaim.desync_flip_bind.enabled;
-
-			if ( g_Vars.antiaim.hide_real_on_shot ) {
-				if ( HideRealAfterShot ) {
-					m_bInverted = !m_bInverted;
-				}
-			}
-		}
-
-		float m_flDesyncSide = -1.0f;
-		if ( m_bInverted )
-			m_flDesyncSide = 1.0f;
-
-		auto desync = animState->GetDesyncDelta( );
-		auto half_desync = desync * 0.5f;
-
-		if ( settings->desync == Jitter ) {
-			if ( m_bInvertJitter )
-				cmd->viewangles.yaw = std::remainderf( cmd->viewangles.y - 180.0f, 360.0f );
-		} else {
-			float desync_amount = desync * ( m_bInverted ? settings->desync_amount_flipped * 0.01f : settings->desync_amount * 0.01f );
-			cmd->viewangles.y = m_bInverted ? std::remainderf( cmd->viewangles.y - desync_amount, 360.0f )
-				: std::remainderf( cmd->viewangles.y + desync_amount, 360.0f );
-		}
-
-		if ( g_Vars.antiaim.mirco_move_type == 1 && Source::m_pClientState->m_nChokedCommands( ) == 0 && animState->m_velocity < 7.f &&
-			 !TickbaseShiftCtx.ExploitsEnabled( ) ) {
-			cmd->viewangles.y = Math::AngleNormalize( local->m_angEyeAngles( ).yaw - 180.f );
-			bSendPacket = false;
-
-			float move = ( local->m_vecViewOffset( ).z <= 63.0f ) ? 4.941177f : 1.01f;
-			if ( !( cmd->command_number & 1 ) )
-				move = move * -1.f;
-			cmd->forwardmove = move;
-
-			force_choke = true;
-		} else {
-			if ( HideRealAfterShot ) {
-				if ( settings->desync == Jitter ) {
-					if ( !m_bInvertJitter )
-						cmd->viewangles.yaw += half_desync * m_flDesyncSide;
-					else
-						cmd->viewangles.yaw -= half_desync * m_flDesyncSide;
-					cmd->viewangles.Normalize( );
-				}
-
-				return;
-			}
-
-#if 0
-			if ( settings->desync == RealAround ) {
-				if ( !m_bInverted )
-					cmd->viewangles.yaw -= desync * ( settings->desync_amount * 0.01f );
-				else
-					cmd->viewangles.yaw += desync * ( settings->desync_amount_flipped * 0.01f );
-			} else if ( settings->desync == FakeAround ) {
-				if ( !m_bInverted )
-					cmd->viewangles.yaw += desync * ( settings->desync_amount * 0.01f );
-				else
-					cmd->viewangles.yaw -= desync * ( settings->desync_amount_flipped * 0.01f );
-			}
-#endif
-
-			int break_lby_type = g_Vars.antiaim.break_lby;
-
-			if ( g_Vars.antiaim.mirco_move_type == 1 /*&& TickbaseShiftCtx.ExploitsEnabled( )*/ ) {
-				break_lby_type = 0;
-			}
-
-			if ( Source::m_pClientState->m_nChokedCommands( ) >= g_Vars.fakelag.lag_limit || !m_bForceBreakLBY ) {
-				if ( Source::m_pClientState->m_nChokedCommands( ) >= g_Vars.fakelag.lag_limit
-					 || ( !m_bBreakLBY && *bSendPacket && Source::m_pClientState->m_nChokedCommands( ) > 0 ) ) {
-					m_bInvertJitter = !m_bInvertJitter;
-					if ( settings->desync == Jitter ) {
-						if ( !m_bInvertJitter )
-							cmd->viewangles.yaw += half_desync * m_flDesyncSide;
-						else
-							cmd->viewangles.yaw -= half_desync * m_flDesyncSide;
-						cmd->viewangles.Normalize( );
-					}
-
-					return;
-				}
-
-				if ( settings->desync == Jitter ) {
-					RandomSeed( cmd->command_number );
-					if ( m_bInvertJitter ) {
-						cmd->viewangles.yaw -= ( desync + 3.0f ) * m_flDesyncSide;
-					} else {
-						cmd->viewangles.yaw += ( desync + 3.0f ) * m_flDesyncSide;
-					}
-				} else {
-					if ( break_lby_type == 3 && local->m_vecVelocity( ).Length2D( ) < 2.0f ) {
-						cmd->viewangles.yaw += ( desync + 3.0f ) * m_flDesyncSide;
-					} else {
-						float desync_offset = ( Source::m_pClientState->m_nChokedCommands( ) >= 1 && local->m_vecVelocity( ).Length2D( ) >= 2.0f ) ? desync : std::min( 178.0f - desync, desync * 2.0f );
-						cmd->viewangles.yaw += desync_offset * m_flDesyncSide;
-					}
-				}
-
-				m_bBreakLBY = false;
-				*bSendPacket = false;
-			} else {
-				// sway
-				auto dsc_side = m_flDesyncSide;
-				if ( break_lby_type == 2 ) {
-					static auto last_tick = 0;
-					static auto invert = false;
-					// 0.6 = 60 / (100 / 64) / 64
-					// auto approach_speed = Source::m_pGlobalVars->interval_per_tick * 100.0f;
-					// 60.0f / ( 100.0f / Source::m_pGlobalVars->interval_per_tick ) / ( 1.0f / Source::m_pGlobalVars->interval_per_tick )
-					if ( TICKS_TO_TIME( std::abs( Source::m_pGlobalVars->tickcount - last_tick ) ) >= ( desync + 10.0f ) * 0.01f ) {
-						last_tick = Source::m_pGlobalVars->tickcount;
-						invert = !invert;
-					}
-
-					if ( invert )
-						dsc_side = -m_flDesyncSide;
-				}
-
-				if ( settings->desync == Jitter ) {
-					if ( m_bInvertJitter ) {
-						cmd->viewangles.yaw += 90.0f * dsc_side;
-					} else {
-						cmd->viewangles.yaw -= 90.0f * dsc_side;
-					}
-				} else {
-					cmd->viewangles.yaw -= ( desync + 30.0f ) * dsc_side;
-				}
-
-				m_bBreakLBY = true; // break abs rotation again after breaking lby
-				m_bForceBreakLBY = false;
-				*bSendPacket = false;
-			}
-		}
-
-		if ( force_choke ) {
-			bSendPacket = false;
-			force_choke = false;
-		}
-
-		cmd->viewangles.Normalize( );
-	}
-#endif
 
 	bool C_AntiAimbot::AutoDirection( Encrypted_t<CUserCmd> cmd, Encrypted_t<CVariables::ANTIAIM_STATE> settings ) {
 		struct edgy_sort {
@@ -898,32 +675,10 @@ namespace Source {
 			return false;
 		}
 
-#if 0
-		C_SimulationData data;
-		data.m_bJumped = cmd->buttons & IN_JUMP;
-		data.m_iFlags = LocalPlayer->m_fFlags( );
-		data.m_player = LocalPlayer;
-		data.m_vecOrigin = LocalPlayer->m_vecOrigin( );
-		data.m_vecVeloctity = LocalPlayer->m_vecVelocity( );
-
-		if ( settings->extrapolation_ticks > 0 ) {
-			Vector wishvel;
-			Vector wishdir;
-			Vector right, up;
-			Vector forward = cmd->viewangles.ToVectors( &right, &up );
-
-			for ( int i = 0; i < 2; i++ )       // Determine x and y parts of velocity
-				wishvel[ i ] = forward[ i ] * cmd->forwardmove + right[ i ] * cmd->sidemove;
-
-			float wishspeed = wishvel.Normalize( );
-			ExtrapolatePlayer( data, settings->extrapolation_ticks, wishvel, wishspeed, maxSpeed );
-		}
-#else
 		SimulationContext data;
 		data.InitSimulationContext( LocalPlayer );
 		for ( int i = 0; i < settings->extrapolation_ticks; ++i )
 			data.RebuildGameMovement( cmd.Xor( ) );
-#endif
 
 		eyePos = ( settings->autodirection_ignore_duck ) ? data.m_vecOrigin + Vector( 0.0f, 0.0f, 58.0f ) : data.m_vecOrigin + viewHeight;
 		std::sort( players_sorted.begin( ), players_sorted.end( ), std::less< edgy_sort >( ) );
@@ -1025,18 +780,6 @@ namespace Source {
 							data.m_vecDirection.y = ( ( localOffset * -direction.x ) + eyePos.y ) - data.m_vecStart.y;
 							data.m_vecDirection.z = eyePos.z - sorted.eye.z;
 
-#if 0
-							if ( InputSys::Get( )->IsKeyDown( VirtualKeys::H ) ) {
-								Source::m_pDebugOverlay->AddBoxOverlay( data.m_vecStart,
-																		Vector( -2.0f, -2.0f, -2.0f ), Vector( 2.0f, 2.0f, 2.0f ), QAngle( 0.0f, 0.0f, 0.0f ), 255, 180, 0, 200, 2.0f );
-							}
-
-							if ( InputSys::Get( )->IsKeyDown( VirtualKeys::J ) ) {
-								Source::m_pDebugOverlay->AddBoxOverlay( data.m_vecDirection + data.m_vecStart,
-																		Vector( -2.0f, -2.0f, -2.0f ), Vector( 2.0f, 2.0f, 2.0f ), QAngle( 0.0f, 0.0f, 0.0f ), 0, 180, 255, 200, 2.0f );
-							}
-#endif
-
 							data.m_flPenetrationDistance = data.m_vecDirection.Normalize( );
 							auto damage = Autowall::FireBullets( &data );
 							if ( damage >= 1.0f ) {
@@ -1066,21 +809,7 @@ namespace Source {
 
 		float angle = RAD2DEG( atan2( direction.y, direction.x ) );
 
-#if 0
-		bool desync_enabled = settings->desync && settings->desync_autodir;
-#endif
-
 		m_flDirection = finalDistance;
-
-#if 0
-		if ( desync_enabled ) {
-			m_bAutomaticDir = true;
-
-			m_bInverted = finalDistance <= 0.0f;
-			if ( settings->desync_autodir == 2 )
-				m_bInverted = !m_bInverted;
-		}
-#endif
 
 		if ( settings->autodirection ) {
 			if ( finalDistance <= 0.0f )
@@ -1101,21 +830,6 @@ namespace Source {
 			AutoDirection( cmd, settings );
 		}
 
-
-#if 0
-		static bool autodir = false;
-
-		float yaw_backup = cmd->viewangles.yaw;
-		if ( ( !only_desync && settings->autodirection ) || settings->desync_autodir ) {
-			if ( AutoDirection( cmd, settings ) ) {
-				autodir = true;
-			} else {
-				autodir = false;
-			}
-		} else {
-			autodir = false;
-		}
-#endif
 		return false;
 	}
 
