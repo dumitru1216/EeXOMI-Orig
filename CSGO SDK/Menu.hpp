@@ -1,6 +1,12 @@
 #pragma once
-#if 0
+#if 1
 #include "sdk.hpp"
+
+extern ImFont* boldMenuFont;
+extern ImFont* menuFont;
+extern ImFont* controlFont;
+extern ImFont* tabFont;
+extern ImFont* keybindsFont;
 
 class IMenu : public NonCopyable {
 public:

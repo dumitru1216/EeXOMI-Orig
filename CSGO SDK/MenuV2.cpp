@@ -1,3 +1,5 @@
+#if 0
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "Render.hpp"
 #include "MenuV2.hpp"
@@ -3635,3 +3637,5 @@ void CMenuV2::Initialize( IDirect3DDevice9* pDevice ) {
    colors[ ImGuiCol_NavWindowingDimBg ] = ImVec4( 0.80f, 0.80f, 0.80f, 0.20f );
    colors[ ImGuiCol_ModalWindowDimBg ] = ImVec4( 0.10f, 0.10f, 0.10f, 0.35f );
 }
+
+#endif

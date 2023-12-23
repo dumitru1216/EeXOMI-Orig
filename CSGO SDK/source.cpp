@@ -16,7 +16,7 @@
 #include "KitParser.hpp"
 
 #include "EXGui/main/setup.hpp"
-#include "MenuV2.hpp"
+#include "Menu.hpp"
 
 #include "hooker.hpp"
 
@@ -709,7 +709,7 @@ namespace Source
 
 	  Render::Get( )->Initialize( D3DDevice9 );
 
-	  MenuV2::Get( )->Initialize( D3DDevice9 );
+	  IMenu::Get( )->Initialize( D3DDevice9 );
 
 	  GameEvent::Get( )->Register( );
 

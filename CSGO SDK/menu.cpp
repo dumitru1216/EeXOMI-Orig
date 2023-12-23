@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "Menu.hpp"
 #include "source.hpp"
@@ -27,10 +27,6 @@
 #include "EventLogger.hpp"
 #include "Render.hpp"
 
-extern ImFont* boldMenuFont;
-extern ImFont* menuFont;
-extern ImFont* controlFont;
-extern ImFont* tabFont;
 
 class CMenu : public IMenu {
 public:
@@ -1779,8 +1775,13 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 						   XorStr( "Unresolved" ),
 						};
 
-						InsertMultiCombo( XorStr( "Hitboxes" ),
-										  hitboxes_str, hitboxes, 8 );
+						/*
+						const char* label, bool* current_items[], const char* items[],
+					int items_count, int popup_max_height_in_items = -1, const char* default_preview = XorStr( "..." ) ) {
+						*/
+
+						ImGui::MultiCombo( XorStr( "Hitboxes" ),
+										   hitboxes, hitboxes_str, 8 );
 
 						InsertMultiCombo( XorStr( "Multipoint safety" ),
 										  hitboxes_str, mp_safety_hitboxes, 8 );
@@ -2057,8 +2058,8 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 
 						const char* mode[] = { XorStr( "Off" ), XorStr( "Passive" ), XorStr( "Adaptive" ), XorStr( "Step" ), XorStr( "Dynamic" ) };
 
-						if ( g_Vars.fakelag.mode > 4 )
-						   g_Vars.fakelag.mode = 4;
+						//if ( g_Vars.fakelag.mode > 4 )
+						//   g_Vars.fakelag.mode = 4;
 
 						//InsertCombo( XorStr( "Mode" ), g_Vars.fakelag.mode, mode );
 						InsertSliderInt( XorStr( "Limit" ), g_Vars.fakelag.choke, 1, g_Vars.fakelag.lag_limit, XorStr( "%d ticks" ) );
@@ -2621,19 +2622,19 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 						   InsertCombo( XorStr( "Enemy Material##enemy" ), g_Vars.esp.enemy_chams_mat, materials );
 						   InsertCombo( XorStr( "Team Material##team" ), g_Vars.esp.team_chams_mat, materials );
 
-						   InsertCheckbox( XorStr( "Hands" ), g_Vars.esp.hands_chams );
-						   if ( g_Vars.esp.hands_chams ) {
-							  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-							  ImGui::ColorEdit4( XorStr( "##Hands Color" ), g_Vars.esp.hands_chams_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
-							  InsertComboWithoutText( XorStr( "##Hands Material" ), g_Vars.esp.hands_chams_mat, no_dis_materials );
-						   }
-
-						   InsertCheckbox( XorStr( "Weapon" ), g_Vars.esp.weapon_chams );
-						   if ( g_Vars.esp.weapon_chams ) {
-							  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-							  ImGui::ColorEdit4( XorStr( "##Weapon Color" ), g_Vars.esp.weapon_chams_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
-							  InsertComboWithoutText( XorStr( "##Weapon Material" ), g_Vars.esp.weapon_chams_mat, no_dis_materials );
-						   }
+						  //InsertCheckbox( XorStr( "Hands" ), g_Vars.esp.hands_chams );
+						  //if ( g_Vars.esp.hands_chams ) {
+							//  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
+							//  ImGui::ColorEdit4( XorStr( "##Hands Color" ), g_Vars.esp.hands_chams_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
+							//  InsertComboWithoutText( XorStr( "##Hands Material" ), g_Vars.esp.hands_chams_mat, no_dis_materials );
+						  //}
+						  //
+						  //InsertCheckbox( XorStr( "Weapon" ), g_Vars.esp.weapon_chams );
+						  //if ( g_Vars.esp.weapon_chams ) {
+							//  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
+							//  ImGui::ColorEdit4( XorStr( "##Weapon Color" ), g_Vars.esp.weapon_chams_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
+							//  InsertComboWithoutText( XorStr( "##Weapon Material" ), g_Vars.esp.weapon_chams_mat, no_dis_materials );
+						  //}
 
 						   InsertCheckbox( XorStr( "Lag chams" ), g_Vars.esp.chams_lag );
 						   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
@@ -2646,12 +2647,12 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 							  InsertComboWithoutText( XorStr( "##Local material" ), g_Vars.esp.chams_local_mat, no_dis_materials );
 						   }
 
-						   InsertCheckbox( XorStr( "Desync chams" ), g_Vars.esp.chams_desync );
-						   if ( g_Vars.esp.chams_desync ) {
-							  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-							  ImGui::ColorEdit4( XorStr( "##Desync color" ), g_Vars.esp.chams_desync_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
-							  InsertComboWithoutText( XorStr( "##Desync material" ), g_Vars.esp.chams_desync_mat, no_dis_materials );
-						   }
+						  //InsertCheckbox( XorStr( "Desync chams" ), g_Vars.esp.chams_desync );
+						  //if ( g_Vars.esp.chams_desync ) {
+							//  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
+							//  ImGui::ColorEdit4( XorStr( "##Desync color" ), g_Vars.esp.chams_desync_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
+							//  InsertComboWithoutText( XorStr( "##Desync material" ), g_Vars.esp.chams_desync_mat, no_dis_materials );
+						  //}
 
 						   InsertCheckbox( XorStr( "Enemy Vis" ), g_Vars.esp.enemy_chams_vis );
 						   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
@@ -2673,22 +2674,22 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 						   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
 						   ImGui::ColorEdit4( XorStr( "##Chams History Color" ), g_Vars.esp.chams_history_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
 
-						   InsertCheckbox( XorStr( "Double Coloring" ), g_Vars.esp.second_color );
-						   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-						   ImGui::ColorEdit4( XorStr( "##Double Coloring Color" ), g_Vars.esp.second_chams_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
-
-						   InsertSlider( XorStr( "Reflectivity##chams" ), g_Vars.esp.chams_reflectivity, 0.f, 1.f, XorStr( "%0.2f" ) );
-						   //InsertSlider( XorStr( "Contrast##chams" ), g_Vars.esp.chams_contrast, 0.f, 50.f, XorStr( "%0.1f" ) );
-						   InsertSlider( XorStr( "Shine##chams" ), g_Vars.esp.chams_shine, 0.f, 20.f, XorStr( "%0.1f" ) );
-						   InsertSlider( XorStr( "Rim##chams" ), g_Vars.esp.chams_depth, 1.0f, 100.f, XorStr( "%0.0f" ) );
-						   InsertSlider( XorStr( "Brightness" ), g_Vars.esp.chams_brightness, 0.f, 5.0f, XorStr( "%.2f" ) );
-						   InsertSlider( XorStr( "Border" ), g_Vars.esp.chams_border, 0.f, 20.0f, XorStr( "%.1f" ) );
-						   InsertSlider( XorStr( "Outline" ), g_Vars.esp.chams_outline, 0.f, 20.0f, XorStr( "%.1f" ) );
-						   InsertSlider( XorStr( "Embossing" ), g_Vars.esp.chams_embossing, 0.f, 10.0f, XorStr( "%.1f" ) );
+						  //InsertCheckbox( XorStr( "Double Coloring" ), g_Vars.esp.second_color );
+						  //ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
+						  //ImGui::ColorEdit4( XorStr( "##Double Coloring Color" ), g_Vars.esp.second_chams_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
+						  //
+						  //InsertSlider( XorStr( "Reflectivity##chams" ), g_Vars.esp.chams_reflectivity, 0.f, 1.f, XorStr( "%0.2f" ) );
+						  ////InsertSlider( XorStr( "Contrast##chams" ), g_Vars.esp.chams_contrast, 0.f, 50.f, XorStr( "%0.1f" ) );
+						  //InsertSlider( XorStr( "Shine##chams" ), g_Vars.esp.chams_shine, 0.f, 20.f, XorStr( "%0.1f" ) );
+						  //InsertSlider( XorStr( "Rim##chams" ), g_Vars.esp.chams_depth, 1.0f, 100.f, XorStr( "%0.0f" ) );
+						  //InsertSlider( XorStr( "Brightness" ), g_Vars.esp.chams_brightness, 0.f, 5.0f, XorStr( "%.2f" ) );
+						  //InsertSlider( XorStr( "Border" ), g_Vars.esp.chams_border, 0.f, 20.0f, XorStr( "%.1f" ) );
+						  //InsertSlider( XorStr( "Outline" ), g_Vars.esp.chams_outline, 0.f, 20.0f, XorStr( "%.1f" ) );
+						  //InsertSlider( XorStr( "Embossing" ), g_Vars.esp.chams_embossing, 0.f, 10.0f, XorStr( "%.1f" ) );
 
 						   InsertCheckbox( XorStr( "Skip occlusion" ), g_Vars.esp.skip_occulusion );
 
-						   InsertSlider( XorStr( "Glow Modifier##glow chams" ), g_Vars.esp.glow_modifier, 0.f, 1.f, XorStr( "%0.3f" ) );
+						  // InsertSlider( XorStr( "Glow Modifier##glow chams" ), g_Vars.esp.glow_modifier, 0.f, 1.f, XorStr( "%0.3f" ) );
 						}
 						style->ItemSpacing = ImVec2( 0, 0 );
 						style->WindowPadding = ImVec2( 6, 6 );
@@ -2710,9 +2711,9 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 						ImGui::CustomSpacing( 9.f );
 
 						InsertCheckbox( XorStr( "Grenade prediction" ), g_Vars.esp.NadePred );
-						if ( g_Vars.esp.NadePred ) {
-						   InsertCheckbox( XorStr( "Only when pin pulled" ), g_Vars.esp.grenade_pred_only_pin_pull );
-						}
+						//if ( g_Vars.esp.NadePred ) {
+						//   InsertCheckbox( XorStr( "Only when pin pulled" ), g_Vars.esp.grenade_pred_only_pin_pull );
+						//}
 						InsertCheckbox( XorStr( "Bullet tracer" ), g_Vars.esp.beam_enabled );
 						ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
 						ImGui::ColorEdit4( XorStr( "##BulletTracer Color" ), g_Vars.esp.beam_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
@@ -2728,8 +2729,8 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 
 						static bool* hitmarkers_conditions[] = {
 						   &g_Vars.esp.vizualize_hitmarker	,
-						   &g_Vars.esp.hitmarker,
-						   &g_Vars.esp.vizualize_hitmarker_text,
+						  // &g_Vars.esp.hitmarker,
+						  // &g_Vars.esp.vizualize_hitmarker_text,
 						};
 
 						const char* hitmarkers_conditions_str[] = {
@@ -2802,7 +2803,7 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 						   InsertSlider( XorStr( "Time##PreserveKillfeed" ), g_Vars.esp.preserve_killfeed_time, 1.f, 300.f, XorStr( "%.0f ms" ) );
 						}
 
-						InsertCheckbox( XorStr( "Overlay Info" ), g_Vars.misc.overlay_info );
+						//InsertCheckbox( XorStr( "Overlay Info" ), g_Vars.misc.overlay_info );
 
 						static bool* bomb_conditions[] = {
 						   &g_Vars.esp.draw_c4,
@@ -2832,12 +2833,12 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 						   InsertSlider( XorStr( "Size##iOff" ), g_Vars.esp.autowall_crosshair_height, 1.f, 30.0f, XorStr( "%.0f px" ) );
 						}
 
-						InsertCheckbox( XorStr( "Crosshair" ), g_Vars.esp.crosshair );
-						ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-						ImGui::ColorEdit4( XorStr( "##Crosshair Color" ), g_Vars.esp.crosshair_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
-						if ( g_Vars.esp.crosshair ) {
-						   InsertSliderInt( XorStr( "Size##Crosshair" ), g_Vars.esp.crosshair_size, 1.f, 15.f, XorStr( "%d" ) );
-						}
+						//InsertCheckbox( XorStr( "Crosshair" ), g_Vars.esp.crosshair );
+						//ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
+						//ImGui::ColorEdit4( XorStr( "##Crosshair Color" ), g_Vars.esp.crosshair_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
+						//if ( g_Vars.esp.crosshair ) {
+						//   InsertSliderInt( XorStr( "Size##Crosshair" ), g_Vars.esp.crosshair_size, 1.f, 15.f, XorStr( "%d" ) );
+						//}
 						InsertCheckbox( XorStr( "Dropped weapons" ), g_Vars.esp.dropped_weapons );
 						ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
 						ImGui::ColorEdit4( XorStr( "##Dropped Weapons Color" ), g_Vars.esp.dropped_weapons_color, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoTooltip );
@@ -2874,7 +2875,7 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 						InsertCheckbox( XorStr( "Keybind list" ), g_Vars.esp.keybind_list );
 						InsertCheckbox( XorStr( "Indicators list" ), g_Vars.esp.indicators_list );
 						InsertCheckbox( XorStr( "Watermark" ), g_Vars.esp.watermark );
-						InsertCheckbox( XorStr( "Show indicators" ), g_Vars.misc.indicator_frame );
+						//InsertCheckbox( XorStr( "Show indicators" ), g_Vars.misc.indicator_frame );
 
 						InsertCheckbox( XorStr( "Zoom## priblijenye naxoy" ), g_Vars.esp.zoom );
 						ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
@@ -3116,9 +3117,9 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 						   InsertCheckbox( XorStr( "Fake duck" ), g_Vars.misc.fakeduck );
 						   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
 						   InsertKeyBox( "", g_Vars.misc.fakeduck_bind );
-						   if ( g_Vars.misc.fakeduck ) {
-							  InsertSliderInt( XorStr( "Fake duck ticks##fakeduck_ticks" ), g_Vars.misc.fakeduck_ticks, 8, 15, XorStr( "%d ticks" ) );
-						   }
+						  // if ( g_Vars.misc.fakeduck ) {
+							//  InsertSliderInt( XorStr( "Fake duck ticks##fakeduck_ticks" ), g_Vars.misc.fakeduck_ticks, 8, 15, XorStr( "%d ticks" ) );
+						  // }
 						   InsertCheckbox( XorStr( "Mini jump" ), g_Vars.misc.minijump );
 						   InsertCheckbox( XorStr( "Edge jump" ), g_Vars.misc.edgejump );
 						   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
@@ -3430,1332 +3431,6 @@ void CMenu::Main( IDirect3DDevice9* pDevice ) {
 
 	  ImGui::End( );
    }
-
-#if 0
-   //   full_window = ImGui::GetContentRegionAvail( );
-   //   if ( ImGui::BeginChild( XorStr( "##Legitbot1" ), ImVec2( 0.0f, full_window.y ), false ) ) {
-   //	  ImGui::Columns( 3, NULL, false );
-   //	  ImGui::SetColumnWidth( 0, full_window.x / 3.0f );
-   //	  ImGui::SetColumnWidth( 1, full_window.x / 3.0f );
-   //	  ImGui::SetColumnWidth( 2, full_window.x );
-
-   //	  ImGui::Checkbox( XorStr( "Active" ), &g_Vars.legit.active );
-   //	  ImGui::Checkbox( XorStr( "Nearest" ), &g_Vars.legit.nearest );
-   //	  ImGui::ComboA( XorStr( "Hitbox" ), &g_Vars.legit.hitbox, std::vector<std::string> {
-   //		 XorStr( "HEAD" ),
-   //			XorStr( "NECK" ),
-   //			XorStr( "PELVIS" ),
-   //			XorStr( "STOMACH" ),
-   //			XorStr( "LOW CHEST" ),
-   //			XorStr( "CHEST" ),
-   //			XorStr( "UP CHEST" ),
-   //			XorStr( "RIGHT THIGH" ),
-   //			XorStr( "LEFT THIGH" ),
-   //			XorStr( "RIGHT CALF" ),
-   //			XorStr( "LEFT CALF" ),
-   //			XorStr( "RIGHT FOOT" ),
-   //			XorStr( "LEFT FOOT" ),
-   //			XorStr( "RIGHT HAND" ),
-   //			XorStr( "LEFT HAND" ),
-   //			XorStr( "RIGHT UP ARM" ),
-   //			XorStr( "RIGHT FOREARM" ),
-   //			XorStr( "LEFT UP ARM" ),
-   //	  } );
-
-   //	  ImGui::NextColumn( );
-
-   //	  ImGui::SliderFloatA( XorStr( "Fov" ), &g_Vars.legit.fov, 0.f, 180.f );
-   //	  ImGui::SliderFloatA( XorStr( "Smooth" ), &g_Vars.legit.smooth, 0.1f, 25.f );
-
-   //	  ImGui::NextColumn( );
-   //   }
-   //   ImGui::EndChild( );
-   //}
-   //case 3:
-
-
-
-   //{
-   //   ImGui::BeginChild( XorStr( "##MiscTab" ), ImVec2( 0.0f, 0.0f ), true, ImGuiWindowFlags_NoScrollbar );
-   //   {
-   //	  float total_tabs_width = ImGui::GetContentRegionAvail( ).x - style.WindowPadding.x;
-   //	  const int tabs_count = 3;
-   //	  const int tab_pads = 0;
-   //	  float tab_width = total_tabs_width / ( tabs_count + tab_pads );
-
-   //	  // ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-
-   //	  if ( ImGui::Button( XorStr( "MAIN" ), ImVec2( tab_width + 1.5f, 25.f ) ) ) page_in_tab = 0;
-   //	  ImGui::SameLine( 0, 0 );
-   //	  if ( ImGui::Button( XorStr( "CONFIG" ), ImVec2( tab_width + 1.5f, 25.f ) ) ) page_in_tab = 1;
-   //	  ImGui::SameLine( 0, 0 );
-   //	  if ( ImGui::Button( XorStr( "SCRIPTS" ), ImVec2( tab_width + 1.5f, 25.f ) ) ) page_in_tab = 2;
-
-   //	  // ImGui::PopStyleVar( );
-
-   //	  ImGui::Columns( 2, NULL, false );
-   //	  ImGui::SetColumnWidth( 0, full_window.x * 0.5f );
-   //	  ImGui::SetColumnWidth( 1, full_window.x );
-
-   //	  if ( page_in_tab == 0 ) {
-   //		 ImGui::BeginChild( XorStr( "##Misc1" ), ImVec2( 0.0f, 0.0f ), true );
-   //		 {
-   /*			ImGui::Checkbox( XorStr( "Misc Enabled" ), &g_Vars.misc.active );
-   ImGui::Checkbox( XorStr( "Auto Jump" ), &g_Vars.misc.autojump );
-   ImGui::Checkbox( XorStr( "Auto Strafe" ), &g_Vars.misc.autostrafer );
-   ImGui::Checkbox( XorStr( "WASD Strafe" ), &g_Vars.misc.autostrafer_wasd );
-   ImGui::SliderFloatA( XorStr( "Strafe Retrack" ), &g_Vars.misc.autostrafer_retrack, 2.0f, 8.0f );
-
-   ImGui::Checkbox( XorStr( "Fast Duck" ), &g_Vars.misc.fastduck );
-   ImGui::Checkbox( XorStr( "Fake Duck" ), &g_Vars.misc.fakeduck );
-   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   ImGui::KeyBox( &g_Vars.misc.fakeduck_bind );
-   ImGui::Checkbox( XorStr( "Mini Jump" ), &g_Vars.misc.minijump );
-   ImGui::Checkbox( XorStr( "Edge Jump" ), &g_Vars.misc.edgejump );
-   ImGui::Checkbox( XorStr( "Duck Jump" ), &g_Vars.misc.duckjump );
-   ImGui::Checkbox( XorStr( "Quick Stop" ), &g_Vars.misc.quickstop );
-   ImGui::Checkbox( XorStr( "Slow Walk" ), &g_Vars.misc.slow_walk );
-   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   ImGui::KeyBox( &g_Vars.misc.slow_walk_bind );
-   ImGui::SliderFloatA( XorStr( "Slow Walk Speed" ), &g_Vars.misc.slow_walk_speed, 1.0f, 100.0f, XorStr( "%.1f %%" ) );
-
-   ImGui::Checkbox( XorStr( "Knife bot" ), &g_Vars.rage.knife_bot );
-   ImGui::ComboA( XorStr( "Knife bot type" ), &g_Vars.rage.knife_bot_type, std::vector<std::string> { XorStr( "Off" ), XorStr( "Default" ), XorStr( "Backstab" ), XorStr( "Quick" ) } );
-   ImGui::Checkbox( XorStr( "Show Impacts" ), &g_Vars.misc.impacts_spoof );*/
-   //		 } ImGui::EndChild( );
-
-   //		 ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //		 ImGui::NextColumn( );
-   //		 ImGui::PopStyleVar( );
-
-   //		 ImGui::BeginChild( XorStr( "##Misc2" ), ImVec2( 0.0f, 0.0f ), true );
-   //		 {
-   //			ImGui::Checkbox( XorStr( "ThirdPerson" ), &g_Vars.misc.third_person );
-   //			ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //			ImGui::KeyBox( &g_Vars.misc.third_person_bind );
-   //			ImGui::Checkbox( XorStr( "Disable On Grenade##thridperson" ), &g_Vars.misc.off_third_person_on_grenade );
-   //			ImGui::SliderFloatA( XorStr( "distance " ), &g_Vars.misc.third_person_dist, 0, 250, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View World Fov " ), &g_Vars.esp.world_fov, 0.f, 200.f, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View Model Fov " ), &g_Vars.misc.viewmodel_fov, 0.f, 200.f, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View Model x " ), &g_Vars.misc.viewmodel_x, -20.f, 20.f, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View Model y " ), &g_Vars.misc.viewmodel_y, -20.f, 20.f, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View Model z " ), &g_Vars.misc.viewmodel_z, -20.f, 20.f, XorStr( "%.0f" ) );
-
-   //			ImGui::Checkbox( XorStr( "Chat Spammer" ), &g_Vars.misc.chat_spammer );
-   //			ImGui::Checkbox( XorStr( "ClanTag " ), &g_Vars.misc.clantag_changer );
-   //			ImGui::Checkbox( XorStr( "Name Changer" ), &g_Vars.misc.name_changer );
-
-   //			// ImGui::ComboA( XorStr( "ClanTag Type" ), &g_Vars.misc.clantag_changer_type, std::vector<std::string>{ XorStr( "Static" ), XorStr( "Dynamic" ) } );
-
-   //			static char buffer[ 128 ] = { XorStr( '\0' ) };
-   //			static char buffer2[ 128 ] = { XorStr( '\0' ) };
-
-   //			ImGui::InputText( XorStr( "ClanTag##clantag name" ), buffer, 128 );
-
-   //			ImGui::InputText( XorStr( "Name##name changer" ), buffer2, 128 );
-
-   //			if ( ImGui::Button( XorStr( "Apply ClanTag" ) ) )
-   //			   g_Vars.misc.clantag_changer_str = buffer;
-
-   //			if ( ImGui::Button( XorStr( "Apply Name" ) ) ) {
-   //			   g_Vars.misc.name_changer_str = buffer2;
-
-   //			   static ConVar* cName = Source::m_pCvar->FindVar( XorStr( "name" ) );
-   //			   *( int* ) ( ( uintptr_t ) & cName->fnChangeCallback + 0xC ) = 0;
-   //			   cName->SetValue( buffer2 );
-   //			}
-
-   //			ImGui::ColorEdit4( XorStr( "main_color" ), g_Vars.menu.main_color );
-
-   //		 #ifdef _DEBUG
-   //			extern char BufferName[ 4096 ];
-   //			extern int FontWeight;
-   //			extern int FontSize;
-   //			extern int FontFlags;
-   //			extern int CurrentRenderFont;
-   //			extern bool FontMax;;
-   //			extern std::vector<std::string> fonts_names;
-   //			extern void AddFontNew( );
-
-   //			ImGui::ComboA( XorStr( "current font" ), &CurrentRenderFont, fonts_names );
-
-   //			ImGui::InputText( XorStr( "config name" ), BufferName, 4096 );
-   //			ImGui::SliderIntA( XorStr( "FontWeight" ), &FontWeight, 0, 900, XorStr( "%d" ) );
-   //			ImGui::SliderIntA( XorStr( "FontSize" ), &FontSize, -20, 20, XorStr( "%d" ) );
-
-   //			static bool aa, cleartype;
-   //			ImGui::Checkbox( XorStr( "aa" ), &aa );
-   //			ImGui::Checkbox( XorStr( "cleartype" ), &cleartype );
-   //			ImGui::Checkbox( XorStr( "FontMax" ), &FontMax );
-
-   //			FontFlags = 0;
-   //			if ( aa )
-   //			   FontFlags |= 1 << 3;
-
-   //			if ( cleartype )
-   //			   FontFlags |= 1 << 2;
-
-   //			if ( ImGui::Button( XorStr( "create new font" ) ) )
-   //			   AddFontNew( );
-   //		 #endif
-
-   //		 }   ImGui::EndChild( );
-   //	  }
-
-   //	  if ( page_in_tab == 1 ) {
-   //		 ImGui::BeginChild( XorStr( "##Misc3" ), ImVec2( 0.0f, 0.0f ), true );
-   //		 {
-   //			ImGui::InputText( XorStr( "Cfg name" ), config_name, 256 );
-   //			ImGui::ListBox( XorStr( "Configs" ), &voted_cfg, cfg_list );
-
-   //			if ( ImGui::Button( XorStr( "Update" ), ImVec2( 97.f, 25 ) ) )
-   //			   cfg_list = ConfigManager::GetConfigs( );
-
-   //			ImGui::SameLine( );
-
-   //			if ( ImGui::Button( XorStr( "Create" ), ImVec2( 97.f, 25 ) ) ) {
-   //			   ConfigManager::CreateConfig( config_name );
-   //			   cfg_list = ConfigManager::GetConfigs( );
-   //			}
-
-   //			if ( ImGui::Button( XorStr( "Load" ), ImVec2( 97.f, 25 ) ) && cfg_list.size( ) > 0 ) {
-   //			   ConfigManager::LoadConfig( cfg_list.at( voted_cfg ) );
-   //			}
-
-   //			ImGui::SameLine( );
-
-   //			if ( ImGui::Button( XorStr( "Save" ), ImVec2( 97.f, 25 ) ) && cfg_list.size( ) > 0 ) {
-   //			   ConfigManager::SaveConfig( cfg_list.at( voted_cfg ) );
-   //			}
-
-   //			if ( ImGui::Button( XorStr( "Delete" ), ImVec2( 200.f, 25 ) ) && cfg_list.size( ) > 0 ) {
-   //			   ConfigManager::RemoveConfig( cfg_list.at( voted_cfg ) );
-   //			   cfg_list = ConfigManager::GetConfigs( );
-   //			}
-   //		 }
-   //		 ImGui::EndChild( );
-
-   //		 ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //		 ImGui::NextColumn( );
-   //		 ImGui::PopStyleVar( );
-
-   //		 ImGui::BeginChild( XorStr( "##Misc4" ), ImVec2( 0.0f, 0.0f ), true );
-   //		 {
-   //			ImGui::Checkbox( XorStr( "Auto Buy" ), &g_Vars.misc.autobuy_enabled );
-
-   //			ImGui::ComboA( XorStr( "First Weapon" ), &g_Vars.misc.autobuy_first_weapon, std::vector<std::string>{ XorStr( "scar20" ), XorStr( "g3sg1" ), XorStr( "ssg08" ), XorStr( "awp" ) } );
-   //			ImGui::ComboA( XorStr( "Second Weapon" ), &g_Vars.misc.autobuy_second_weapon, std::vector<std::string>{ XorStr( "elite" ), XorStr( "deagle" ), XorStr( "revolver" ), XorStr( "cz75a" ), XorStr( "tec9" )} );
-   //			static bool* other[] = {
-   //			   &g_Vars.misc.autobuy_flashbang,
-   //			   &g_Vars.misc.autobuy_hegrenade,
-   //			   &g_Vars.misc.autobuy_molotovgrenade,
-   //			   &g_Vars.misc.autobuy_smokegreanade,
-   //			   &g_Vars.misc.autobuy_incgrenade,
-   //			   &g_Vars.misc.autobuy_decoy,
-   //			   &g_Vars.misc.autobuy_zeus,
-   //			   &g_Vars.misc.autobuy_armor,
-   //			};
-
-   //			const char* other_str[] = {
-   //			   XorStr( "flash" ), XorStr( "hegrenade" ), XorStr( "molotov" ), XorStr( "smoke" ), XorStr( "incgrenade" ), XorStr( "decoy" ),XorStr( "zeus" ),XorStr( "armor" )
-   //			};
-
-   //			ImGui::MultiCombo( XorStr( "Other Items" ),
-   //			   other, other_str, 8 );
-   //		 }
-   //		 ImGui::EndChild( );
-   //	  }
-
-   //	  if ( page_in_tab == 2 ) {
-
-   //	  }
-   //   }
-   //   ImGui::EndChild( );
-   //}
-   //}
-   //}
-   //ImGui::PopFont( );
-
-   //ImGui::End( );
-   //#if 0
-   //ImGui::Begin( XorStr( "EEXOMI" ), &g_Vars.globals.menuOpen, flags );
-   //{
-   //static int page_in_tab = 0;
-   //static int tab_index = 0;
-
-   //const char* TabNames[] = {
-   //  XorStr( "Ragebot" ),
-   //  XorStr( "Legitbot" ),
-   //  XorStr( "Anti-Aim" ),
-   //  XorStr( "Players" ),
-   //  XorStr( "Visuals" ),
-   //  XorStr( "Skins" ),
-   //  XorStr( "Misc" ),
-   //};
-
-
-   //ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //ImGui::BeginChild( XorStr( "##TABS_STUFF" ), ImVec2( 0.0f, 40.0f ) );
-   //{
-   //static int tabOrder[] = { 0, 1, 2, 3, 4, 5, 6 };
-
-   //ImGui::BeginGroup( );
-   //{
-   //   ImGui::TabLabels( TabNames, 7, tab_index, tabOrder, true );
-   //}
-   //ImGui::EndGroup( );
-   //}
-   //ImGui::EndChild( );
-   //ImGui::PopStyleVar( );
-   //RESTORE_WINDOW_PADDING( );
-
-
-   //if ( ImGui::BeginChild( XorStr( "##pre_tab_contents" ), ImVec2( 0.0f, 0.0f ), true ) ) {
-   //static bool tickbase = false;
-   //auto full_wnd = ImGui::GetContentRegionAvail( );
-
-
-   //if ( tab_index == 0 ) {
-
-   //   ImGui::Columns( 3, NULL, false );
-   //   ImGui::SetColumnWidth( 0, full_wnd.x / 3.0f );
-   //   ImGui::SetColumnWidth( 1, full_wnd.x / 3.0f );
-   //   ImGui::SetColumnWidth( 2, full_wnd.x );
-
-   //   full_wnd = ImGui::GetContentRegionAvail( );
-   //   if ( ImGui::BeginChild( XorStr( "##Aimbot1" ), ImVec2( 0.0f, full_wnd.y ), true ) ) {
-   //	  //ImGui::ComboA( XorStr( "Resolver Type" ), &g_Vars.rage.resolver_type, std::vector<std::string>{XorStr( "Experimental" ), XorStr( "Bruteforce" )} );
-   //	  ImGui::Checkbox( XorStr( "Active" ), &g_Vars.rage.enabled );
-   //	  ImGui::Checkbox( XorStr( "Silent Aim" ), &g_Vars.rage.silent_aim );
-   //	  ImGui::Checkbox( XorStr( "No Recoil" ), &g_Vars.rage.no_recoil );
-   //	  ImGui::Checkbox( XorStr( "No Spread" ), &g_Vars.rage.no_spread );
-   //	  ImGui::Checkbox( XorStr( "Rapid fire" ), &g_Vars.rage.rapid_fire );
-   //	  ImGui::Checkbox( XorStr( "Lag Fix" ), &g_Vars.rage.lagfix );
-   //	  ImGui::Checkbox( XorStr( "Position Adjustment" ), &g_Vars.rage.backtrack );
-   //	  ImGui::Checkbox( XorStr( "Resolver" ), &g_Vars.rage.resolver );
-   //	  ImGui::Checkbox( XorStr( "Delay Shot" ), &g_Vars.rage.delay_shot );
-   //	  ImGui::Checkbox( XorStr( "Auto Wall" ), &g_Vars.rage.autowall );
-   //	  ImGui::Checkbox( XorStr( "Auto Revolver" ), &g_Vars.rage.autorevolver );
-   //	  ImGui::Checkbox( XorStr( "Auto Scope" ), &g_Vars.rage.autoscope );
-   //	  ImGui::ComboA( XorStr( "Auto Stop" ), &g_Vars.rage.autostop, std::vector<std::string> { XorStr( "Off" ), XorStr( "Full Stop" ), XorStr( "Minimal speed" ), XorStr( "Fast Stop" ) } );
-   //	  ImGui::Checkbox( XorStr( "Disable Auto Stop in Air" ), &g_Vars.rage.autostop_disable_inair );
-   //   } ImGui::EndChild( );
-
-   //   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //   ImGui::NextColumn( );
-   //   ImGui::PopStyleVar( );
-
-   //   full_wnd = ImGui::GetContentRegionAvail( );
-   //   if ( ImGui::BeginChild( XorStr( "##Aimbot2" ), ImVec2( 0.0f, full_wnd.y ), true ) ) {
-   //	  ImGui::SliderFloatA( XorStr( "Hitchance" ), &g_Vars.rage.hitchance, 0.f, 100.f, XorStr( "%.1f %%" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Taser Hitchance" ), &g_Vars.rage.taser_hitchance, 0.f, 100.f, XorStr( "%.1f %%" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Min Damage - Autowall" ), &g_Vars.rage.min_damage, 0.f, 100.f, XorStr( "%.1f hp" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Min Damage - Visible" ), &g_Vars.rage.min_damage_visible, 0.f, 100.f, XorStr( "%.1f hp" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Min Damage - Override" ), &g_Vars.rage.min_damage_override, 0.f, 100.f, XorStr( "%.1f hp" ) );
-
-   //	  ImGui::Text( XorStr( "Damage override key" ) );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //	  ImGui::KeyBox( &g_Vars.rage.key_dmg_override );
-
-   //	  ImGui::ComboA( XorStr( "Hitbox Selection" ), &g_Vars.rage.hitbox_selection, std::vector<std::string>{ XorStr( "Damage" ), XorStr( "Accuracy" ) } );
-
-   //	  ImGui::Checkbox( XorStr( "Ignore limbs on move" ), &g_Vars.rage.ignorelimbs_ifwalking );
-   //	  ImGui::Checkbox( XorStr( "Shot Delay" ), &g_Vars.rage.shotdelay );
-   //	  if ( g_Vars.rage.shotdelay )
-   //		 ImGui::SliderFloatA( XorStr( "Shot Delay Amount" ), &g_Vars.rage.shotdelay_amount, 0.f, 1.f, XorStr( "%.01f %%" ) );
-   //   } ImGui::EndChild( );
-
-   //   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //   ImGui::NextColumn( );
-   //   ImGui::PopStyleVar( );
-   //   if ( ImGui::BeginChild( XorStr( "##Aimbot3" ), ImVec2( 0.0f, full_wnd.y ), true ) ) {
-   //	  static bool* hitboxes[] = {
-   //		&g_Vars.rage.head_hitbox	,
-   //		&g_Vars.rage.neck_hitbox	,
-   //		&g_Vars.rage.chest_hitbox,
-   //		&g_Vars.rage.stomach_hitbox	,
-   //		&g_Vars.rage.pelvis_hitbox	,
-   //		&g_Vars.rage.arms_hitbox	,
-   //		&g_Vars.rage.legs_hitbox	,
-   //	  };
-
-   //	  static bool* bt_hitboxes[] = {
-   //		&g_Vars.rage.bt_head_hitbox	,
-   //		&g_Vars.rage.bt_neck_hitbox	,
-   //		&g_Vars.rage.bt_chest_hitbox,
-   //		&g_Vars.rage.bt_stomach_hitbox	,
-   //		&g_Vars.rage.bt_pelvis_hitbox	,
-   //		&g_Vars.rage.bt_arms_hitbox	,
-   //		&g_Vars.rage.bt_legs_hitbox	,
-   //	  };
-
-   //	  const char* hitboxes_str[] = {
-   //		XorStr( "Head" ), XorStr( "Neck" ), XorStr( "Chest" ), XorStr( "Stomach" ), XorStr( "Pelvis" ), XorStr( "Arms" ), XorStr( "Legs" )
-   //	  };
-
-   //	  static bool* bt_conditions[] = {
-   //		&g_Vars.rage.override_bactkrack	,
-   //		&g_Vars.rage.override_moving	,
-   //		&g_Vars.rage.override_inair	,
-   //	  };
-
-   //	  const char* conditions_str[] = {
-   //		XorStr( "Backtracking" ), XorStr( "Moving" ), XorStr( "In Air" )
-   //	  };
-
-   //	  ImGui::MultiCombo( XorStr( "Hitscan" ),
-   //		 hitboxes, hitboxes_str, 7 );
-
-   //	  ImGui::MultiCombo( XorStr( "Override Condition" ),
-   //		 bt_conditions, conditions_str, 3 );
-
-   //	  ImGui::MultiCombo( XorStr( "Override hitscan" ),
-   //		 bt_hitboxes, hitboxes_str, 7 );
-   //	  ImGui::SliderIntA( XorStr( "Override after X Missed Shots" ), &g_Vars.rage.override_after_x_shots, 0, 15 );
-
-   //	  ImGui::Text( XorStr( "Override key" ) );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //	  ImGui::KeyBox( &g_Vars.rage.override_key );
-
-   //	  ImGui::Checkbox( XorStr( "Dynamic point scale" ), &g_Vars.rage.dynamic_ps );
-
-   //	  ImGui::SliderFloatA( XorStr( "Max Head Scale##Head" ), &g_Vars.rage.head_ps, 0.f, 100.0f, XorStr( "%.1f %%" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Max Neck Scale##Neck" ), &g_Vars.rage.neck_ps, 0.f, 100.0f, XorStr( "%.1f %%" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Max Stomach Scale##Stomach" ), &g_Vars.rage.stomach_ps, 0.f, 100.0f, XorStr( "%.1f %%" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Max Pelvis Scale##Pelvis" ), &g_Vars.rage.pelvis_ps, 0.f, 100.0f, XorStr( "%.1f %%" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Max Chest Scale##Chest" ), &g_Vars.rage.chest_ps, 0.f, 100.0f, XorStr( "%.1f %%" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Max Arms Scale##Arms" ), &g_Vars.rage.arms_ps, 0.f, 100.0f, XorStr( "%.1f %%" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Max Legs Scale##Legs" ), &g_Vars.rage.legs_ps, 0.f, 100.0f, XorStr( "%.1f %%" ) );
-
-   //	  static bool* op_points[] = {
-   //		&g_Vars.rage.optimal_point_head,
-   //		&g_Vars.rage.optimal_point_upper_body,
-   //		&g_Vars.rage.optimal_point_lower_body,
-   //		&g_Vars.rage.optimal_point_limbs,
-   //	  };
-
-   //   #if 0
-   //	  const char* op_points_str[] = {
-   //		XorStr( "Head" ), XorStr( "Upper Body" ), XorStr( "Lower Body" ), XorStr( "Limbs" )
-   //	  };
-
-   //	  ImGui::Checkbox( XorStr( "Optimal Point" ), &g_Vars.rage.optimal_point );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //	  ImGui::KeyBox( &g_Vars.rage.optimal_point_key );
-
-   //	  ImGui::MultiCombo( XorStr( "Optimal groups" ),
-   //		 op_points, op_points_str, 4 );
-   //   #endif
-   //   }
-   //   ImGui::EndChild( );
-   //}
-   //if ( tab_index == 1 ) {
-   //   full_wnd = ImGui::GetContentRegionAvail( );
-   //   if ( ImGui::BeginChild( XorStr( "##Legitbot1" ), ImVec2( 0.0f, full_wnd.y ), false ) ) {
-   //	  ImGui::Columns( 3, NULL, false );
-   //	  ImGui::SetColumnWidth( 0, full_wnd.x / 3.0f );
-   //	  ImGui::SetColumnWidth( 1, full_wnd.x / 3.0f );
-   //	  ImGui::SetColumnWidth( 2, full_wnd.x );
-
-   /*	  ImGui::Checkbox( XorStr( "Active" ), &g_Vars.legit.active );
-   ImGui::Checkbox( XorStr( "Nearest" ), &g_Vars.legit.nearest );
-   ImGui::ComboA( XorStr( "Hitbox" ), &g_Vars.legit.hitbox, std::vector<std::string> {
-   XorStr( "HEAD" ),
-   XorStr( "NECK" ),
-   XorStr( "PELVIS" ),
-   XorStr( "STOMACH" ),
-   XorStr( "LOW CHEST" ),
-   XorStr( "CHEST" ),
-   XorStr( "UP CHEST" ),
-   XorStr( "RIGHT THIGH" ),
-   XorStr( "LEFT THIGH" ),
-   XorStr( "RIGHT CALF" ),
-   XorStr( "LEFT CALF" ),
-   XorStr( "RIGHT FOOT" ),
-   XorStr( "LEFT FOOT" ),
-   XorStr( "RIGHT HAND" ),
-   XorStr( "LEFT HAND" ),
-   XorStr( "RIGHT UP ARM" ),
-   XorStr( "RIGHT FOREARM" ),
-   XorStr( "LEFT UP ARM" ),
-   } );
-
-   ImGui::NextColumn( );
-
-   ImGui::SliderFloatA( XorStr( "Fov" ), &g_Vars.legit.fov, 0.f, 180.f );
-   ImGui::SliderFloatA( XorStr( "Smooth" ), &g_Vars.legit.smooth, 0.1f, 25.f );*/
-
-   //	  ImGui::NextColumn( );
-   //   }
-   //   ImGui::EndChild( );
-   //}
-
-   //if ( tab_index == 2 ) {
-   //   ImGui::Columns( 2, NULL, false );
-   //   ImGui::SetColumnWidth( 0, full_wnd.x * 0.5f );
-   //   ImGui::SetColumnWidth( 1, full_wnd.x );
-
-   //   if ( ImGui::BeginChild( XorStr( "##AntiAim1" ), ImVec2( 0.0f, 0.0f ), true ) ) {
-   //	  static int antiaim_type = 0;
-   //	  CVariables::ANTIAIM_STATE* settings = nullptr;
-
-   //	  float total_tabs_width = ImGui::GetContentRegionAvail( ).x;
-   //	  float tab_width = total_tabs_width / 3.0f;
-
-   //	  ImGui::Checkbox( XorStr( "Enable Anti Aims" ), &g_Vars.antiaim.enabled );
-
-   //	  ImGui::Text( XorStr( "Desync Flip" ) );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //	  ImGui::KeyBox( &g_Vars.antiaim.desync_flip_bind );
-
-   //	  ImGui::Text( XorStr( "Manual Bind Left" ) );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //	  ImGui::KeyBox( &g_Vars.antiaim.manual_left_bind );
-   //	  ImGui::Text( XorStr( "Manual Bind Right" ) );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //	  ImGui::KeyBox( &g_Vars.antiaim.manual_right_bind );
-   //	  ImGui::Text( XorStr( "Manual Bind Back" ) );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //	  ImGui::KeyBox( &g_Vars.antiaim.manual_back_bind );
-
-   //	  ImGui::Checkbox( XorStr( "Hide shots" ), &g_Vars.rage.hide_shots );
-   //	  ImGui::Checkbox( XorStr( "Shift" ), &g_Vars.antiaim.shift );
-
-   //	  tickbase = g_Vars.antiaim.enabled && ( g_Vars.rage.hide_shots || g_Vars.antiaim.shift )
-   //		 || g_Vars.rage.enabled && g_Vars.rage.rapid_fire;
-
-   //	  REMOVE_WINDOW_PADDING( );
-
-   //	  ImGui::BeginChild( XorStr( "##AntiAimState" ), ImVec2( 0.0f, 0.0f ), true );
-   //	  {
-   //		 if ( ImGui::Button( XorStr( "Stand" ), ImVec2( tab_width, 25.0f ) ) )
-   //			antiaim_type = 0;
-
-   //		 ImGui::SameLine( 0, 0 );
-   //		 if ( ImGui::Button( XorStr( "Move" ), ImVec2( tab_width, 25.0f ) ) )
-   //			antiaim_type = 1;
-
-   //		 ImGui::SameLine( 0, 0 );
-   //		 if ( ImGui::Button( XorStr( "Air" ), ImVec2( tab_width, 25.0f ) ) )
-   //			antiaim_type = 2;
-
-   //		 if ( antiaim_type == 0 )
-   //			settings = &g_Vars.antiaim_stand;
-   //		 else if ( antiaim_type == 1 )
-   //			settings = &g_Vars.antiaim_move;
-   //		 else
-   //			settings = &g_Vars.antiaim_air;
-
-   //		 RESTORE_WINDOW_PADDING( );
-
-   //		 ImGui::BeginChild( XorStr( "##AntiAimStub" ), ImVec2( 0.0f, 0.0f ), false, ImGuiWindowFlags_AlwaysUseWindowPadding );
-   //		 {
-   //			ImGui::ComboA( XorStr( "Pitch Base" ), &settings->base_pitch, std::vector<std::string>{ XorStr( "Static" ), XorStr( "View" ), XorStr( "At targets" ) } );
-   //			ImGui::ComboA( XorStr( "Yaw Base" ), &settings->base_yaw, std::vector<std::string>{ XorStr( "Static" ), XorStr( "View" ), XorStr( "At targets" ) } );
-
-   //			ImGui::ComboA( XorStr( "Pitch" ), &settings->pitch, std::vector<std::string>{ XorStr( "Down" ), XorStr( "Up" ), XorStr( "Zero" ), XorStr( "Secret" ) } );
-   //			ImGui::ComboA( XorStr( "Yaw" ), &settings->yaw, std::vector<std::string>{ XorStr( "Backward" ), XorStr( "Forward" ), XorStr( "Manual" ), XorStr( "Spinbot" ) } );
-
-   //			if ( g_Vars.antiaim.shift ) {
-   //			   ImGui::ComboA( XorStr( "Shift Pitch" ), &settings->shift_pitch, std::vector<std::string>{ XorStr( "Off" ), XorStr( "Inverse" ), XorStr( "Forward" ) } );
-   //			   ImGui::ComboA( XorStr( "Shift Yaw" ), &settings->shift_yaw, std::vector<std::string>{ XorStr( "Off" ), XorStr( "Inverse" ), XorStr( "Static" ), XorStr( "Spinbot" ) } );
-   //			}
-
-   //			ImGui::ComboA( XorStr( "Auto direction" ), &settings->autodirection, std::vector<std::string>{ XorStr( "Off" ), XorStr( "On" ), XorStr( "Auto Desync" ) } );
-   //			ImGui::ComboA( XorStr( "Desync" ), &settings->desync, std::vector<std::string>{ XorStr( "Off" ), XorStr( "Static" ), XorStr( "Balance" ), XorStr( "Jitter" ), XorStr( "Jitter Test" ) } );
-
-   //			ImGui::SliderFloatA( XorStr( "Desync Offset Left" ), &settings->desync_amount_left, -100.0f, 100.0f, XorStr( "%.1f %%" ) );
-   //			ImGui::SliderFloatA( XorStr( "Desync Offset Right" ), &settings->desync_amount_right, -100.0f, 100.0f, XorStr( "%.1f %%" ) );
-   //			ImGui::SliderFloatA( XorStr( "Spin speed" ), &settings->spin_speed, -45.0f, 45.0f, XorStr( "%.1f degrees" ) );
-
-   //		 } ImGui::EndChild( );
-   //	  }ImGui::EndChild( );
-   //   }ImGui::EndChild( );
-
-   //   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //   ImGui::NextColumn( );
-   //   ImGui::PopStyleVar( );
-
-   //   if ( ImGui::BeginChild( XorStr( "##AntiAim2" ), ImVec2( 0.0f, 0.0f ), true ) ) {
-   //	  ImGui::Checkbox( XorStr( "Fake Lag Enabled" ), &g_Vars.fakelag.enabled );
-
-   //	  static bool* conditions[] = {
-   //		&g_Vars.fakelag.when_standing,
-   //		&g_Vars.fakelag.when_moving,
-   //		&g_Vars.fakelag.when_air,
-   //		&g_Vars.fakelag.when_shooting,
-   //	  };
-
-   //	  const char* conditions_str[] = {
-   //		XorStr( "Standing" ), XorStr( "Moving" ), XorStr( "Air" ), XorStr( "Shooting" )
-   //	  };
-
-   //	  static bool* alt_conditions[] = {
-   //		&g_Vars.fakelag.when_unducking,
-   //		&g_Vars.fakelag.when_accelerate,
-   //		&g_Vars.fakelag.when_land,
-   //		&g_Vars.fakelag.when_switching_weapon,
-   //		&g_Vars.fakelag.when_reloading,
-   //	  };
-
-   //	  const char* alt_conditions_str[] = {
-   //		XorStr( "Unducking" ), XorStr( "Accelerate" ), XorStr( "Land" ), XorStr( "Weapon Swap" ), XorStr( "Reload" )
-   //	  };
-
-   //	  ImGui::MultiCombo( XorStr( "Conditions" ),
-   //		 conditions, conditions_str, 4 );
-
-   //	  ImGui::Checkbox( XorStr( "Latency compensation" ), &g_Vars.fakelag.auto_set );
-   //	  ImGui::ComboA( XorStr( "Mode" ), &g_Vars.fakelag.mode, std::vector<std::string>{XorStr( "Static" ), XorStr( "LC Break" ), XorStr( "Peek" ), XorStr( "Peek Unlag" )} );
-   //	  ImGui::SliderFloatA( XorStr( "Peek distance" ), &g_Vars.fakelag.peekdist, 0.0f, 50.0f, XorStr( "%.2f units" ) );
-   //	  ImGui::SliderIntA( XorStr( "Lag amount" ), &g_Vars.fakelag.choke, 0, tickbase ? g_Vars.fakelag.lag_limit - 7 : g_Vars.fakelag.lag_limit, XorStr( "%d ticks" ) );
-
-   //	  ImGui::MultiCombo( XorStr( "Alternative Conditions" ),
-   //		 alt_conditions, alt_conditions_str, 5 );
-   //	  ImGui::SliderIntA( XorStr( "Alternative lag amount" ), &g_Vars.fakelag.alternative_choke, 0, tickbase ? g_Vars.fakelag.lag_limit - 7 : g_Vars.fakelag.lag_limit, XorStr( "%d ticks" ) );
-
-   //	  ImGui::SliderIntA( XorStr( "Lag limit" ), &g_Vars.fakelag.lag_limit, 6, 62, XorStr( "%d ticks" ) );
-
-   //	  //	ImGui::Checkbox( XorStr( "Server crasher" ), &g_Vars.misc.server_crasher );
-   //	  //	ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //	  //	ImGui::KeyBox( &g_Vars.misc.server_crasher_bind );
-
-   //	  //	ImGui::SliderIntA( XorStr( "Messages" ), &g_Vars.misc.server_crasher_msges, 1, 500, XorStr( "%d" ) );
-   //	  //	ImGui::SliderIntA( XorStr( "Packets" ), &g_Vars.misc.server_crasher_packets, 1, 5, XorStr( "%d" ) );
-
-   //		  // std::min( 5, g_Vars.fakelag.choke + 3 );
-
-   //		  // for test only
-   //		  //ImGui::SliderIntA( XorStr( "Shift" ), &g_Vars.globals.FakeDuckWillChoke, 0, 17, XorStr( "%d ticks" ) );
-   //		  // ImGui::SliderIntA( XorStr( "Min delta" ), &g_Vars.globals.SavedCommandNr, 0, 17, XorStr( "%d ticks" ) );
-   //   } ImGui::EndChild( );
-   //}
-
-   //if ( tab_index == 3 ) {
-   //   float total_tabs_width = ImGui::GetContentRegionAvail( ).x - style.WindowPadding.x;
-   //   const int tabs_count = 3;
-   //   const int tab_pads = 0;
-   //   float tab_width = total_tabs_width / ( tabs_count + tab_pads );
-
-   //   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-
-   //   if ( ImGui::Button( XorStr( "ESP" ), ImVec2( tab_width + 3.f, 25.f ) ) ) page_in_tab = 0;
-   //   ImGui::SameLine( 0, 0 );
-   //   if ( ImGui::Button( XorStr( "CHAMS" ), ImVec2( tab_width + 3.f, 25.f ) ) ) page_in_tab = 1;
-   //   ImGui::SameLine( 0, 0 );
-   //   if ( ImGui::Button( XorStr( "MISC" ), ImVec2( tab_width + 3.f, 25.f ) ) ) page_in_tab = 2;
-
-   //   ImGui::PopStyleVar( );
-
-   //   ImGui::Columns( 2, NULL, false );
-   //   ImGui::SetColumnWidth( 0, full_wnd.x * 0.5f );
-   //   ImGui::SetColumnWidth( 1, full_wnd.x );
-
-   //   if ( page_in_tab == 0 ) {
-   //	  ImGui::BeginChild( XorStr( "##Visuals1" ), ImVec2( 0.0f, 0.0f ), true );
-   //	  {
-   //		 ImGui::Checkbox( XorStr( "Esp Enabled" ), &g_Vars.esp.esp_enable );
-   //		 ImGui::ComboA( XorStr( "Esp Type" ), &g_Vars.esp.esp_type, std::vector<std::string>{ XorStr( "Static" ), XorStr( "Dynamic" )} );
-   //		 ImGui::Checkbox( XorStr( "Fade Esp" ), &g_Vars.esp.fade_esp );
-   //		 if ( g_Vars.esp.fade_esp )
-   //			ImGui::Checkbox( XorStr( "Safe Last Player Pos" ), &g_Vars.esp.vizualize_last_pos );
-   //		 ImGui::Checkbox( XorStr( "Ignore Team" ), &g_Vars.esp.team_check );
-
-   //		 ImGui::Checkbox( XorStr( "Skeleton" ), &g_Vars.esp.skeleton );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Skelet Color" ), g_Vars.esp.skeleton_color, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::Checkbox( XorStr( "Skeleton History" ), &g_Vars.esp.skeleton_history );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Skelet History Color" ), g_Vars.esp.skeleton_history_color, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::ComboA( XorStr( "Type##Skelet History Type" ), &g_Vars.esp.skeleton_history_type, std::vector<std::string>{ XorStr( "Oldest Tick" ), XorStr( "All Ticks" )} );
-   //		 ImGui::Checkbox( XorStr( "Skip Occulusion" ), &g_Vars.esp.skip_occulusion );
-   //		 ImGui::Checkbox( XorStr( "Extended Esp" ), &g_Vars.esp.extended_esp );
-   //		 ImGui::Checkbox( XorStr( "Force Crosshair" ), &g_Vars.esp.force_sniper_crosshair );
-   //		 ImGui::Checkbox( XorStr( "Visualise angles" ), &g_Vars.esp.vizualize_angles );
-   //		 ImGui::Checkbox( XorStr( "Draw Hitboxes" ), &g_Vars.esp.draw_hitboxes );
-
-   //		 ImGui::Checkbox( XorStr( "Transparency In Scope" ), &g_Vars.esp.blur_in_scoped );
-   //		 if ( g_Vars.esp.blur_in_scoped )
-   //			ImGui::SliderFloatA( XorStr( "Transparency Amount##Transparency In Scope" ), &g_Vars.esp.blur_in_scoped_value, 0.0f, 1.f, XorStr( "%0.01f" ) );
-
-   //	  } ImGui::EndChild( );
-
-   //	  ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //	  ImGui::NextColumn( );
-   //	  ImGui::PopStyleVar( );
-
-   //	  ImGui::BeginChild( XorStr( "##Visuals2" ), ImVec2( 0.0f, 0.0f ), true );
-   //	  {
-   //		 ImGui::Checkbox( XorStr( "Box" ), &g_Vars.esp.box );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Box Color" ), g_Vars.esp.box_color, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::ComboA( XorStr( "Box Type##box type" ), &g_Vars.esp.box_type, std::vector<std::string>{ XorStr( "Bounding" ), XorStr( "Corner" ) } );
-   //		 ImGui::Checkbox( XorStr( "Health" ), &g_Vars.esp.health );
-   //		 if ( g_Vars.esp.health )
-   //			ImGui::Checkbox( XorStr( "Health Edge" ), &g_Vars.esp.health_edge );
-   //		 ImGui::ComboA( XorStr( "Position##health" ), &g_Vars.esp.health_pos, std::vector<std::string>{ XorStr( "Left" ), XorStr( "Right" ), XorStr( "Top" ), XorStr( "Bottom" ) } );
-   //		 ImGui::Checkbox( XorStr( "Armor Bar" ), &g_Vars.esp.armor_bar );
-   //		 ImGui::ComboA( XorStr( "Position##Armor" ), &g_Vars.esp.armor_pos, std::vector<std::string>{ XorStr( "Left" ), XorStr( "Right" ), XorStr( "Top" ), XorStr( "Bottom" ) } );
-
-   //		 ImGui::Checkbox( XorStr( "Info" ), &g_Vars.esp.info );
-   //		 ImGui::Checkbox( XorStr( "Scoped" ), &g_Vars.esp.draw_scoped );
-   //		 ImGui::Checkbox( XorStr( "Flashed" ), &g_Vars.esp.draw_flashed );
-   //		 ImGui::Checkbox( XorStr( "Money Count" ), &g_Vars.esp.draw_money );
-   //		 ImGui::Checkbox( XorStr( "Armor Type" ), &g_Vars.esp.draw_armor );
-   //		 ImGui::Checkbox( XorStr( "Name" ), &g_Vars.esp.name );
-   //		 ImGui::Checkbox( XorStr( "Weapon" ), &g_Vars.esp.weapon );
-   //		 ImGui::ComboA( XorStr( "Type##Weapon" ), &g_Vars.esp.weapon_type, std::vector<std::string>{ XorStr( "Text" ), XorStr( "Icon" ), } );
-   //		 ImGui::Checkbox( XorStr( "Weapon Ammo" ), &g_Vars.esp.weapon_ammo );
-   //		 ImGui::Checkbox( XorStr( "Ammo Bar" ), &g_Vars.esp.draw_ammo_bar );
-   //		 ImGui::Checkbox( XorStr( "Reloading" ), &g_Vars.esp.draw_reloading );
-
-   //		 ImGui::Checkbox( XorStr( "Aim points" ), &g_Vars.esp.aim_points );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Aim points Color" ), g_Vars.esp.aim_points_color, ImGuiColorEditFlags_NoInputs );
-
-   //	  } ImGui::EndChild( );
-   //   } else if ( page_in_tab == 1 ) {
-   //	  ImGui::BeginChild( XorStr( "##Visuals3" ), ImVec2( 0.0f, 0.0f ), true );
-   //	  {
-   /*		 ImGui::Checkbox( XorStr( "Chams Enabled" ), &g_Vars.esp.chams_enabled );
-   ImGui::Checkbox( XorStr( "Chams History" ), &g_Vars.esp.chams_history );
-   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   ImGui::ColorEdit4( XorStr( "##Chams History Color" ), g_Vars.esp.chams_history_color, ImGuiColorEditFlags_NoInputs );
-
-   static auto materials = std::vector<std::string>{ XorStr( "Off" ), XorStr( "Flat" ), XorStr( "Flat with wireframe" ), XorStr( "Metallic" ), XorStr( "Metalic with wireframe" ) };
-
-   ImGui::ComboA( XorStr( "Enemy Material##enemy" ), &g_Vars.esp.enemy_chams_mat, materials );
-   ImGui::ComboA( XorStr( "Team Material##team" ), &g_Vars.esp.team_chams_mat, materials );
-
-   ImGui::ComboA( XorStr( "Hands## Material" ), &g_Vars.esp.hands_chams_mat, materials );
-   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   ImGui::ColorEdit4( XorStr( "##Hands Color" ), g_Vars.esp.hands_chams, ImGuiColorEditFlags_NoInputs );
-
-   ImGui::ComboA( XorStr( "Weapon##Material" ), &g_Vars.esp.weapon_chams_mat, materials );
-   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   ImGui::ColorEdit4( XorStr( "##Weapon Color" ), g_Vars.esp.weapon_chams, ImGuiColorEditFlags_NoInputs );
-
-   ImGui::Checkbox( XorStr( "Local player" ), &g_Vars.esp.chams_local );
-   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   ImGui::ColorEdit4( XorStr( "##Local color" ), g_Vars.esp.chams_local_color, ImGuiColorEditFlags_NoInputs );
-
-   ImGui::ComboA( XorStr( "Local material" ), &g_Vars.esp.chams_local_mat, materials );
-
-   ImGui::Checkbox( XorStr( "Desync chams" ), &g_Vars.esp.chams_desync );
-   ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   ImGui::ColorEdit4( XorStr( "##Desync color" ), g_Vars.esp.chams_desync_color, ImGuiColorEditFlags_NoInputs );
-
-   ImGui::ComboA( XorStr( "Desync material" ), &g_Vars.esp.chams_desync_mat, materials );*/
-
-   //	  } ImGui::EndChild( );
-
-   //	  ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //	  ImGui::NextColumn( );
-   //	  ImGui::PopStyleVar( );
-
-   //	  ImGui::BeginChild( XorStr( "##Visuals4" ), ImVec2( 0.0f, 0.0f ), true );
-   //	  {
-   //		 ImGui::Checkbox( XorStr( "Enemy Chams XQZ" ), &g_Vars.esp.enemy_chams_xqz );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Enemy Chams Color XQZ" ), g_Vars.esp.enemy_chams_color_xqz, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::Checkbox( XorStr( "Enemy Chams Vis" ), &g_Vars.esp.enemy_chams_vis );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Team Chams Color XQZ" ), g_Vars.esp.enemy_chams_color_vis, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::Checkbox( XorStr( "Team Chams XQZ" ), &g_Vars.esp.team_chams_xqz );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "3##Enemy Chams Color Vis" ), g_Vars.esp.team_chams_color_xqz, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::Checkbox( XorStr( "Team Chams Vis" ), &g_Vars.esp.team_chams_vis );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Team Chams Color Vis" ), g_Vars.esp.team_chams_color_vis, ImGuiColorEditFlags_NoInputs );
-
-   //		 ImGui::SliderFloatA( XorStr( "Reflectivity##chams" ), &g_Vars.esp.chams_reflectivity, 0.f, 1.f );
-   //		 ImGui::SliderFloatA( XorStr( "Contrast##chams" ), &g_Vars.esp.chams_contrast, 0.f, 1.f );
-   //	  } ImGui::EndChild( );
-   //   } else if ( page_in_tab == 2 ) {
-   //	  ImGui::BeginChild( XorStr( "##Visuals7" ), ImVec2( 0.0f, 0.0f ), true );
-   //	  {
-   //		 static bool* event_logger_cond[] = {
-   //			&g_Vars.esp.event_bomb,
-   //			&g_Vars.esp.event_dmg,
-   //			&g_Vars.esp.event_buy,
-   //			&g_Vars.esp.event_resolver,
-   //			&g_Vars.esp.event_misc,
-   //		 };
-
-   //		 const char* event_logger_cond_str[] = {
-   //			XorStr( "Bomb" ), XorStr( "Damage" ), XorStr( "Buy" ), XorStr( "Resolver" ), XorStr( "Misc" )
-   //		 };
-
-   //		 ImGui::MultiCombo( XorStr( "Event Logger" ),
-   //			event_logger_cond, event_logger_cond_str, 5 );
-
-   //		 static bool* removeals_cond[] = {
-   //			&g_Vars.esp.remove_smoke,
-   //			&g_Vars.esp.remove_flash,
-   //			&g_Vars.esp.remove_scope,
-   //			&g_Vars.esp.remove_scope_zoom,
-   //			&g_Vars.esp.remove_recoil,
-   //			&g_Vars.esp.remove_sleeves,
-   //		 };
-
-   //		 const char* removeals_cond_str[] = {
-   //			XorStr( "Smoke" ), XorStr( "Flash" ), XorStr( "Scope" ), XorStr( "Zoom" ), XorStr( "Recoil" ), XorStr( "Sleeves" )
-   //		 };
-
-   //		 ImGui::MultiCombo( XorStr( "Removals" ),
-   //			removeals_cond, removeals_cond_str, 6 );
-
-   //		 ImGui::Checkbox( XorStr( "SoundEsp" ), &g_Vars.esp.sound_esp );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##SoundEsp Color" ), g_Vars.esp.sound_esp_color, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::ComboA( XorStr( "Type##SoundEsp" ), &g_Vars.esp.sound_esp_type, std::vector<std::string>{ XorStr( "Beam" ), XorStr( "Default" ), } );
-   //		 ImGui::SliderFloatA( XorStr( "Time##SEsp" ), &g_Vars.esp.sound_esp_time, 0.f, 8.0f, XorStr( "%.1f seconds" ) );
-   //		 ImGui::SliderFloatA( XorStr( "Radius##SEsp" ), &g_Vars.esp.sound_esp_radius, 0.f, 500.0f, XorStr( "%.1f units" ) );
-
-   //		 ImGui::Checkbox( XorStr( "Kill Effect" ), &g_Vars.esp.kill_effect );
-   //		 if ( g_Vars.esp.kill_effect )
-   //			ImGui::SliderFloat( XorStr( "Kill Effect Time##kill effect" ), &g_Vars.esp.kill_effect_time, 0.f, 5.f );
-
-
-   //	  } ImGui::EndChild( );
-   //	  ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //	  ImGui::NextColumn( );
-   //	  ImGui::PopStyleVar( );
-   //	  ImGui::BeginChild( XorStr( "##Visuals8" ), ImVec2( 0.0f, 0.0f ), true );
-   //	  {
-   //		 ImGui::Checkbox( XorStr( "Glow Enabled" ), &g_Vars.esp.glow_enabled );
-   //		 ImGui::Checkbox( XorStr( "Glow Players" ), &g_Vars.esp.glow_players );
-   //		 ImGui::Checkbox( XorStr( "Glow Render Team" ), &g_Vars.esp.glow_team );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Glow Team Color" ), g_Vars.esp.glow_team_color, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::Checkbox( XorStr( "Glow Render Enemy" ), &g_Vars.esp.glow_enemy );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Glow Enemy Color" ), g_Vars.esp.glow_enemy_color, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::Checkbox( XorStr( "Glow Weapons" ), &g_Vars.esp.glow_weapons );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Glow Weapon Color" ), g_Vars.esp.glow_weapons_color, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::Checkbox( XorStr( "Glow Grenade" ), &g_Vars.esp.glow_grenade );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Glow grenade Color" ), g_Vars.esp.glow_grenade_color, ImGuiColorEditFlags_NoInputs );
-   //		 ImGui::ComboA( XorStr( "Glow Type" ), &g_Vars.esp.glow_type, std::vector<std::string>{ XorStr( "Outline" ), XorStr( "Cover" ), XorStr( "Thin" ) } );
-
-   //		 ImGui::Checkbox( XorStr( "Offscreen" ), &g_Vars.esp.offscren_enabled );
-   //		 ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //		 ImGui::ColorEdit4( XorStr( "##Offscreen Color" ), g_Vars.esp.offscreen_color, ImGuiColorEditFlags_NoInputs );
-
-   //		 ImGui::SliderInt( XorStr( "Size##Off" ), &g_Vars.esp.offscren_size, 0.f, 20.f );
-   //		 ImGui::SliderInt( XorStr( "Distance##iOff" ), &g_Vars.esp.offscren_distance, 0.f, 700.f );
-
-   //	  } ImGui::EndChild( );
-   //   }
-   //}
-
-   //if ( tab_index == 4 ) {
-   //   ImGui::Columns( 2, NULL, false );
-   //   ImGui::SetColumnWidth( 0, full_wnd.x * 0.5f );
-   //   ImGui::SetColumnWidth( 1, full_wnd.x );
-
-   //   ImGui::BeginChild( XorStr( "##Visuals5" ), ImVec2( 0.0f, 0.0f ), true );
-   //   {
-
-   //	  ImGui::Checkbox( XorStr( "Nade Prediction" ), &g_Vars.esp.NadePred );
-   //	  ImGui::Checkbox( XorStr( "Nade Prediction Only Pin Pulled" ), &g_Vars.esp.grenade_pred_only_pin_pull );
-
-   //	  ImGui::Checkbox( XorStr( "Walls Modulation" ), &g_Vars.esp.walls );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##wall_modulation Color" ), g_Vars.esp.wall_modulation, ImGuiColorEditFlags_NoInputs );
-
-   //	  ImGui::Checkbox( XorStr( "Props Modulation" ), &g_Vars.esp.props );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##props_modulation Color" ), g_Vars.esp.props_modulation, ImGuiColorEditFlags_NoInputs );
-
-   //	  ImGui::Checkbox( XorStr( "Skybox Modulation" ), &g_Vars.esp.skybox );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##skybox_modulation Color" ), g_Vars.esp.skybox_modulation, ImGuiColorEditFlags_NoInputs );
-
-
-   //	  ImGui::Checkbox( XorStr( "BulletTracer" ), &g_Vars.esp.beam_enabled );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##BulletTracer Color" ), g_Vars.esp.beam_color, ImGuiColorEditFlags_NoInputs );
-   //	  ImGui::ComboA( XorStr( "Type##BulletTracer" ), &g_Vars.esp.beam_type, std::vector<std::string>{ XorStr( "Physbeam" ), XorStr( "Blue Glow" ), XorStr( "Bubble" ), XorStr( "Glow" ), XorStr( "Purple Glow" ), XorStr( "Purple Laser" ), XorStr( "Radio" ), XorStr( "White" ) } );
-   //	  ImGui::SliderFloatA( XorStr( "Time##BulletTracer" ), &g_Vars.esp.beam_life_time, 0.f, 10.0f, XorStr( "%.1f seconds" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Speed##BulletTracer" ), &g_Vars.esp.beam_speed, 0.0f, 10.0f, XorStr( "%.1f" ) );
-   //	  ImGui::SliderFloatA( XorStr( "Width##BulletTracer" ), &g_Vars.esp.beam_width, 1.f, 10.0f, XorStr( "%.1f size" ) );
-   //	  ImGui::Checkbox( XorStr( "HitSound" ), &g_Vars.misc.hitsound );
-   //	  ImGui::ComboA( XorStr( "HitSound Type##HitSound" ), &g_Vars.misc.hitsound_type, std::vector<std::string>{ XorStr( "Switch" ), XorStr( "Bumble" ), } );
-
-
-   //	  static bool* hitmarkers_conditions[] = {
-   //		&g_Vars.esp.vizualize_hitmarker	,
-   //		&g_Vars.esp.event_hitmarker	,
-   //		&g_Vars.esp.hitmarker,
-   //	  };
-
-   //	  const char* hitmarkers_conditions_str[] = {
-   //		XorStr( "World Space" ), XorStr( "Notify" ), XorStr( "2D Space" )
-   //	  };
-
-   //	  ImGui::MultiCombo( XorStr( "Hitmarker" ),
-   //		 hitmarkers_conditions, hitmarkers_conditions_str, 3 );
-
-   //	  ImGui::Checkbox( XorStr( "Snaplines" ), &g_Vars.esp.snaplines_enalbed );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##snaplines Color" ), g_Vars.esp.snaplines_color, ImGuiColorEditFlags_NoInputs );
-   //	  ImGui::ComboA( XorStr( "Position##snaplines pos" ), &g_Vars.esp.snaplines_pos, std::vector<std::string>{ XorStr( "Left" ), XorStr( "Right" ), XorStr( "Top" ), XorStr( "Bottom" ), XorStr( "Center" ) } );
-
-   //	  ImGui::Checkbox( XorStr( "Angle lines" ), &g_Vars.esp.angle_lines ); //aa_indicator
-   //	  ImGui::Checkbox( XorStr( "Manual AA Indicator" ), &g_Vars.esp.aa_indicator );
-   //	  ImGui::Checkbox( XorStr( "Zeus Distance" ), &g_Vars.esp.zeus_distance );
-   //   } ImGui::EndChild( );
-
-   //   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //   ImGui::NextColumn( );
-   //   ImGui::PopStyleVar( );
-
-   //   ImGui::BeginChild( XorStr( "##Visuals6" ), ImVec2( 0.0f, 0.0f ), true );
-   //   {
-
-   //	  ImGui::Checkbox( XorStr( "Preserve KillFeed" ), &g_Vars.esp.preserve_killfeed );
-
-   //	  ImGui::Checkbox( XorStr( "C4 Planted" ), &g_Vars.esp.draw_c4 );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##c4 Color" ), g_Vars.esp.c4_color, ImGuiColorEditFlags_NoInputs );
-
-   //	  ImGui::Checkbox( XorStr( "Nades" ), &g_Vars.esp.nades );
-
-   //	  ImGui::Checkbox( XorStr( "Penetrate Crosshair" ), &g_Vars.esp.autowall_crosshair );
-   //	  ImGui::SliderFloatA( XorStr( "Lenght##iOff" ), &g_Vars.esp.autowall_crosshair_height, 0.f, 500.f );
-
-   //	  ImGui::Checkbox( XorStr( "Crosshair" ), &g_Vars.esp.crosshair );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##Crosshair Color" ), g_Vars.esp.crosshair_color, ImGuiColorEditFlags_NoInputs );
-   //	  ImGui::SliderIntA( XorStr( "Size##Crosshair" ), &g_Vars.esp.crosshair_size, 1.f, 10.f );
-
-   //	  ImGui::Checkbox( XorStr( "Dropped Weapons" ), &g_Vars.esp.DroppedWeapons );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##Dropped Weapons Color" ), g_Vars.esp.DroppedWeapons_color, ImGuiColorEditFlags_NoInputs );
-
-   //	  ImGui::ComboA( XorStr( "Weapons Type" ), &g_Vars.esp.DroppedWeapons_Type, std::vector<std::string>{ XorStr( "2D" ), XorStr( "3D" ) } );
-
-   //	  std::vector<std::string> SkyNames = {
-   //		XorStr( "Default" ),
-   //		XorStr( "cs_baggage_skybox_" ),
-   //		XorStr( "cs_tibet" ),
-   //		XorStr( "embassy" ),
-   //		XorStr( "italy" ),
-   //		XorStr( "jungle" ),
-   //		XorStr( "nukeblank" ),
-   //		XorStr( "office" ),
-   //		XorStr( "sky_csgo_cloudy01" ),
-   //		XorStr( "sky_csgo_night02" ),
-   //		XorStr( "sky_csgo_night02b" ),
-   //		XorStr( "sky_dust" ),
-   //		XorStr( "sky_venice" ),
-   //		XorStr( "vertigo" ),
-   //		XorStr( "vietnam" ),
-   //		XorStr( "sky_descent" )
-   //	  };
-
-   //	  ImGui::ComboA( XorStr( "Sky Type" ), &g_Vars.esp.sky_changer, SkyNames );
-   //	  ImGui::Checkbox( XorStr( "Fov Crosshair" ), &g_Vars.esp.fov_crosshair );
-   //	  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) - ImGui::GetFrameHeight( ) );
-   //	  ImGui::ColorEdit4( XorStr( "##Fov Crosshair Color" ), g_Vars.esp.fov_crosshair_color, ImGuiColorEditFlags_NoInputs );
-   //	  ImGui::Checkbox( XorStr( "Stat Logger" ), &g_Vars.esp.stat_logger );
-
-   //	  ImGui::Checkbox( XorStr( "Molotov Indicator" ), &g_Vars.esp.molotov_indicator );
-   //	  ImGui::Checkbox( XorStr( "Indicators##text" ), &g_Vars.misc.indicator_vizualise );
-   //   } ImGui::EndChild( );
-   //}
-
-   //if ( tab_index == 5 ) {
-   //   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-
-   //   ImGui::PopStyleVar( );
-
-   //   ImGui::BeginChild( XorStr( "##SkinsTab" ), ImVec2( 0.0f, 0.0f ), true, ImGuiWindowFlags_NoScrollbar );
-   //   {
-   //	  ImGui::Checkbox( XorStr( "Active" ), &g_Vars.m_global_skin_changer.m_active );
-
-   //	  full_wnd = ImGui::GetContentRegionAvail( );
-
-   //	  ImGui::Columns( 2, NULL, false );
-   //	  ImGui::SetColumnWidth( 0, full_wnd.x * 0.5f );
-   //	  ImGui::SetColumnWidth( 1, full_wnd.x );
-
-   //	  ImGui::BeginChild( XorStr( "##Skins1" ), ImVec2( 0.0f, 0.0f ), true );
-   //	  {
-   //		 ImGui::Columns( 2, nullptr, false );
-
-   //		 ImGui::PushItemWidth( ImGui::GetColumnWidth( ) - 10.0f );
-
-   //		 static int weapon_id = 0;
-
-   //		 ImGui::ListBox(
-   //			XorStr( "##skins_weapons" ), &weapon_id,
-   //			[] ( void* data, int32_t idx, const char** out_text ) {
-   //			auto vec = reinterpret_cast< std::vector< item_skins >* >( data );
-   //			*out_text = vec->at( idx ).display_name.c_str( );
-   //			return true;
-   //		 },
-   //			( void* ) ( &weapon_skins ), weapon_skins.size( ), 27 );
-
-   //		 ImGui::PopItemWidth( );
-
-   //		 ImGui::NextColumn( );
-
-   //		 ImGui::PushItemWidth( ImGui::GetColumnWidth( ) - 10.0f );
-
-   //		 auto& current_weapon = weapon_skins[ weapon_id ];
-   //		 auto idx = current_weapon.id;
-
-   //		 auto& skin_data = g_Vars.m_skin_changer;
-   //		 CVariables::skin_changer_data* skin = nullptr;
-   //		 for ( size_t i = 0u; i < skin_data.Size( ); ++i ) {
-   //			skin = skin_data[ i ];
-   //			if ( skin->m_definition_index == idx ) {
-   //			   break;
-   //			}
-   //		 }
-
-   //		 ImGui::Checkbox( XorStr( "enabled" ), &skin->m_enabled );
-
-   //		 ImGui::Text( XorStr( "Paint Kits" ) ); // current_weapon
-
-   //		 auto& kit = current_weapon.m_kits[ skin->m_paint_kit_index ];
-   //		 if ( kit.id != skin->m_paint_kit ) {
-   //			auto it = std::find_if( current_weapon.m_kits.begin( ), current_weapon.m_kits.end( ), [skin] ( paint_kit& a ) {
-   //			   return a.id == skin->m_paint_kit;
-   //			} );
-
-   //			if ( it != current_weapon.m_kits.end( ) )
-   //			   skin->m_paint_kit_index = std::distance( current_weapon.m_kits.begin( ), it );
-   //		 }
-
-   //		 ImGui::ListBox(
-   //			XorStr( "##paint_kits" ), &skin->m_paint_kit_index,
-   //			[] ( void* data, int32_t idx, const char** out_text ) {
-   //			auto vec = reinterpret_cast< std::vector< paint_kit >* >( data );
-   //			*out_text = vec->at( idx ).name.c_str( );
-   //			return true;
-   //		 },
-   //			( void* ) ( &current_weapon.m_kits ), current_weapon.m_kits.size( ), 20 );
-
-   //		 skin->m_paint_kit = current_weapon.m_kits[ skin->m_paint_kit_index ].id;
-
-   //		 ImGui::PopItemWidth( );
-
-   //		 ImGui::PushItemWidth( ImGui::GetColumnWidth( ) - 70.0f );
-
-   //		 ImGui::SliderFloat( XorStr( "Wear" ), &skin->m_wear, 0.00f, 1.00f, XorStr( "%.2f" ) );
-   //		 ImGui::InputInt( XorStr( "Seed" ), &skin->m_seed, 1, 10 );
-   //		 ImGui::InputInt( XorStr( "Stat-trak" ), &skin->m_stat_trak, 1, 10 );
-
-   //		 static char buffer[ 128 ] = { XorStr( '\0' ) };
-
-   //		 ImGui::InputText( XorStr( "Name" ), buffer, 128 );
-
-   //		 ImGui::PopItemWidth( );
-
-   //		 ImGui::Columns( 1, nullptr, false );
-   //	  } ImGui::EndChild( );
-
-   //	  ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //	  ImGui::NextColumn( );
-   //	  ImGui::PopStyleVar( );
-
-   //	  ImGui::BeginGroup( );
-   //	  {
-   //		 ImGui::BeginChild( XorStr( "##wear_skins" ), ImVec2( 0.0f, full_wnd.y * 0.45f - style.ItemSpacing.y ), true, ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysAutoResize );
-   //		 {
-   //			if ( ImGui::Checkbox( XorStr( "knife changer##knife" ), &g_Vars.m_global_skin_changer.m_knife_changer ) )
-   //			   g_Vars.m_global_skin_changer.m_update_skins = true;
-
-   //			ImGui::PushItemWidth( ImGui::GetContentRegionAvailWidth( ) - style.WindowPadding.x );
-
-   //			if ( k_knife_names.at( g_Vars.m_global_skin_changer.m_knife_vector_idx ).definition_index != g_Vars.m_global_skin_changer.m_knife_idx ) {
-   //			   auto it = std::find_if( k_knife_names.begin( ), k_knife_names.end( ), [&] ( const WeaponName_t& a ) {
-   //				  return a.definition_index == g_Vars.m_global_skin_changer.m_knife_idx;
-   //			   } );
-
-   //			   if ( it != k_knife_names.end( ) )
-   //				  g_Vars.m_global_skin_changer.m_knife_vector_idx = std::distance( k_knife_names.begin( ), it );
-   //			}
-
-   //			ImGui::ListBox(
-   //			   XorStr( "##knives" ), &g_Vars.m_global_skin_changer.m_knife_vector_idx,
-   //			   [] ( void* data, int32_t idx, const char** out_text ) {
-   //			   auto vec = reinterpret_cast< std::vector< WeaponName_t >* >( data );
-   //			   *out_text = vec->at( idx ).name;
-   //			   return true;
-   //			},
-   //			   ( void* ) ( &k_knife_names ), k_knife_names.size( ), 10 );
-
-   //			g_Vars.m_global_skin_changer.m_knife_idx = k_knife_names[ g_Vars.m_global_skin_changer.m_knife_vector_idx ].definition_index;
-
-   //			ImGui::PopItemWidth( );
-   //		 }
-   //		 ImGui::EndChild( );
-
-   //		 ImGui::BeginChild( XorStr( "##wear_gloves" ), ImVec2( 0.0f, full_wnd.y * 0.37f - style.ItemSpacing.y ), true, ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysAutoResize );
-   //		 {
-   //			if ( ImGui::Checkbox( XorStr( "glove changer##glove" ), &g_Vars.m_global_skin_changer.m_glove_changer ) )
-   //			   g_Vars.m_global_skin_changer.m_update_gloves = true;
-
-   //			ImGui::PushItemWidth( ImGui::GetContentRegionAvailWidth( ) - style.WindowPadding.x );
-
-   //			if ( k_glove_names.at( g_Vars.m_global_skin_changer.m_gloves_vector_idx ).definition_index != g_Vars.m_global_skin_changer.m_gloves_idx ) {
-   //			   auto it = std::find_if( k_glove_names.begin( ), k_glove_names.end( ), [&] ( const WeaponName_t& a ) {
-   //				  return a.definition_index == g_Vars.m_global_skin_changer.m_gloves_idx;
-   //			   } );
-
-   //			   if ( it != k_glove_names.end( ) )
-   //				  g_Vars.m_global_skin_changer.m_gloves_vector_idx = std::distance( k_glove_names.begin( ), it );
-   //			}
-
-   //			ImGui::ListBox(
-   //			   XorStr( "##gloves" ), &g_Vars.m_global_skin_changer.m_gloves_vector_idx,
-   //			   [] ( void* data, int32_t idx, const char** out_text ) {
-   //			   auto vec = reinterpret_cast< std::vector< WeaponName_t >* >( data );
-   //			   *out_text = vec->at( idx ).name;
-   //			   return true;
-   //			},
-   //			   ( void* ) ( &k_glove_names ), k_glove_names.size( ), 8 );
-
-   //			g_Vars.m_global_skin_changer.m_gloves_idx = k_glove_names[ g_Vars.m_global_skin_changer.m_gloves_vector_idx ].definition_index;
-
-   //			ImGui::PopItemWidth( );
-   //		 }
-   //		 ImGui::EndChild( );
-
-   //		 ImGui::BeginChild( XorStr( "##update_buttons" ), ImVec2( 0.0f, full_wnd.y * 0.18f ), true, ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysAutoResize );
-   //		 {
-   //			auto size = ImGui::GetContentRegionAvail( );
-
-   //			if ( ImGui::Button( XorStr( "Update Gloves" ), ImVec2( size.x, size.y * 0.5f - style.ItemSpacing.y ) ) ) {
-   //			   g_Vars.m_global_skin_changer.m_update_skins = true;
-   //			   g_Vars.m_global_skin_changer.m_update_gloves = true;
-   //			}
-
-   //			if ( ImGui::Button( XorStr( "Update Skins" ), ImVec2( size.x, size.y * 0.5f - style.ItemSpacing.y ) ) ) {
-   //			   g_Vars.m_global_skin_changer.m_update_skins = true;
-   //			}
-   //		 }
-   //		 ImGui::EndChild( );
-   //	  }
-   //	  ImGui::EndGroup( );
-   //   }
-   //   ImGui::EndChild( );
-   //}
-
-   //if ( tab_index == 6 ) {
-   //   float total_tabs_width = ImGui::GetContentRegionAvail( ).x - style.WindowPadding.x;
-
-   //   const int tabs_count = 3;
-   //   const int tab_pads = 0;
-   //   float tab_width = total_tabs_width / ( tabs_count + tab_pads );
-
-   //   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-
-   //   if ( ImGui::Button( XorStr( "MAIN" ), ImVec2( tab_width + 3.f, 25.f ) ) ) page_in_tab = 0;
-   //   ImGui::SameLine( 0, 0 );
-   //   if ( ImGui::Button( XorStr( "CONFIG" ), ImVec2( tab_width + 3.f, 25.f ) ) ) page_in_tab = 1;
-   //   ImGui::SameLine( 0, 0 );
-   //   if ( ImGui::Button( XorStr( "SCRIPTS" ), ImVec2( tab_width + 3.f, 25.f ) ) ) page_in_tab = 2;
-
-   //   ImGui::PopStyleVar( );
-
-   //   ImGui::BeginChild( XorStr( "##MiscTab" ), ImVec2( 0.0f, 0.0f ), true, ImGuiWindowFlags_NoScrollbar );
-   //   {
-   //	  ImGui::Columns( 2, NULL, false );
-   //	  ImGui::SetColumnWidth( 0, full_wnd.x * 0.5f );
-   //	  ImGui::SetColumnWidth( 1, full_wnd.x );
-
-   //	  if ( page_in_tab == 0 ) {
-   //		 ImGui::BeginChild( XorStr( "##Misc1" ), ImVec2( 0.0f, 0.0f ), true );
-   //		 {
-   //			ImGui::Checkbox( XorStr( "Misc Enabled" ), &g_Vars.misc.active );
-   //			ImGui::Checkbox( XorStr( "Auto Jump" ), &g_Vars.misc.autojump );
-   //			ImGui::Checkbox( XorStr( "Auto Strafe" ), &g_Vars.misc.autostrafer );
-   //			ImGui::Checkbox( XorStr( "WASD Strafe" ), &g_Vars.misc.autostrafer_wasd );
-   //			ImGui::SliderFloatA( XorStr( "Strafe Retrack" ), &g_Vars.misc.autostrafer_retrack, 2.0f, 8.0f );
-
-   //			ImGui::Checkbox( XorStr( "Fast Duck" ), &g_Vars.misc.fastduck );
-   //			ImGui::Checkbox( XorStr( "Fake Duck" ), &g_Vars.misc.fakeduck );
-   //			ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //			ImGui::KeyBox( &g_Vars.misc.fakeduck_bind );
-   //			ImGui::Checkbox( XorStr( "Mini Jump" ), &g_Vars.misc.minijump );
-   //			ImGui::Checkbox( XorStr( "Edge Jump" ), &g_Vars.misc.edgejump );
-   //			ImGui::Checkbox( XorStr( "Duck Jump" ), &g_Vars.misc.duckjump );
-   //			ImGui::Checkbox( XorStr( "Quick Stop" ), &g_Vars.misc.quickstop );
-   //			ImGui::Checkbox( XorStr( "Slow Walk" ), &g_Vars.misc.slow_walk );
-   //			ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //			ImGui::KeyBox( &g_Vars.misc.slow_walk_bind );
-   //			ImGui::SliderFloatA( XorStr( "Slow Walk Speed" ), &g_Vars.misc.slow_walk_speed, 1.0f, 100.0f, XorStr( "%.1f %%" ) );
-
-   //			ImGui::Checkbox( XorStr( "Knife bot" ), &g_Vars.rage.knife_bot );
-   //			ImGui::ComboA( XorStr( "Knife bot type" ), &g_Vars.rage.knife_bot_type, std::vector<std::string> { XorStr( "Off" ), XorStr( "Default" ), XorStr( "Backstab" ), XorStr( "Quick" ) } );
-   //			ImGui::Checkbox( XorStr( "Show Impacts" ), &g_Vars.misc.impacts_spoof );
-   //		 } ImGui::EndChild( );
-
-   //		 ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //		 ImGui::NextColumn( );
-   //		 ImGui::PopStyleVar( );
-
-   //		 ImGui::BeginChild( XorStr( "##Misc2" ), ImVec2( 0.0f, 0.0f ), true );
-   //		 {
-   //			ImGui::Checkbox( XorStr( "ThirdPerson" ), &g_Vars.misc.third_person );
-   //			ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
-   //			ImGui::KeyBox( &g_Vars.misc.third_person_bind );
-   //			ImGui::Checkbox( XorStr( "Disable On Grenade##thridperson" ), &g_Vars.misc.off_third_person_on_grenade );
-   //			ImGui::SliderFloatA( XorStr( "distance " ), &g_Vars.misc.third_person_dist, 0, 250, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View World Fov " ), &g_Vars.esp.world_fov, 0.f, 200.f, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View Model Fov " ), &g_Vars.misc.viewmodel_fov, 0.f, 200.f, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View Model x " ), &g_Vars.misc.viewmodel_x, -20.f, 20.f, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View Model y " ), &g_Vars.misc.viewmodel_y, -20.f, 20.f, XorStr( "%.0f" ) );
-   //			ImGui::SliderFloatA( XorStr( "View Model z " ), &g_Vars.misc.viewmodel_z, -20.f, 20.f, XorStr( "%.0f" ) );
-
-   //			ImGui::Checkbox( XorStr( "Chat Spammer" ), &g_Vars.misc.chat_spammer );
-   //			ImGui::Checkbox( XorStr( "ClanTag " ), &g_Vars.misc.clantag_changer );
-   //			ImGui::Checkbox( XorStr( "Name Changer" ), &g_Vars.misc.name_changer );
-
-   //			// ImGui::ComboA( XorStr( "ClanTag Type" ), &g_Vars.misc.clantag_changer_type, std::vector<std::string>{ XorStr( "Static" ), XorStr( "Dynamic" ) } );
-
-   //			static char buffer[ 128 ] = { XorStr( '\0' ) };
-   //			static char buffer2[ 128 ] = { XorStr( '\0' ) };
-
-   //			ImGui::InputText( XorStr( "ClanTag##clantag name" ), buffer, 128 );
-
-   //			ImGui::InputText( XorStr( "Name##name changer" ), buffer2, 128 );
-
-   //			if ( ImGui::Button( XorStr( "Apply ClanTag" ) ) )
-   //			   g_Vars.misc.clantag_changer_str = buffer;
-
-   //			if ( ImGui::Button( XorStr( "Apply Name" ) ) ) {
-   //			   g_Vars.misc.name_changer_str = buffer2;
-
-   //			   static ConVar* cName = Source::m_pCvar->FindVar( XorStr( "name" ) );
-   //			   *( int* ) ( ( uintptr_t ) & cName->fnChangeCallback + 0xC ) = 0;
-   //			   cName->SetValue( buffer2 );
-   //			}
-
-   //			ImGui::ColorEdit4( XorStr( "main_color" ), g_Vars.menu.main_color );
-
-   //		 #ifdef _DEBUG
-   //			extern char BufferName[ 4096 ];
-   //			extern int FontWeight;
-   //			extern int FontSize;
-   //			extern int FontFlags;
-   //			extern int CurrentRenderFont;
-   //			extern bool FontMax;;
-   //			extern std::vector<std::string> fonts_names;
-   //			extern void AddFontNew( );
-
-   //			ImGui::ComboA( XorStr( "current font" ), &CurrentRenderFont, fonts_names );
-
-   //			ImGui::InputText( XorStr( "config name" ), BufferName, 4096 );
-   //			ImGui::SliderIntA( XorStr( "FontWeight" ), &FontWeight, 0, 900, XorStr( "%d" ) );
-   //			ImGui::SliderIntA( XorStr( "FontSize" ), &FontSize, -20, 20, XorStr( "%d" ) );
-
-   //			static bool aa, cleartype;
-   //			ImGui::Checkbox( XorStr( "aa" ), &aa );
-   //			ImGui::Checkbox( XorStr( "cleartype" ), &cleartype );
-   //			ImGui::Checkbox( XorStr( "FontMax" ), &FontMax );
-
-   //			FontFlags = 0;
-   //			if ( aa )
-   //			   FontFlags |= 1 << 3;
-
-   //			if ( cleartype )
-   //			   FontFlags |= 1 << 2;
-
-   //			if ( ImGui::Button( XorStr( "create new font" ) ) )
-   //			   AddFontNew( );
-   //		 #endif
-
-   //		 }   ImGui::EndChild( );
-   //	  }
-
-   //	  if ( page_in_tab == 1 ) {
-   //		 ImGui::BeginChild( XorStr( "##Misc3" ), ImVec2( 0.0f, 0.0f ), true );
-   //		 {
-   //			ImGui::InputText( XorStr( "Cfg name" ), config_name, 256 );
-   //			ImGui::ListBox( XorStr( "Configs" ), &voted_cfg, cfg_list );
-
-   //			if ( ImGui::Button( XorStr( "Update" ), ImVec2( 97.f, 25 ) ) )
-   //			   cfg_list = ConfigManager::GetConfigs( );
-
-   //			ImGui::SameLine( );
-
-   //			if ( ImGui::Button( XorStr( "Create" ), ImVec2( 97.f, 25 ) ) ) {
-   //			   ConfigManager::CreateConfig( config_name );
-   //			   cfg_list = ConfigManager::GetConfigs( );
-   //			}
-
-   //			if ( ImGui::Button( XorStr( "Load" ), ImVec2( 97.f, 25 ) ) && cfg_list.size( ) > 0 ) {
-   //			   ConfigManager::LoadConfig( cfg_list.at( voted_cfg ) );
-   //			}
-
-   //			ImGui::SameLine( );
-
-   //			if ( ImGui::Button( XorStr( "Save" ), ImVec2( 97.f, 25 ) ) && cfg_list.size( ) > 0 ) {
-   //			   ConfigManager::SaveConfig( cfg_list.at( voted_cfg ) );
-   //			}
-
-   //			if ( ImGui::Button( XorStr( "Delete" ), ImVec2( 200.f, 25 ) ) && cfg_list.size( ) > 0 ) {
-   //			   ConfigManager::RemoveConfig( cfg_list.at( voted_cfg ) );
-   //			   cfg_list = ConfigManager::GetConfigs( );
-   //			}
-   //		 }
-   //		 ImGui::EndChild( );
-
-   //		 ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 0.0f, 0.0f ) );
-   //		 ImGui::NextColumn( );
-   //		 ImGui::PopStyleVar( );
-
-   //		 ImGui::BeginChild( XorStr( "##Misc4" ), ImVec2( 0.0f, 0.0f ), true );
-   //		 {
-   //			ImGui::Checkbox( XorStr( "Auto Buy" ), &g_Vars.misc.autobuy_enabled );
-
-   //			ImGui::ComboA( XorStr( "First Weapon" ), &g_Vars.misc.autobuy_first_weapon, std::vector<std::string>{ XorStr( "scar20" ), XorStr( "g3sg1" ), XorStr( "ssg08" ), XorStr( "awp" ) } );
-   //			ImGui::ComboA( XorStr( "Second Weapon" ), &g_Vars.misc.autobuy_second_weapon, std::vector<std::string>{ XorStr( "elite" ), XorStr( "deagle" ), XorStr( "revolver" ), XorStr( "cz75a" ), XorStr( "tec9" )} );
-   //			static bool* other[] = {
-   //			   &g_Vars.misc.autobuy_flashbang,
-   //			   &g_Vars.misc.autobuy_hegrenade,
-   //			   &g_Vars.misc.autobuy_molotovgrenade,
-   //			   &g_Vars.misc.autobuy_smokegreanade,
-   //			   &g_Vars.misc.autobuy_incgrenade,
-   //			   &g_Vars.misc.autobuy_decoy,
-   //			   &g_Vars.misc.autobuy_zeus,
-   //			   &g_Vars.misc.autobuy_armor,
-   //			};
-
-   //			const char* other_str[] = {
-   //			   XorStr( "flash" ), XorStr( "hegrenade" ), XorStr( "molotov" ), XorStr( "smoke" ), XorStr( "incgrenade" ), XorStr( "decoy" ),XorStr( "zeus" ),XorStr( "armor" )
-   //			};
-
-   //			ImGui::MultiCombo( XorStr( "Other Items" ),
-   //			   other, other_str, 8 );
-   //		 }
-   //		 ImGui::EndChild( );
-   //	  }
-
-   //	  if ( page_in_tab == 2 ) {
-
-   //	  }
-   //   }
-   //   ImGui::EndChild( );
-   //}
-   //}
-   //ImGui::EndChild( );
-   //ImGui::End( );
-   //ImGui::PopFont( );
-   //// #endif	 
-
-
-   //}
-   //#endif
-   //}
-#endif
 
    style->Alpha = meme;
 

@@ -1,5 +1,6 @@
 #include "Hooked.hpp"
 #include "MenuV2.hpp"
+#include "Menu.hpp"
 #include <intrin.h>
 #include "imgui_impl_win32.h"
 #include "InputSys.hpp"

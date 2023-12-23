@@ -26,6 +26,12 @@ ImFont* pMainCapsFont = nullptr;
 ImFont* pMenuFont = nullptr;
 ImFont* pSecondFont = nullptr;
 
+ImFont* boldMenuFont = nullptr;
+ImFont* menuFont = nullptr;
+ImFont* controlFont = nullptr;
+ImFont* tabFont = nullptr;
+ImFont* keybindsFont = nullptr;
+
 using Vec4 = Vector4D;
 using Vec3 = Vector;
 using Vec2 = Vector2D;
@@ -157,6 +163,36 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
    cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
    //  pSecondFont = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Users\\ikfakof\\Documents\\Work\\Programming\\new indigo source\\Raleway-Regular.ttf" ), 16.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic());
    pSecondFont = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Windows\\Fonts\\Verdana.ttf" ), 16.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
+   
+   //fg = new ImFontConfig( );
+   //fg->PixelSnapH = true;
+   //fg->OversampleH = cfg->OversampleV = 1;
+   //fg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+   //abFont = m_io->Fonts->AddFontFromMemoryTTF( &tabFont, sizeof( tabFont ), 12, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
+   //
+   //fg = new ImFontConfig( );
+   //fg->PixelSnapH = true;
+   //fg->OversampleH = cfg->OversampleV = 1;
+   //fg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+   //oldMenuFont = m_io->Fonts->AddFontFromMemoryCompressedTTF( boldMenuFont, sizeof boldMenuFont, 11, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
+   //
+   //fg = new ImFontConfig( );
+   //fg->PixelSnapH = true;
+   //fg->OversampleH = cfg->OversampleV = 1;
+   //fg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+   //enuFont = m_io->Fonts->AddFontFromMemoryCompressedTTF( menuFont, sizeof menuFont, 11, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
+   //
+   //fg = new ImFontConfig( );
+   //fg->PixelSnapH = true;
+   //fg->OversampleH = cfg->OversampleV = 1;
+   //fg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+   //ontrolFont = m_io->Fonts->AddFontFromMemoryCompressedTTF( controlFont, sizeof controlFont, 12, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
+   //
+   //fg = new ImFontConfig( );
+   //fg->PixelSnapH = true;
+   //fg->OversampleH = cfg->OversampleV = 1;
+   //fg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+   //eybindsFont = m_io->Fonts->AddFontFromMemoryTTF( keybindsFont, sizeof keybindsFont, 10.f, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
 
    static const ImWchar ranges[] =
    {

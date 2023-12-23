@@ -1,3 +1,5 @@
+#if 0
+
 #pragma once
 #include "sdk.hpp"
 
@@ -15,3 +17,5 @@ protected:
 
    }
 };
+
+#endif

@@ -439,6 +439,8 @@
     <ClCompile Include="LogSystem.cpp">
       <Filter>Misc</Filter>
     </ClCompile>
+    <ClCompile Include="clip_win.cpp" />
+    <ClCompile Include="clip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSecure.hpp">
@@ -960,6 +962,8 @@
     <ClInclude Include="LogSystem.hpp">
       <Filter>Misc</Filter>
     </ClInclude>
+    <ClInclude Include="clip.h" />
+    <ClInclude Include="clip_lock_impl.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Entrypoint">

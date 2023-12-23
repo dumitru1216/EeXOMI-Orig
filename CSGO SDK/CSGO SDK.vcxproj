@@ -162,6 +162,8 @@
     <ClCompile Include="CClientState.cpp" />
     <ClCompile Include="CCSGO_HudDeathNotice.cpp" />
     <ClCompile Include="characterset.cpp" />
+    <ClCompile Include="clip.cpp" />
+    <ClCompile Include="clip_win.cpp" />
     <ClCompile Include="CrashHandler.cpp" />
     <ClCompile Include="CSecure.cpp" />
     <ClCompile Include="DispatchUserMessage.cpp" />
@@ -322,6 +324,8 @@
     <ClInclude Include="CCSGO_HudDeathNotice.hpp" />
     <ClInclude Include="characterset.hpp" />
     <ClInclude Include="CColor.hpp" />
+    <ClInclude Include="clip.h" />
+    <ClInclude Include="clip_lock_impl.h" />
     <ClInclude Include="Config.hpp" />
     <ClInclude Include="core.hpp" />
     <ClInclude Include="CPlayerResource.hpp" />

@@ -1,6 +1,6 @@
 #pragma once
 #include "imgui.h"
-#if 0
+#if 1
 // =====================================
 // - Custom controls
 // =====================================
@@ -27,8 +27,8 @@
 #define InsertSliderInt( x1, x2, x3, x4, x5 ) ImGui::Spacing( ); ImGui::Spacing( ); ImGui::Spacing( ); ImGui::Spacing( ); ImGui::Spacing( ); ImGui::Spacing( ); ImGui::Spacing( ); ImGui::Spacing( ); ImGui::NewLine( ); ImGui::SameLine( 43.f ); ImGui::PushItemWidth( 159.f ); ImGui::SliderInt( x1, &x2, x3, x4, x5 ); ImGui::PopItemWidth( );
 #define InsertCombo(x1,x2,x3) ImGui::Spacing(); ImGui::NewLine(); ImGui::NewLine(); ImGui::SameLine(42.f); ImGui::PushItemWidth(158.f); ImGui::Combo(x1, &x2, x3, IM_ARRAYSIZE(x3)); ImGui::PopItemWidth(); ImGui::CustomSpacing(1.f);
 #define InsertComboWithoutText(x1,x2,x3) ImGui::Spacing(); ImGui::NewLine(); ImGui::SameLine(42.f); ImGui::PushItemWidth(158.f); ImGui::Combo(x1, &x2, x3, IM_ARRAYSIZE(x3)); ImGui::PopItemWidth(); ImGui::CustomSpacing(1.f);
-#define InsertMultiCombo(x1,x2,x3,x4) ImGui::Spacing(); ImGui::NewLine(); ImGui::NewLine(); ImGui::SameLine(42.f); ImGui::PushItemWidth(158.f); ImGui::MultiCombo(x1, x2, x3, x4); ImGui::PopItemWidth(); ImGui::CustomSpacing(1.f);
-#define InsertMultiComboWithoutText(x1,x2,x3,x4) ImGui::Spacing(); ImGui::NewLine(); ImGui::SameLine(42.f); ImGui::PushItemWidth(158.f); ImGui::MultiCombo(x1, x2, x3, x4); ImGui::PopItemWidth(); ImGui::CustomSpacing(1.f);
+#define InsertMultiCombo(x1,x2,x3,x4) ImGui::Spacing(); ImGui::NewLine(); ImGui::NewLine(); ImGui::SameLine(42.f); ImGui::PushItemWidth(158.f); ImGui::MultiCombo(x1, x3, x2, x4); ImGui::PopItemWidth(); ImGui::CustomSpacing(1.f);
+#define InsertMultiComboWithoutText(x1,x2,x3,x4) ImGui::Spacing(); ImGui::NewLine(); ImGui::SameLine(42.f); ImGui::PushItemWidth(158.f); ImGui::MultiCombo(x1, x3, x2, x4); ImGui::PopItemWidth(); ImGui::CustomSpacing(1.f);
 #define InsertKeyBox(x1,x2) ImGui::NewLine( ); ImGui::SameLine( 47.f, 0.f  ); ImGui::Text(x1); ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ), 0.f ); ImGui::PushItemWidth(100.f); ImGui::KeyBox(&x2);
 #define InsertKeyBoxDefCond(x1,x2,x3) ImGui::NewLine( ); ImGui::SameLine( 47.f ); ImGui::Text(x1); ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) ); ImGui::KeyBox(&x2, x3);
 #define InsertColorPicker(x1,x2,x3) ImGui::SameLine(219.f); Menu::ColorPicker(x1, x2, x3);
