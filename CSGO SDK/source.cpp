@@ -408,24 +408,6 @@ namespace Source
    WNDPROC oldWindowProc;
    HWND hWindow = nullptr;
 
-#if 0
-   Memory::VmtSwap::Shared m_pClientSwap = nullptr;
-   Memory::VmtSwap::Shared m_pClientModeSwap = nullptr;
-   Memory::VmtSwap::Shared m_pPredictionSwap = nullptr;
-   Memory::VmtSwap::Shared m_pPanelSwap = nullptr;
-   Memory::VmtSwap::Shared m_pD3D9Swap = nullptr;
-   Memory::VmtSwap::Shared m_pResetSwap = nullptr;
-   Memory::VmtSwap::Shared m_pVguiSurfaceSwap = nullptr;
-   Memory::VmtSwap::Shared m_pGameEventSwap = nullptr;
-   Memory::VmtSwap::Shared m_pMatSystemSwap = nullptr;
-   Memory::VmtSwap::Shared m_pBSPQuerySwap = nullptr;
-   Memory::VmtSwap::Shared m_pClientStateSwap = nullptr;
-   Memory::VmtSwap::Shared m_pNetChannelSwap = nullptr;
-   Memory::VmtSwap::Shared m_pStudioRenderSwap = nullptr;
-   Memory::VmtSwap::Shared m_pEngineSoundSwap = nullptr;
-   Memory::VmtSwap::Shared m_pEngineSwap = nullptr;
-#endif
-
    RecvPropHook::Shared m_pDidSmokeEffectSwap = nullptr;
    RecvPropHook::Shared m_pFlAbsYawSwap = nullptr;
    RecvPropHook::Shared m_pPlaybackRateSwap = nullptr;
@@ -880,7 +862,9 @@ namespace Source
 
 	  oProcessInterpolatedList = Hooked::HooksManager.CreateHook<decltype( oProcessInterpolatedList ) >( &hkProcessInterpolatedList, ( void* )process_interpolated_list );
 	  o_CLMove = Hooked::HooksManager.CreateHook<decltype( o_CLMove ) >( &CL_Move, ( void* )cl_move );
-	  oWriteUsercmdDeltaToBuffer = Hooked::HooksManager.HookVirtual<decltype( oWriteUsercmdDeltaToBuffer )>( m_pClient.Xor( ), &Hooked::WriteUsercmdDeltaToBuffer, 23 );
+	 
+	  // we dont need this shit
+	  // oWriteUsercmdDeltaToBuffer = Hooked::HooksManager.HookVirtual<decltype( oWriteUsercmdDeltaToBuffer )>( m_pClient.Xor( ), &Hooked::WriteUsercmdDeltaToBuffer, 23 );
 
 
 	 //auto modify_eye_pos = Memory::Scan( XorStr( "client.dll" ), XorStr( "E8 ? ? ? ? 8B 06 8B CE FF 90 ? ? ? ? 85 C0 74 4E" ) );//Engine::Displacement.Data.m_ModifyEyePos;

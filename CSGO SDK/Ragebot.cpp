@@ -1589,45 +1589,9 @@ namespace Source {
 			}
 
 			if ( !temp_points.empty( ) ) {
-				if ( g_Vars.rage.rage_multithread ) {
-					auto numThreads = std::thread::hardware_concurrency( );
-					numThreads = Math::Clamp<unsigned int>( numThreads, 2, 16 );
-
-					C_PointsArray arrayScan[ 32 ] = {};
-					auto threadScan = numThreads;
-					auto pointsPerThread = temp_points.size( ) / numThreads;
-					auto additionalPoints = 0;
-					auto additionalStep = 0;
-					if ( temp_points.size( ) <= numThreads ) {
-						threadScan = temp_points.size( );
-						pointsPerThread = 1;
-					} else if ( ( temp_points.size( ) % numThreads ) != 0 ) {
-						additionalPoints = temp_points.size( ) % numThreads;
-						additionalStep = additionalPoints;
-						additionalStep = std::min( additionalPoints, int( numThreads ) / additionalPoints );
-					}
-
-					auto currentIt = 0;
-					for ( uint32_t i = 0; i < threadScan; ++i ) {
-						arrayScan[ i ].pointsCount = pointsPerThread;
-						arrayScan[ i ].points = &temp_points[ currentIt ];
-
-						currentIt += pointsPerThread;
-						if ( additionalPoints > 0 ) {
-							arrayScan[ i ].pointsCount += additionalStep;
-							currentIt += additionalStep;
-
-							additionalPoints -= additionalStep;
-						}
-
-						Threading::QueueJobRef( C_Ragebot::ScanPointArrayMT, &arrayScan[ i ] );
-					}
-
-					Threading::FinishQueue( );
-				} else {
-					for ( size_t i = 0u; i < temp_points.size( ); ++i )
-						ScanPoint( &temp_points.at( i ) );
-				}
+				/* scan point */
+				for ( size_t i = 0u; i < temp_points.size( ); ++i )
+					ScanPoint( &temp_points.at( i ) );
 
 				for ( auto& p : temp_points ) {
 					if ( p.damage > 1.0f ) {
@@ -2107,9 +2071,6 @@ namespace Source {
 				break;
 		}
 
-		// if ( current[ Unresolved ] && !record->m_iCorrectionType )
-		//	 return true;
-
 		if ( current[ InAir ] && !( record->m_iFlags & FL_ONGROUND ) )
 			return true;
 
@@ -2354,8 +2315,6 @@ namespace Source {
 
 		float left_damage = 0.f, right_damage = 0.f;
 		record->Apply( player );
-		// record->Apply( player);
-		// record->Apply( player );
 
 		auto hitboxSet = hdr->pHitboxSet( player->m_nHitboxSet( ) );
 
@@ -2403,13 +2362,6 @@ namespace Source {
 			if ( !GetBoxOption( hitbox, hitboxSet, ps, aim_target.override_hitscan ) ) {
 				continue;
 			}
-
-			/*if ( rageData->m_pCmd->command_number % 6 >= 3 ) {
-			   if ( hitbox->group == Hitgroup_RightArm || hitbox->group == Hitgroup_RightLeg )
-				  continue;
-			} else if ( hitbox->group == Hitgroup_LeftArm || hitbox->group == Hitgroup_LeftLeg ) {
-			   continue;
-			}*/
 
 			ps *= 0.01f;
 
@@ -2603,34 +2555,7 @@ sup:
 	}
 
 	int C_Ragebot::GetResolverSide( C_CSPlayer* player, Engine::C_LagRecord* record, int& type ) {
-		auto lagData = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
-
-		auto get_side = [ ]( int s ) {
-			switch ( s ) {
-				case RESOLVER_SIDE_LEFT:
-					return ANIMATION_RESOLVER_LEFT;
-					break;
-				case RESOLVER_SIDE_RIGHT:
-					return ANIMATION_RESOLVER_RIGHT;
-					break;
-				default:
-				case RESOLVER_SIDE_FAKE:
-					return ANIMATION_RESOLVER_FAKE;
-					break;
-			}
-			};
-
-		type = 0;
-
-		player_info_t player_info;
-		if ( !Source::m_pEngine->GetPlayerInfo( player->m_entIndex, &player_info ) ) {
-			return 0;
-		}
-
-		if ( player_info.fakeplayer )
-			return 0;
-
-		return g_BruteforceData[ player->m_entIndex ].GetYawSide( player->m_entIndex, *record );
+		return 0; /* main side */
 	}
 
 	bool C_Ragebot::IsStaticPointSafe( Engine::C_LagRecord* record, const Vector& point, mstudiobbox_t* hitbox, int side ) {

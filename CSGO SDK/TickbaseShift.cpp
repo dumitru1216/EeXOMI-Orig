@@ -780,7 +780,9 @@ void TickbaseSystem::tickbase_manipulation( Encrypted_t<CUserCmd> cmd, bool* sen
 	if ( !m_double_tap )
 		return;
 
-
+	/* do not run on those */
+	if ( weaponInfo->m_iWeaponType == WEAPONTYPE_C4 || weaponInfo->m_iWeaponType == WEAPONTYPE_GRENADE || weaponInfo->m_iWeaponType == WEAPONTYPE_KNIFE )
+		return;
 
 	if ( !m_charged ) {
 		if ( m_charge_timer > TIME_TO_TICKS( .5 ) ) { // .5 seconds after shifting, lets recharge
@@ -806,6 +808,7 @@ void TickbaseSystem::tickbase_manipulation( Encrypted_t<CUserCmd> cmd, bool* sen
 
 		*sendPacket = false;
 	}
+
 	if ( !m_charged ) {
 		m_charged_ticks = 0;
 	}

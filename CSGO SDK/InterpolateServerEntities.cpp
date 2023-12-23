@@ -44,7 +44,7 @@ namespace Hooked
 
 		 #if 0
 			typedef void( __thiscall * o_BuildTransformations )( C_CSPlayer*, CStudioHdr*, Vector*, Quaternion*, const matrix3x4_t&, int32_t, uint8_t* );
-			Memory::VCall< o_BuildTransformations >( local, 188 )( local,
+			Memory::VCall< o_BuildTransformations >( local, 184 )( local,
 			   local->m_pStudioHdr( ),
 			   g_Vars.globals.m_RealBonesPositions,
 			   g_Vars.globals.m_RealBonesRotations,
