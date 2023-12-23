@@ -12,6 +12,16 @@ int VelModTick = 0;
 int VelModBroken = 0;
 
 namespace Engine {
+	/* reference: csgo-src 
+	* credits: l3d
+	*/
+	void Prediction::StartCommand( C_CSPlayer* player, CUserCmd* ucmd ) {
+		// Prediction::StartCommand rebuild
+		player->SetCurrentCommand( predictionData->m_pCmd.Xor( ) );
+		C_BaseEntity::SetPredictionRandomSeed( predictionData->m_pCmd.Xor( ) );
+		C_BaseEntity::SetPredictionPlayer( predictionData->m_pPlayer );
+	}
+
 	// C_BasePlayer::PhysicsSimulate & CPrediction::RunCommand rebuild
 	void Prediction::Begin( Encrypted_t<CUserCmd> _cmd, bool* send_packet ) {
 		predictionData->m_RestoreData.is_filled = false;
