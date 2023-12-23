@@ -506,9 +506,10 @@ namespace Source {
 				rageData->m_pCmd->buttons &= ~IN_ATTACK;
 			}
 
-	
+#if 0
 			unk_rofl = unk_meme;
 			unk_meme = TickbaseShiftCtx.over_choke_nr > 0;
+#endif
 		} else if ( !this->rageData->m_pLocal->CanShoot( ) ) {
 			if ( !rageData->m_pWeaponInfo->m_ucFullAuto )
 				rageData->m_pCmd->buttons &= ~IN_ATTACK;
@@ -1080,19 +1081,8 @@ namespace Source {
 		//}
 
 		auto exploits_enabled = [ ]( ) {
-			if ( !g_Vars.rage.exploit ) {
-				return false;
-			}
-
-			if ( g_Vars.globals.Fakeducking )
-				return false;
-
-			if ( g_Vars.rage.exploit_type == 0 ) {
-				return g_Vars.rage.hide_shots_bind.enabled || g_Vars.rage.double_tap_bind.enabled;
-			}
-
-			return TickbaseShiftCtx.exploits_enabled;
-			};
+			return g_TickbaseController.Using( );
+		};
 
 		if ( !rageData->m_pLocal->CanShoot( ) )
 			return false;
@@ -1285,7 +1275,7 @@ namespace Source {
 			};
 
 		float hitchance = rageData->rbot->hitchance;
-		if ( TickbaseShiftCtx.double_tapped )
+		if ( g_TickbaseController.Using( ) )
 			hitchance = rageData->rbot->doubletap_hitchance;
 
 		if ( rageData->rbot->hitchance > 0.0f && can_hitchance( ) ) {
@@ -1496,6 +1486,8 @@ namespace Source {
 
 		rageData->m_bFailedHitchance = false;
 		rageData->m_bPrepareAim = false;
+
+		g_TickbaseController.m_bSupressRecharge = false; // suppress recharge
 
 		// IProfiler::ProfileData_t ProfileData = IProfiler::Get( )->GetData( 0 ); 
 		std::vector<C_AimPoint> aim_points;
@@ -1743,7 +1735,7 @@ namespace Source {
 
 			if ( rageData->m_pWeapon->m_iItemDefinitionIndex( ) == WEAPON_SCAR20 ||
 				 rageData->m_pWeapon->m_iItemDefinitionIndex( ) == WEAPON_G3SG1 &&
-				 TickbaseShiftCtx.exploits_enabled &&
+				 g_Vars.rage.exploit &&
 				 g_Vars.rage.double_tap_bind.enabled
 				 ) {
 
@@ -2781,11 +2773,11 @@ sup:
 			rageData->m_pCmd->viewangles.Normalize( );
 		}
 
-		if ( !TickbaseShiftCtx.in_rapid ) {
-			if ( best_point->target->record->m_bTeleportDistance || !g_Vars.globals.Fakeducking ) {
-				*rageData->m_pSendPacket = true;
-			}
-		}
+		// if ( !TickbaseShiftCtx.in_rapid ) {
+		// 	if ( best_point->target->record->m_bTeleportDistance || !g_Vars.globals.Fakeducking ) {
+		// 		*rageData->m_pSendPacket = true;
+		// 	}
+		// }
 
 		g_Vars.globals.CorrectShootPosition = true;
 		g_Vars.globals.AimPoint = best_point->point;

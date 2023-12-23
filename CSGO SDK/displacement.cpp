@@ -303,6 +303,10 @@ namespace Engine
 		Displacement.Function.m_LockStudioHdr = rel32_fix( Memory::Scan( image_client, XorStr( "E8 ?? ?? ?? ?? 8D 47 FC" ) ) );
 		Displacement.Function.m_LineGoesThroughSmoke = Memory::Scan( image_client, XorStr( "55 8B EC 83 EC 08 8B 15 ?? ?? ?? ?? 0F 57 C0" ) );
 		Displacement.Function.m_TraceFilterSimple = Memory::Scan( image_client, XorStr( "55 8B EC 83 E4 F0 83 EC 7C 56 52" ) ) + 0x3D; //xref : offset ??_7CTraceFilterSimple@@6B@ ; const CTraceFilterSimple::`vftable' 
+		
+		Displacement.Function.m_RunSimulation = rel32_fix( Memory::Scan( image_client, XorStr( "E8 ? ? ? ? A1 ? ? ? ? F3 0F 10 45 ? F3 0F 11 40" ) ) );
+		Displacement.Function.m_PredictionUpdate = Memory::Scan( image_client, XorStr( "55 8B EC 83 EC 08 53 56 8B F1 8B 0D ? ? ? ? 57 8B B9" ) );
+
 	}
 
 

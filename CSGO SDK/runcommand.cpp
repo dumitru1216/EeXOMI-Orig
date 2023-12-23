@@ -71,7 +71,7 @@ namespace Hooked
 		 return;
 	  }
 
-	  if ( !TickbaseShiftCtx.IsTickcountValid( ucmd->tick_count ) ) {
+	  if ( g_TickbaseController.IsTickcountValid( ucmd->tick_count ) ) {
 		 ucmd->hasbeenpredicted = true;
 		 return;
 	  }

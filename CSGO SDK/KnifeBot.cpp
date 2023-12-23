@@ -154,8 +154,10 @@ namespace Source
 			first_attack:
 			   knifeBotData->m_pCmd->viewangles = vecDelta.ToEulerAngles( );
 			   knifeBotData->m_pCmd->buttons |= IN_ATTACK;
+#if 0
 			   if ( !TickbaseShiftCtx.in_rapid )
 				  * sendPacket = true;
+#endif
 			   return true;
 			}
 		 } else if ( g_Vars.misc.knife_bot_type == 2 ) {
@@ -174,8 +176,11 @@ namespace Source
 
 	  knifeBotData->m_pCmd->viewangles = vecDelta.ToEulerAngles( );
 	  knifeBotData->m_pCmd->buttons |= IN_ATTACK2;
+#if 0
 	  if ( !TickbaseShiftCtx.in_rapid )
 		 * sendPacket = true;
+#endif
+
 	  return true;
    }
 

@@ -85,15 +85,9 @@ namespace Source
 		 return;
 	  }
 
-	  // if ( !g_Vars.fakelag.when_exploits && TickbaseShiftCtx.exploits_enabled )
-	  //	 return;
-
-	  if ( TickbaseShiftCtx.exploits_enabled )
+	 if ( g_Vars.rage.exploit && g_Vars.rage.double_tap_bind.enabled || !( *bSendPacket ) ) //  we use dt
 		 return;
 
-	  if ( !( *bSendPacket ) || TickbaseShiftCtx.in_rapid || TickbaseShiftCtx.was_in_rapid ) {
-		 return;
-	  }
 
 	  if ( !g_Vars.fakelag.enabled || HideRealAfterShot )
 		 return;
@@ -124,14 +118,15 @@ namespace Source
 			   return;
 			}
 		 }
-	  } else if ( cmd->buttons & IN_ATTACK ) {
-		 if ( !TickbaseShiftCtx.in_rapid ) {
-			if ( !g_Vars.globals.Fakeducking ) {
-			   *bSendPacket = true;
-			   return;
-			}
-		 }
-	  }
+	  } 
+	 // else if ( cmd->buttons & IN_ATTACK ) {
+	//	 if ( !TickbaseShiftCtx.in_rapid ) {
+	//		if ( !g_Vars.globals.Fakeducking ) {
+	//		   *bSendPacket = true;
+	//		   return;
+	//		}
+	//	 }
+	 // }
 
 	  fakelagData->m_iLimit = g_Vars.fakelag.lag_limit;
 	  if ( fakelagData->m_iLimit <= 0 )

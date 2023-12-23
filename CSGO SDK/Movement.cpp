@@ -533,17 +533,26 @@ namespace Source
 		 *movementData->m_pLocal->m_PlayerAnimState( ) = animStateBackup;
 	  }
 
-	  Source::FakeLag::Get( )->Main( movementData->m_pSendPacket, movementData->m_pCmd );
+	  // Source::FakeLag::Get( )->Main( movementData->m_pSendPacket, movementData->m_pCmd );
 
-	  if ( Source::m_pClientState->m_nChokedCommands( ) >= TickbaseShiftCtx.lag_limit ) {
-		 *movementData->m_pSendPacket = true;
+
+	  if ( g_TickbaseController.Using( ) ) {
+		  bool bShouldLag = g_TickbaseController.s_nExtraProcessingTicks > 1;
+		  *movementData->m_pSendPacket = !bShouldLag;
+	  } else if ( !g_TickbaseController.Building( ) && g_Vars.fakelag.enabled ) {
+		  Source::FakeLag::Get( )->Main( movementData->m_pSendPacket, movementData->m_pCmd );
 	  }
 
+
+	 // if ( Source::m_pClientState->m_nChokedCommands( ) >= TickbaseShiftCtx.lag_limit ) {
+	//	 *movementData->m_pSendPacket = true;
+	 // }
+#if 0
 	  if ( TickbaseShiftCtx.in_rapid )
 		 *movementData->m_pSendPacket = 0;
 	  if ( TickbaseShiftCtx.was_in_rapid )
 		 *movementData->m_pSendPacket = 1;
-
+#endif
 	  bool success = Source::Ragebot::Get( )->Run( movementData->m_pCmd, movementData->m_pLocal, movementData->m_pSendPacket );
 
 	  if ( !g_Vars.rage.enabled )

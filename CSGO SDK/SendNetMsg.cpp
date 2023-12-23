@@ -24,6 +24,7 @@ void WriteUsercmd( bf_write* buf, CUserCmd* incmd, CUserCmd* outcmd ) {
    }
 }
 
+#if 0
 void BypassChokeLimit( CCLCMsg_Move_t* CL_Move, INetChannel* pNetChan ) {
    // not shifting or dont need do extra fakelag
    if ( TickbaseShiftCtx.commands_to_shift == 0 && ( CL_Move->m_nNewCommands != 15 || Source::m_pClientState->m_nChokedCommands( ) <= 14 ) )
@@ -90,6 +91,7 @@ void BypassChokeLimit( CCLCMsg_Move_t* CL_Move, INetChannel* pNetChan ) {
 	  assign_std_autistic_string( CL_Move->m_data, buf.m_pData, curbit );
    }
 }
+#endif
 
 bool __fastcall Hooked::SendNetMsg( INetChannel* pNetChan, void* edx, INetMessage& msg, bool bForceReliable, bool bVoice ) {
    g_Vars.globals.szLastHookCalled = XorStr( "33" );
@@ -99,9 +101,13 @@ bool __fastcall Hooked::SendNetMsg( INetChannel* pNetChan, void* edx, INetMessag
    if ( g_Vars.misc.sv_pure_bypass && msg.GetType( ) == 14 ) // Return and don't send messsage if its FileCRCCheck
 	  return false;
 
+#if 0
    if ( msg.GetGroup( ) == 11 ) {
 	  BypassChokeLimit( ( CCLCMsg_Move_t* ) & msg, pNetChan );
-   } else if ( msg.GetGroup( ) == 9 ) { // group 9 is VoiceData
+   } else 
+#endif
+
+   if ( msg.GetGroup( ) == 9 ) { // group 9 is VoiceData
 	  // Fixing fakelag with voice
 	  bVoice = true;
 	  g_Vars.globals.VoiceEnable = true;

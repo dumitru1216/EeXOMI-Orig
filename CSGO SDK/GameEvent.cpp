@@ -16,6 +16,7 @@
 #include "ESP.hpp"
 #include "CChams.hpp"
 #include "Resolver.hpp"
+#include "TickbaseShift.hpp"
 #pragma comment(lib,"Winmm.lib")
 
 // BOLSHE VIRTUALNIX TABLICH BOGU VMT
@@ -399,6 +400,8 @@ void C_GameEvent::FireGameEvent( IGameEvent* pEvent ) {
 		 IAutoBuy::Get( )->Main( );
 		 if ( !g_Vars.esp.event_misc )
 			return;
+
+		 g_TickbaseController.m_bSupressRecharge = false;
 
 		 std::stringstream msg;
 		 msg << XorStr( "new round ! " );

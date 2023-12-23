@@ -312,6 +312,9 @@ struct DllInitializeData {
 	  DWORD32 m_LockStudioHdr;
 	  DWORD32 m_LineGoesThroughSmoke;
 	  DWORD32 m_TraceFilterSimple;
+
+	  DWORD32 m_RunSimulation;
+	  DWORD32 m_PredictionUpdate;
    } Function;
 };
 

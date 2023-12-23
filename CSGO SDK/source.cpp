@@ -805,6 +805,20 @@ namespace Source
 
 	  MH_Initialize( );
 
+	  RunSimulationDetor.m_nAddress = Engine::Displacement.Function.m_RunSimulation;
+	  if ( RunSimulationDetor.m_nAddress ) {
+		  if ( !RunSimulationDetor.Hook( ) ) {
+			  return false;
+		  }
+	  }
+
+	  PredictionUpdateDetor.m_nAddress = Engine::Displacement.Function.m_PredictionUpdate;
+	  if ( PredictionUpdateDetor.m_nAddress ) {
+		  if ( !PredictionUpdateDetor.Hook( ) ) {
+			  return false;
+		  }
+	  }
+
 	  oGetScreenAspectRatio = Hooked::HooksManager.HookVirtual<decltype( oGetScreenAspectRatio )>( m_pEngine.Xor( ), &Hooked::hkGetScreenAspectRatio, Index::EngineClient::GetScreenAspectRatio );
 	  oFireEvents = Hooked::HooksManager.HookVirtual<decltype( oFireEvents )>( m_pEngine.Xor( ), &hkFireEvents, 59 );
 	  oDispatchUserMessage = Hooked::HooksManager.HookVirtual<decltype( oDispatchUserMessage )>( m_pClient.Xor( ), &hkDispatchUserMessage, 38 );

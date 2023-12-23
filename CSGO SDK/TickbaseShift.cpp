@@ -2,7 +2,10 @@
 #include "source.hpp"
 #include "player.hpp"
 #include "weapon.hpp"
+#include "hooked.hpp"
+#include "displacement.hpp"
 
+#if 0
 C_TickbaseShift TickbaseShiftCtx;
 
 bool C_TickbaseShift::ExploitsEnabled( ) {
@@ -232,4 +235,332 @@ void C_TickbaseShift::OnNewPacket( int command_nr, int tickbase_from_server, int
 	  C_CSPlayer::GetLocalPlayer( )->m_nTickBase( ) = tickbase_from_server;
 	  Memory::VCall<void( __thiscall* )( void* )>( Source::m_pPrediction.Xor( ), 5 )( Source::m_pPrediction.Xor( ) );
    }
+}
+#endif
+
+void* g_pLocal = nullptr;
+TickbaseSystem g_TickbaseController;
+
+TickbaseShift_t::TickbaseShift_t( int _cmdnum, int _tickbase ) :
+	cmdnum( _cmdnum ), tickbase( _tickbase ) {
+	;
+}
+
+#define OFFSET_LASTOUTGOING 0x4CAC
+#define OFFSET_CHOKED 0x4CB0
+#define OFFSET_TICKBASE 0x3404
+
+bool TickbaseSystem::IsTickcountValid( int nTick ) {
+	return nTick >= ( Source::m_pGlobalVars->tickcount + int( 1 / Source::m_pGlobalVars->interval_per_tick ) + 8 );
+}
+
+void TickbaseSystem::OnCLMove( bool bFinalTick, float accumulated_extra_samples ) {
+#ifndef STANDALONE_CSGO
+	s_nTicksSinceUse++;
+#endif
+
+	//if we have low fps, we need to send our current batch 
+	//before we can start building or we'll get a prediction error
+	if ( !bFinalTick ) {
+		s_bFreshFrame = false;
+	}
+
+	//can only start building on the final tick of this frame
+	if ( ( !bFinalTick && !s_bBuilding ) || !g_pLocal ) {
+		//level change; reset our shifts
+		if ( !g_pLocal ) {
+			g_iTickbaseShifts.clear( );
+		}
+
+		Hooked::oCL_Move( bFinalTick, accumulated_extra_samples );
+		return;
+	}
+
+
+	const bool bStart = s_bBuilding;
+	s_bBuilding = g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit && !GetAsyncKeyState( VK_LBUTTON )
+#ifndef STANDALONE_CSGO
+		//	&& s_nTicksSinceUse >= s_nTicksRequired
+		&& !m_bSupressRecharge
+#endif
+		;
+
+	if ( bStart && !s_bBuilding && ( ( s_nExtraProcessingTicks > 0 && !s_bAckedBuild ) || ( int )s_nExtraProcessingTicks < s_iClockCorrectionTicks ) ) {
+		s_bBuilding = true;
+
+		//wait for a fresh frame on low fps to start charging 
+	} else if ( !bStart && s_bBuilding && !s_bFreshFrame ) {
+		if ( bFinalTick ) {
+			s_bFreshFrame = true;
+		}
+
+		s_iServerIdealTick++;
+		Hooked::oCL_Move( bFinalTick, accumulated_extra_samples );
+		return;
+	}
+
+	//do this afterwards so we catch when we're on the final tick
+	//if we had multiple ticks this frame
+	if ( bFinalTick ) {
+		s_bFreshFrame = true;
+	}
+
+#ifndef STANDALONE_CSGO
+	if ( !bStart && s_bBuilding ) {
+		s_nTicksSinceStarted = 0;
+	}
+
+	if ( s_bBuilding ) {
+		s_nTicksSinceStarted++;
+		if ( s_nTicksSinceStarted <= s_nTicksDelay ) {
+			s_iServerIdealTick++;
+			Hooked::oCL_Move( bFinalTick, accumulated_extra_samples );
+			return;
+		}
+	}
+#endif
+
+	if ( s_bBuilding && s_nExtraProcessingTicks < s_nSpeed ) {
+		s_bAckedBuild = false;
+
+		//keep track of the server's ideal tickbase
+		//note: should really do this once when host_currentframetick is 0 
+		//but it doesn't matter since we don't do anything here anyway
+		s_iServerIdealTick++;
+
+		//allow time for this cmd to process; increase m_iTicksAllowedForProcessing
+		s_nExtraProcessingTicks++;
+		return;
+	}
+
+	int cmdnumber = 1;
+	int choke = *( int* )( ( size_t )Source::m_pClientState.Xor( ) + OFFSET_CHOKED );
+	cmdnumber += *( int* )( ( size_t )Source::m_pClientState.Xor( ) + OFFSET_LASTOUTGOING );
+	cmdnumber += choke;
+
+	//where the server wants us to be
+	int arrive = s_iServerIdealTick;
+
+	bool inya = false;
+
+	//if we charged eg 15 ticks, our client's tickbase will be 15 ticks behind
+	//and the next tick we send will cause our tickbase to be adjusted
+	//so account for that
+	if ( !s_bAckedBuild ) {
+		s_bAckedBuild = true;
+
+		//note that we should really be adding host_frameticks - 1 - host_currentframetick to estimated 
+		//but that will only matter on low fps
+
+		int estimated = *( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) + **( int** )Engine::Displacement.Data.m_uHostFrameTicks + choke;
+		if ( estimated > arrive + s_iClockCorrectionTicks || estimated < arrive - s_iClockCorrectionTicks ) {
+			estimated = arrive - **( int** )Engine::Displacement.Data.m_uHostFrameTicks - choke + 1;
+			g_iTickbaseShifts.emplace_back( cmdnumber, estimated );
+		}
+
+		Hooked::oCL_Move( bFinalTick, accumulated_extra_samples );
+
+		//keep track of time
+		s_iServerIdealTick++;
+	}
+	//if you want to have absolutely perfect prediction on low fps with doubletap, 
+	//only double tap on the first tick of a frame with multiple ticks
+	//this is because older ticks in the same frame will now be being run 
+	//with a different tickbase if you shift later on
+	//this does not really matter^^ which is why on shot anti aim with fakelag is a thing
+	else if ( !s_bBuilding && s_nExtraProcessingTicks > 0 ) {
+#ifndef STANDALONE_CSGO
+		jmpRunExtraCommands :
+#endif
+
+		//the + 1 is because of the real command we are due
+		int estimated = *( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) + **( int** )Engine::Displacement.Data.m_uHostFrameTicks + s_nExtraProcessingTicks + choke;
+		if ( estimated > arrive + s_iClockCorrectionTicks || estimated < arrive - s_iClockCorrectionTicks ) {
+			estimated = arrive - s_nExtraProcessingTicks - choke - **( int** )Engine::Displacement.Data.m_uHostFrameTicks + 1;
+
+			const size_t realcmd = **( int** )Engine::Displacement.Data.m_uHostFrameTicks + s_nExtraProcessingTicks + choke;
+			for ( size_t i = 0; i < realcmd; i++ ) {
+				//now account for the shift on all our new commands
+				g_iTickbaseShifts.emplace_back( cmdnumber, estimated );
+
+				cmdnumber++;
+				estimated++;
+			}
+
+			//and then make sure the command after all of the above 
+			//starts in the right spot
+			//estimated = arrive + 1; // + 1 here??
+			//g_iTickbaseShifts.emplace_back(cmdnumber, estimated);
+		}
+
+		if ( !inya ) {
+			Hooked::oCL_Move( false, accumulated_extra_samples );
+
+			__asm
+			{
+				xorps xmm0, xmm0
+			}
+		}
+
+		while ( s_nExtraProcessingTicks > 0 ) {
+			bFinalTick = s_nExtraProcessingTicks == 1;
+
+			Hooked::oCL_Move( bFinalTick, 0.f );
+
+			if ( inya ) {
+				inya = false;
+				__asm
+				{
+					xorps xmm0, xmm0
+				}
+			}
+
+			s_nExtraProcessingTicks--;
+		}
+
+		//keep track of time
+		s_iServerIdealTick++;
+
+#ifndef STANDALONE_CSGO
+		s_nTicksSinceUse = 0;
+#endif
+	} else {
+		//otherwise copy the 'prestine' server ideal tick (m_nTickBase)
+		//note that this will actually break on really low doubletap speeds 
+		//(ie <= sv_clockcorrection_msecs because the server won't adjust your tickbase) 
+		if ( g_iTickbaseShifts.size( ) ) {
+			s_iServerIdealTick++;
+		} else {
+			s_iServerIdealTick = *( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) + 1;
+		}
+
+#ifndef STANDALONE_CSGO
+		int start = *( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE );
+		bool bPred = s_bBuilding && s_nExtraProcessingTicks > 0;
+
+		if ( bPred ) {
+			s_bInMove = true;
+			s_iMoveTickBase = start;
+
+			int estimated = start + s_nExtraProcessingTicks + **( int** )Engine::Displacement.Data.m_uHostFrameTicks + choke; // Engine::Displacement.DT_CSPlayer.m_bIsWalking
+			if ( estimated > arrive + s_iClockCorrectionTicks || estimated < arrive - s_iClockCorrectionTicks ) {
+				estimated = arrive - s_nExtraProcessingTicks - choke - **( int** )Engine::Displacement.Data.m_uHostFrameTicks + 1;
+
+				s_iMoveTickBase = estimated;
+				*( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) = estimated;
+			}
+		} else {
+			s_bInMove = false;
+		}
+#endif
+
+		// not building or it's not time to send
+		Hooked::oCL_Move( bFinalTick, accumulated_extra_samples );
+
+#ifndef STANDALONE_CSGO
+		if ( bPred ) {
+			s_bInMove = false;
+			*( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) = start;
+
+			if ( Source::m_pInput.Xor( ) ) {
+				typedef CUserCmd* ( __thiscall* GetUserCmdFn_t )( void*, int, int );
+				GetUserCmdFn_t fn = ( GetUserCmdFn_t )( ( *( void*** )Source::m_pInput.Xor( ) )[ 8 ] );
+				if ( fn ) {
+					CUserCmd* cmd = fn( Source::m_pInput.Xor( ), -1, cmdnumber );
+					if ( cmd ) {
+						if ( cmd->buttons & ( 1 << 0 ) ) {
+							s_bBuilding = false;
+							inya = true;
+							goto jmpRunExtraCommands;
+						}
+					}
+				}
+			}
+		}
+#endif
+	}
+}
+
+// TODO: Move me
+void InvokeRunSimulation( void* this_, float curtime, int cmdnum, CUserCmd* cmd, size_t local ) {
+	__asm {
+		push local
+		push cmd
+		push cmdnum
+
+		movss xmm2, curtime
+		mov ecx, this_
+
+		call Hooked::RunSimulationDetor.m_pOldFunction
+	}
+}
+
+void TickbaseSystem::OnRunSimulation( void* this_, int iCommandNumber, CUserCmd* pCmd, size_t local ) {
+	g_pLocal = ( void* )local;
+
+	float curtime;
+	__asm
+	{
+		movss curtime, xmm2
+	}
+
+	for ( int i = 0; i < ( int )g_iTickbaseShifts.size( ); i++ ) {
+		//ideally you compare the sequence we set this tickbase shift to
+		//with the last acknowledged sequence
+		if ( ( g_iTickbaseShifts[ i ].cmdnum < iCommandNumber - s_iNetBackup ) ||
+			 ( g_iTickbaseShifts[ i ].cmdnum > iCommandNumber + s_iNetBackup ) ) {
+			g_iTickbaseShifts.erase( g_iTickbaseShifts.begin( ) + i );
+			i--;
+		}
+	}
+
+	int tickbase = -1;
+	for ( size_t i = 0; i < g_iTickbaseShifts.size( ); i++ ) {
+		const auto& elem = g_iTickbaseShifts[ i ];
+
+		if ( elem.cmdnum == iCommandNumber ) {
+			tickbase = elem.tickbase;
+			break;
+		}
+	}
+
+	//apply our new shifted tickbase 
+	if ( tickbase != -1 && local ) {
+		*( int* )( local + OFFSET_TICKBASE ) = tickbase;
+		curtime = tickbase * s_flTickInterval;
+	}
+
+	//run simulation is the perfect place to do this because
+	//all other predictables (ie your weapon)
+	//will be run in the right curtime 
+	InvokeRunSimulation( this_, curtime, iCommandNumber, pCmd, local );
+}
+
+void TickbaseSystem::OnPredictionUpdate( void* prediction, void*, int startframe, bool validframe, int incoming_acknowledged, int outgoing_command ) {
+	typedef void( __thiscall* PredictionUpdateFn_t )( void*, int, bool, int, int );
+	PredictionUpdateFn_t fn = ( PredictionUpdateFn_t )Hooked::PredictionUpdateDetor.m_pOldFunction;
+	fn( prediction, startframe, validframe, incoming_acknowledged, outgoing_command );
+
+	if ( s_bInMove && g_pLocal ) {
+		*( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) = s_iMoveTickBase;
+	}
+
+	if ( g_pLocal ) {
+		for ( size_t i = 0; i < g_iTickbaseShifts.size( ); i++ ) {
+			const auto& elem = g_iTickbaseShifts[ i ];
+
+			if ( elem.cmdnum == ( outgoing_command + 1 ) ) {
+				*( int* )( ( size_t )g_pLocal + OFFSET_TICKBASE ) = elem.tickbase;
+				break;
+			}
+		}
+	}
+}
+
+bool TickbaseSystem::Building( ) const {
+	return s_bBuilding && !s_nExtraProcessingTicks && Source::m_pClientState->m_nChokedCommands( ) > 0;
+}
+
+bool TickbaseSystem::Using( ) const {
+	return !s_bBuilding && s_nExtraProcessingTicks;
 }

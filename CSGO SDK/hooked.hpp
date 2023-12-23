@@ -155,6 +155,12 @@ namespace Hooked
    inline FnCL_Move oCL_Move;
    void __vectorcall CL_Move( float accumulated_extra_samples, bool bFinalTick );
 
+   void __fastcall RunSimulation( void* this_, void*, int iCommandNumber, CUserCmd* pCmd, size_t local );
+   inline Memory::DetourHook_t RunSimulationDetor( RunSimulation );
+
+   void __fastcall PredictionUpdate( void* prediction, void*, int startframe, bool validframe, int incoming_acknowledged, int outgoing_command );
+   inline Memory::DetourHook_t PredictionUpdateDetor( PredictionUpdate );
+
    using FnIsConnected = bool( __thiscall* ) ( void );
    inline FnIsConnected oIsConnected;
    bool __fastcall hkIsConnected( void );
