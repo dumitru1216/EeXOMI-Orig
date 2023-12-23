@@ -1198,7 +1198,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 
 				  ImGui::ComboA( XorStr( "Target selection" ), &rbot->target_selection, rage_select_target_names, ARRAYSIZE( rage_select_target_names ) );
 
-				  ImGui::Checkbox( XorStr( "Friendly fire" ), &g_Vars.rage.team_check );
+				  //ImGui::Checkbox( XorStr( "Friendly fire" ), &g_Vars.rage.team_check );
 				  ImGui::Checkbox( XorStr( "Visual resolver" ), &g_Vars.rage.visual_resolver );
 				  ImGui::Checkbox( XorStr( "Predict velocity-modifier" ), &g_Vars.rage.fix_velocity_modifier );
 				  //ImGui::Checkbox( XorStr( "Multithreading" ), &g_Vars.rage.rage_multithread );

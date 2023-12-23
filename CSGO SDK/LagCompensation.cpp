@@ -99,7 +99,7 @@ namespace Engine
 
 	  for ( int i = 1; i <= Source::m_pGlobalVars->maxClients; ++i ) {
 		 auto player = C_CSPlayer::GetPlayerByIndex( i );
-		 if ( !player || player == local || !player->IsPlayer( ) )
+		 if ( !player || player == local || !player->IsPlayer( ) || player->IsTeammate( local ) )
 			continue;
 
 		 player_info_t player_info;
@@ -212,7 +212,7 @@ namespace Engine
 
    void Engine::C_EntityLagData::UpdateRecordData( Encrypted_t< C_EntityLagData > pThis, C_CSPlayer* player, const player_info_t& info, int updateType ) {
 	  auto local = C_CSPlayer::GetLocalPlayer( );
-	  auto team_check = g_Vars.rage.enabled && !g_Vars.rage.team_check && player->IsTeammate( C_CSPlayer::GetLocalPlayer( ) );
+	  auto team_check = g_Vars.rage.enabled && player->IsTeammate( C_CSPlayer::GetLocalPlayer( ) );
 	  if ( player->IsDead( ) || team_check ) {
 		 pThis->m_History.clear( );
 		 pThis->m_flLastUpdateTime = 0.0f;

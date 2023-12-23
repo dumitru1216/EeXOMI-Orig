@@ -1081,7 +1081,7 @@ namespace Source {
 		//}
 
 		auto exploits_enabled = [ ]( ) {
-			return g_TickbaseController.Using( );
+			return ( g_Vars.rage.exploit && g_Vars.rage.double_tap_bind.enabled );
 		};
 
 		if ( !rageData->m_pLocal->CanShoot( ) )
@@ -2661,7 +2661,7 @@ sup:
 		QAngle aimAngles = delta.ToEulerAngles( );
 		aimAngles.Normalize( );
 
-#if 1
+#if 0
 		if ( rageData->rbot->on_shot_aa ) {
 			bool tickbase_hide = g_Vars.rage.exploit && g_Vars.rage.exploit_type == 0 && ( g_Vars.rage.double_tap_bind.enabled || g_Vars.rage.hide_shots_bind.enabled );
 			bool can_hide_shot = false;
@@ -2747,8 +2747,6 @@ sup:
 		}
 #endif
 
-		if ( g_Vars.globals.HideShots )
-			return false;
 
 		if ( !rageData->rbot->silent_aim )
 			Source::m_pEngine->SetViewAngles( aimAngles );

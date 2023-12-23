@@ -295,9 +295,12 @@ namespace Source {
 				if ( throwTime > 0.f )
 					return false;
 			}
-		} else if ( cmd->buttons & IN_ATTACK ) {
-			if ( LocalPlayer->CanShoot( 0 ) )
-				return false;
+		} else {
+			// xref: kaaba
+			if ( ( WeaponInfo->m_iWeaponType == WEAPONTYPE_KNIFE && cmd->buttons & ( IN_ATTACK | IN_ATTACK2 ) ) || cmd->buttons & IN_ATTACK ) {
+				if ( LocalPlayer->CanShoot( ) )
+					return false;
+			}
 		}
 
 		if ( WeaponInfo->m_iWeaponType == WEAPONTYPE_KNIFE && Weapon->m_iItemDefinitionIndex( ) != WEAPON_ZEUS && g_Vars.antiaim.on_knife ) {
