@@ -75,6 +75,8 @@ namespace Source
    extern Encrypted_t<IClientLeafSystem> m_pClientLeafSystem;
    extern Encrypted_t<IMDLCache> m_pMDLCache;
    extern Encrypted_t<IViewRender> m_pViewRender;
+   extern Encrypted_t<CHud> m_pHud;
+   extern Encrypted_t<SFHudDeathNoticeAndBotStatus> g_pDeathNotices;
    extern WNDPROC oldWindowProc;
    extern HWND hWindow;
 

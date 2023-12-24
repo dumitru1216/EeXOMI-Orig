@@ -397,11 +397,20 @@ void C_GameEvent::FireGameEvent( IGameEvent* pEvent ) {
 	  case hash_32_fnv1a_const( "round_start" ):
 	  {
 		 IRoundFireBulletsStore::Get( )->EventCallBack( pEvent, 1, nullptr );
+
+		 /* death notices */
+		 for ( int i = 0; i < Source::g_pDeathNotices->m_vecDeathNotices.Count( ); i++ ) {
+			 auto cur = &Source::g_pDeathNotices->m_vecDeathNotices[ i ];
+			 if ( !cur ) {
+				 continue;
+			 }
+
+			 cur->m_flStartTime = 0.f;
+		 }
+
 		 IAutoBuy::Get( )->Main( );
 		 if ( !g_Vars.esp.event_misc )
 			return;
-
-		/// g_TickbaseController.m_bSupressRecharge = false;
 
 		 std::stringstream msg;
 		 msg << XorStr( "new round ! " );

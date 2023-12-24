@@ -35,36 +35,61 @@ int LastShotTime = 0;
 int OutgoingTickcount = 0;
 
 void PreserveKillfeed( ) {
-	auto pLocal = C_CSPlayer::GetLocalPlayer( );
+	auto local = C_CSPlayer::GetLocalPlayer( );
 
-	static auto ClearNoticies = ( void( __thiscall* )( uintptr_t ) ) Engine::Displacement.Function.m_uClearDeathNotices;
-	static auto DeathNoticeHud = FindHudElement<uintptr_t>( XorStr( "CCSGO_HudDeathNotice" ) );
-
-	if ( !pLocal || pLocal->IsDead( ) || !g_Vars.globals.RenderIsReady || !g_Vars.globals.HackIsReady || !Source::m_pEngine->IsInGame( ) ) {
-		DeathNoticeHud = 0;
+	if ( !local || !Source::m_pEngine->IsInGame( ) || !Source::m_pEngine->IsConnected( ) ) {
 		return;
 	}
 
-	if ( DeathNoticeHud == 0 )
-		DeathNoticeHud = FindHudElement<uintptr_t>( XorStr( "CCSGO_HudDeathNotice" ) );
+	static auto status = false;
+	static float m_spawn_time = local->m_flSpawnTime( );
 
-	if ( DeathNoticeHud ) {
-		if ( g_Vars.esp.preserve_killfeed ) {
-			if ( !g_Vars.globals.IsRoundFreeze && !pLocal->IsDead( ) ) {
-				*( float* )( DeathNoticeHud + 80 ) = g_Vars.esp.preserve_killfeed_time;
+	auto set = false;
+	if ( m_spawn_time != local->m_flSpawnTime( ) || status != g_Vars.esp.preserve_killfeed ) {
+		set = true;
+		status = g_Vars.esp.preserve_killfeed;
+		m_spawn_time = local->m_flSpawnTime( );
+	}
+
+	for ( int i = 0; i < Source::g_pDeathNotices->m_vecDeathNotices.Count( ); i++ ) {
+		auto cur = &Source::g_pDeathNotices->m_vecDeathNotices[ i ];
+		if ( !cur ) {
+			continue;
+		}
+
+		if ( local->IsDead( ) || set ) {
+			if ( cur->set != 1.f && !set ) {
+				continue;
 			}
+
+			cur->m_flStartTime = Source::m_pGlobalVars->curtime;
+			cur->m_flStartTime -= local->m_iHealth( ) <= 0 ? 2.f : 7.5f;
+			cur->set = 2.f;
+
+			continue;
 		}
 
-		static float LastSpawnTime = 0.0f;
-		float spawn_time = pLocal->m_flSpawnTime( );
-		if ( *( float* )( DeathNoticeHud + 80 ) > 1.5f
-			 && ( !g_Vars.esp.preserve_killfeed || LastSpawnTime != spawn_time ) ) {
-			*( float* )( DeathNoticeHud + 80 ) = 1.5f;
-			ClearNoticies( DeathNoticeHud - 20 );
-			LastSpawnTime = spawn_time;
+		if ( cur->set == 2.f ) {
+			continue;
 		}
+
+		if ( !status ) {
+			cur->set = 1.f;
+			return;
+		}
+
+		if ( cur->set == 1.f ) {
+			continue;
+		}
+
+		if ( cur->m_flLifeTimeModifier == 1.5f ) {
+			cur->m_flStartTime = FLT_MAX;
+		}
+
+		cur->set = 1.f;
 	}
 }
+
 
 namespace Hooked {
 	bool CreateMoveHandler( float ft, CUserCmd* _cmd, bool* bSendPacket ) {

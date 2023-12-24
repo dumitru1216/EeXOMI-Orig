@@ -404,6 +404,8 @@ namespace Source
    Encrypted_t<IClientLeafSystem> m_pClientLeafSystem = nullptr;
    Encrypted_t<IMDLCache> m_pMDLCache = nullptr;
    Encrypted_t<IViewRender> m_pViewRender = nullptr;
+   Encrypted_t<CHud> m_pHud = nullptr;
+   Encrypted_t<SFHudDeathNoticeAndBotStatus> g_pDeathNotices = nullptr;
 
    WNDPROC oldWindowProc;
    HWND hWindow = nullptr;
@@ -667,6 +669,14 @@ namespace Source
 		 Win32::Error( XorStr( "m_pViewRender is nullptr (Source::%s)" ), __FUNCTION__ );
 		 return false;
 	  }
+
+	  m_pHud = *( CHud** )( Memory::Scan( XorStr( "client.dll" ), XorStr( "B9 ? ? ? ? E8 ? ? ? ? 8B 5D 08" ) ) + 1 );
+	  if ( !m_pHud.IsValid( ) )
+		  return false;
+
+	  g_pDeathNotices = m_pHud->FindHudElement< SFHudDeathNoticeAndBotStatus* >( XorStr( "SFHudDeathNoticeAndBotStatus" ) );
+	  if ( !g_pDeathNotices.IsValid( ) )
+		  return false;
 
 	  auto D3DDevice9 = **( IDirect3DDevice9*** ) Engine::Displacement.Data.m_D3DDevice;
 	  if ( !D3DDevice9 )

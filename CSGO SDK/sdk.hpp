@@ -1437,3 +1437,35 @@ int main( ) {
 }
 
 #endif
+
+class NoticeText_t {
+public:
+	wchar_t m_nString[ 512 ]; //0x0000 
+	char pad_0x0400[ 0xC ]; //0x0400
+	float set; //0x040C
+	float m_flStartTime; //0x0410 
+	float m_flStartTime2; //0x0414 
+	float m_flLifeTimeModifier; //0x0418 
+	char pad_0x041C[ 0x4 ]; //0x041C
+}; //Size=0x420
+
+
+class SFHudDeathNoticeAndBotStatus {
+public:
+	char pad_0000[ 28 ]; //0x0000
+	char* m_szHudName; //0x001C
+	char pad_0020[ 64 ]; //0x0020
+	float m_flTime; //0x0060
+	char pad_0064[ 4 ]; //0x0064
+	CUtlVector< NoticeText_t > m_vecDeathNotices;
+};
+
+class CHud {
+public:
+	template< class T >
+	T FindHudElement( const char* name ) {
+		static auto FindHudElement_t = reinterpret_cast< uintptr_t( __thiscall* )( void*, const char* ) >( Memory::Scan( XorStr( "client.dll" ), XorStr( "55 8B EC 53 8B 5D 08 56 57 8B F9 33 F6 39 77 28" ) ) );
+
+		return reinterpret_cast< T >( FindHudElement_t( this, name ) );
+	}
+};
