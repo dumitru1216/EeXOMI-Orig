@@ -141,6 +141,15 @@ namespace Hooked {
 			cmd->buttons &= ~IN_ATTACK;
 		}
 
+
+		if ( g_Vars.globals.menuOpen ) {
+			// just looks nicer
+			auto RemoveButtons = [ & ]( int key ) { cmd->buttons &= ~key; };
+			RemoveButtons( IN_ATTACK );
+			RemoveButtons( IN_ATTACK2 );
+			RemoveButtons( IN_USE );			
+		}
+
 		auto weaponInfo = weapon->GetCSWeaponData( );
 
 		Engine::Prediction::Instance( )->RunGamePrediction( );

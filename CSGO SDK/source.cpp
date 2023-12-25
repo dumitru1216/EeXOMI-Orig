@@ -17,7 +17,7 @@
 
 #include "EXGui/main/setup.hpp"
 #include "MenuV2.hpp"
-
+#include "MenuV3/MenuV3.hpp"
 #include "hooker.hpp"
 
 #include "CChams.hpp"
@@ -723,7 +723,11 @@ namespace Source
 
 	  Render::Get( )->Initialize( D3DDevice9 );
 
-	  MenuV2::Get( )->Initialize( D3DDevice9 );
+	  // MenuV2::Get( )->Initialize( D3DDevice9 );
+#ifdef  sal
+	  nem::g_menu->init( D3DDevice9 );
+#endif //  sal
+
 
 	  GameEvent::Get( )->Register( );
 

@@ -4,6 +4,31 @@
 #include "imgui_impl_win32.h"
 #include "InputSys.hpp"
 #include "Render.hpp"
+#include "MenuV3/MenuV3.hpp"
+
+#include "Hooked.hpp"
+#include "Prediction.hpp"
+#include "displacement.hpp"
+#include "sdk.hpp"
+#include "player.hpp"
+#include "EventLogger.hpp"
+#include "GrenadePrediction.hpp"
+#include "Esp.hpp"
+#include "Render.hpp"
+#include "ExtendedEsp.hpp"
+#include "Movement.hpp"
+#include "InputSys.hpp"
+#include "Exploits.hpp"
+#include "Miscellaneous.hpp"
+#include "SetupBones.hpp"
+#include "LagCompensation.hpp"
+#include "Utils/threading.h"
+#include "AnimationSystem.hpp"
+#include "Resolver.hpp"
+#include "BulletBeamTracer.hpp"
+#include "PreserveKillfeed.hpp"
+#include "ServerSounds.hpp"
+#include "TickbaseShift.hpp"
 
 bool run_once = false;
 uint64_t Cookie = 0;
@@ -72,7 +97,7 @@ HRESULT __stdcall Hooked::EndScene( IDirect3DDevice9* pDevice ) {
    pDevice->SetSamplerState( NULL, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
    pDevice->SetSamplerState( NULL, D3DSAMP_SRGBTEXTURE, NULL );
 
-   Render::Get( )->RenderScene( );
+  // Render::Get( )->RenderScene( );
 
    ImGui_ImplDX9_NewFrame( );
    ImGui_ImplWin32_NewFrame( );
@@ -80,7 +105,11 @@ HRESULT __stdcall Hooked::EndScene( IDirect3DDevice9* pDevice ) {
 
    ImGui::GetIO( ).MouseDrawCursor = g_Vars.globals.menuOpen;
 
-   MenuV2::Get( )->MenuRender( pDevice );
+   //MenuV2::Get( )->MenuRender( pDevice );
+#ifdef sal
+   nem::g_menu->render( false, pDevice );
+#endif
+
 
    //IMenu::Get( )->Main( pDevice );
 
@@ -89,6 +118,15 @@ HRESULT __stdcall Hooked::EndScene( IDirect3DDevice9* pDevice ) {
 
    //if ( g_Vars.esp.spectator_list || g_Vars.esp.keybind_list )
 	  //IMenu::Get( )->IndicatorsFrame( );
+
+	  //g_ServerSounds.Start( );
+   IEsp::Get( )->Main( );
+   //g_ServerSounds.Finish( );
+   IGrenadePrediction::Get( )->Paint( );
+   ILoggerEvent::Get( )->Main( );
+   Source::Miscellaneous::Get( )->Main( );
+   if ( g_Vars.esp.beam_enabled )
+	   IBulletBeamTracer::Get( )->Main( );
 
    ImGui::Render( );
 

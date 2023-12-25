@@ -6,6 +6,30 @@
 #include "InputSys.hpp"
 #include "Render.hpp"
 
+#include "Hooked.hpp"
+#include "Prediction.hpp"
+#include "displacement.hpp"
+#include "sdk.hpp"
+#include "player.hpp"
+#include "EventLogger.hpp"
+#include "GrenadePrediction.hpp"
+#include "Esp.hpp"
+#include "Render.hpp"
+#include "ExtendedEsp.hpp"
+#include "Movement.hpp"
+#include "InputSys.hpp"
+#include "Exploits.hpp"
+#include "Miscellaneous.hpp"
+#include "SetupBones.hpp"
+#include "LagCompensation.hpp"
+#include "Utils/threading.h"
+#include "AnimationSystem.hpp"
+#include "Resolver.hpp"
+#include "BulletBeamTracer.hpp"
+#include "PreserveKillfeed.hpp"
+#include "ServerSounds.hpp"
+#include "TickbaseShift.hpp"
+
 HRESULT __stdcall Hooked::Present( LPDIRECT3DDEVICE9 pDevice, const RECT* pSourceRect, const RECT* pDestRect, HWND hDestWindowOverride, const RGNDATA* pDirtyRegion ) {
    g_Vars.globals.szLastHookCalled = XorStr( "27" );
    g_Vars.globals.m_pD3D9Device = pDevice;
@@ -34,13 +58,22 @@ HRESULT __stdcall Hooked::Present( LPDIRECT3DDEVICE9 pDevice, const RECT* pSourc
    pDevice->SetSamplerState( NULL, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
    pDevice->SetSamplerState( NULL, D3DSAMP_SRGBTEXTURE, NULL );
 
-   Render::Get( )->RenderScene( );
+ // Render::Get( )->RenderScene( );
 
    ImGui_ImplDX9_NewFrame( );
    ImGui_ImplWin32_NewFrame( );
    ImGui::NewFrame( );
 
    ImGui::GetIO( ).MouseDrawCursor = g_Vars.globals.menuOpen;
+
+   //g_ServerSounds.Start( );
+   IEsp::Get( )->Main( );
+   //g_ServerSounds.Finish( );
+   IGrenadePrediction::Get( )->Paint( );
+   ILoggerEvent::Get( )->Main( );
+   Source::Miscellaneous::Get( )->Main( );
+   if ( g_Vars.esp.beam_enabled )
+	   IBulletBeamTracer::Get( )->Main( );
 
    /*IMenu::Get( )->Main( pDevice );
 

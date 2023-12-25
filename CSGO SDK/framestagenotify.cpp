@@ -417,19 +417,12 @@ namespace Hooked
 			g_Vars.globals.m_iServerType = -1; // no connected
 
 		 // draw visuals
-		 Render::Get( )->BeginScene( );
+		// Render::Get( )->BeginScene( );
 		 {
-			//g_ServerSounds.Start( );
-			IEsp::Get( )->Main( );
-			//g_ServerSounds.Finish( );
-			IGrenadePrediction::Get( )->Paint( );
-			ILoggerEvent::Get( )->Main( );
-			Source::Miscellaneous::Get( )->Main( );
-			if ( g_Vars.esp.beam_enabled )
-			   IBulletBeamTracer::Get( )->Main( );
+
 
 		 }
-		 Render::Get( )->EndScene( );
+		// Render::Get( )->EndScene( );
 
 		 if ( g_Vars.globals.HackIsReady )
 			g_Vars.globals.RenderIsReady = true;

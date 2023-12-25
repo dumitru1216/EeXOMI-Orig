@@ -168,7 +168,21 @@ LRESULT __stdcall Win32InputSys::WndProc( HWND hWnd, UINT msg, WPARAM wParam, LP
 	  win32input->m_ScrollMouse += ( float ) GET_WHEEL_DELTA_WPARAM( wParam ) / ( float ) WHEEL_DELTA;
    }
 
-   MenuV2::Get( )->WndProcHandler( );
+   //MenuV2::Get( )->WndProcHandler( );
+   if ( g_Vars.antiaim.manual_left_bind.enabled ) {
+	   g_Vars.globals.manual_aa = 0;
+	   g_Vars.globals.MouseOverrideEnabled = false;
+   }
+
+   if ( g_Vars.antiaim.manual_right_bind.enabled ) {
+	   g_Vars.globals.manual_aa = 2;
+	   g_Vars.globals.MouseOverrideEnabled = false;
+   }
+
+   if ( g_Vars.antiaim.manual_back_bind.enabled ) {
+	   g_Vars.globals.manual_aa = 1;
+	   g_Vars.globals.MouseOverrideEnabled = false;
+   }
 
    if ( g_Vars.globals.menuOpen && ImGui_ImplWin32_WndProcHandler( hWnd, msg, wParam, lParam ) ) {
 	 /* if ( !InputSys::Get( )->IsKeyDown( VK_LBUTTON )

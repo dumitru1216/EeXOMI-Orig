@@ -3,7 +3,7 @@
 #include "render.hpp"
 #include <algorithm>
 #include <mutex>
-
+#include "MenuV3/bytes.hpp"
 #include <d3d9.h>
 #pragma comment( lib, "d3d9.lib" )
 
@@ -49,9 +49,6 @@ class DX9Render : public Render {
 
    size_t current_font = 0u;
 
-   ImDrawList* m_draw_list;
-   ImDrawList* m_render_draw_list;
-   std::mutex m_render_mutex;
 
    ImGuiIO* m_io;
 
@@ -130,10 +127,43 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
 
    // init imgui
    ImGui::CreateContext( );
+
+   // ig
+   ImGui::StyleColorsDark( &ImGui::GetStyle( ) );
+
    ImGui_ImplWin32_Init( Source::hWindow );
    ImGui_ImplDX9_Init( device );
 
    m_io = &ImGui::GetIO( );
+
+   ImFontConfig font_config;
+   font_config.PixelSnapH = false;
+   font_config.FontDataOwnedByAtlas = false;
+   font_config.OversampleH = 5;
+   font_config.OversampleV = 5;
+   font_config.RasterizerMultiply = 1.2f;
+
+   static const ImWchar ranges[ ] = {
+
+	   0x0020, 0x00FF, // Basic Latin + Latin Supplement
+	   0x0400, 0x052F, // Cyrillic + Cyrillic Supplement
+	   0x2DE0, 0x2DFF, // Cyrillic Extended-A
+	   0xA640, 0xA69F, // Cyrillic Extended-B
+	   0xE000, 0xE226, // icons
+	   0,
+   };
+
+   font_config.GlyphRanges = ranges;
+
+   m_io->Fonts->AddFontFromMemoryTTF( font_medium_binary, sizeof font_medium_binary, 15, &font_config, ranges );
+   m_io->Fonts->AddFontFromMemoryTTF( font_semi_binary, sizeof font_semi_binary, 15, &font_config, ranges );
+   m_io->Fonts->AddFontFromMemoryTTF( font_bold_binary, sizeof font_bold_binary, 19, &font_config, ranges );
+
+   m_io->Fonts->AddFontFromMemoryTTF( icons_binary, sizeof icons_binary, 9, &font_config, ranges );
+   m_io->Fonts->AddFontFromMemoryTTF( icons_binary, sizeof icons_binary, 13, &font_config, ranges );
+
+   m_io->Fonts->AddFontFromMemoryTTF( font_semi_binary, sizeof font_semi_binary, 17, &font_config, ranges );
+
 
    // add font for rendering
 
@@ -141,26 +171,26 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
    ImFontConfig* cfg = new ImFontConfig( );
    cfg->PixelSnapH = true;
    cfg->OversampleH = cfg->OversampleV = 1;
-   cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+  // cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
    pMainFont = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Windows\\Fonts\\Tahoma.ttf" ), 16.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
 
    cfg = new ImFontConfig( );
    cfg->PixelSnapH = true;
    cfg->OversampleH = cfg->OversampleV = 1;
-   cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+  // cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
    pMenuFont = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Windows\\Fonts\\Verdana.ttf" ), 12.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
 
    cfg = new ImFontConfig( );
    cfg->PixelSnapH = true;
    cfg->OversampleH = cfg->OversampleV = 1;
-   cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+  // cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
    //pMainCapsFont = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Users\\ikfakof\\Documents\\Work\\Programming\\new indigo source\\Raleway-Regular.ttf" ), 24.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic());
    pMainCapsFont = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Windows\\Fonts\\Verdana.ttf" ), 24.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
 
    cfg = new ImFontConfig( );
    cfg->PixelSnapH = true;
    cfg->OversampleH = cfg->OversampleV = 1;
-   cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
+  // cfg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
    //  pSecondFont = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Users\\ikfakof\\Documents\\Work\\Programming\\new indigo source\\Raleway-Regular.ttf" ), 16.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic());
    pSecondFont = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Windows\\Fonts\\Verdana.ttf" ), 16.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
    
@@ -194,16 +224,16 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
    //fg->RasterizerFlags |= ImGuiFreeType::ForceAutoHint;
    //eybindsFont = m_io->Fonts->AddFontFromMemoryTTF( keybindsFont, sizeof keybindsFont, 10.f, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
 
-   static const ImWchar ranges[] =
-   {
-	  0x0020, 0x00FF, // Basic Latin + Latin Supplement
-	  0x0400, 0x052F, // Cyrillic + Cyrillic Supplement
-	  0x2DE0, 0x2DFF, // Cyrillic Extended-A
-	  0xA640, 0xA69F, // Cyrillic Extended-B
-	  0x3131, 0x3163, // Korean alphabets
-	  0xAC00, 0xD79D, // Korean characters
-	  0,
-   };
+  //static const ImWchar ranges[] =
+  //{
+	//  0x0020, 0x00FF, // Basic Latin + Latin Supplement
+	//  0x0400, 0x052F, // Cyrillic + Cyrillic Supplement
+	//  0x2DE0, 0x2DFF, // Cyrillic Extended-A
+	//  0xA640, 0xA69F, // Cyrillic Extended-B
+	//  0x3131, 0x3163, // Korean alphabets
+	//  0xAC00, 0xD79D, // Korean characters
+	//  0,
+  //};
 
    std::tuple<const char*, float, const ImWchar*> render_fonts[] =
    {
@@ -220,7 +250,7 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
 	  cfg = new ImFontConfig( );
 	  cfg->PixelSnapH = true;
 	  cfg->OversampleH = cfg->OversampleV = 1;
-	  cfg->RasterizerFlags |= ImGuiFreeType::MonoHinting;
+	  cfg->FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_MonoHinting;
 
 	  auto im_font = m_io->Fonts->AddFontFromFileTTF( path.c_str( ), std::get<1>( font ), cfg, std::get<2>( font ) );
 	  this->fonts.push_back( im_font );
@@ -230,22 +260,22 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
    cfg->PixelSnapH = true;
    cfg->OversampleH = cfg->OversampleV = 1;
    cfg->RasterizerMultiply = 2.0f;
-   cfg->RasterizerFlags |= ImGuiFreeType::MonoHinting;
+   cfg->FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_MonoHinting;
    auto skeet_font = m_io->Fonts->AddFontFromMemoryTTF( SkeetFont, sizeof( SkeetFont ), 8.0f, cfg );
 
    cfg = new ImFontConfig( );
    cfg->PixelSnapH = true;
    cfg->OversampleH = cfg->OversampleV = 1;
    cfg->RasterizerMultiply = 2.0f;
-   cfg->RasterizerFlags |= ImGuiFreeType::MonoHinting;
+   cfg->FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_MonoHinting;
    auto porter_font = m_io->Fonts->AddFontFromMemoryTTF( PorterFont, sizeof( PorterFont ), 24.0f, cfg );
 
    cfg = new ImFontConfig( );
    cfg->PixelSnapH = true;
    cfg->OversampleH = cfg->OversampleV = 1;
    cfg->RasterizerMultiply = 2.0f;
-   cfg->RasterizerFlags |= ImGuiFreeType::Bold;
-   cfg->RasterizerFlags |= ImGuiFreeType::MonoHinting;
+   cfg->FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bold;
+   cfg->FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_MonoHinting;
    auto skeet_indicator = m_io->Fonts->AddFontFromFileTTF( XorStr( "C:\\Windows\\Fonts\\verdanab.ttf" ), 22.0f, cfg, m_io->Fonts->GetGlyphRangesCyrillic( ) );
 
 #if 0
@@ -261,7 +291,7 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
    cfg->PixelSnapH = true;
    cfg->OversampleH = cfg->OversampleV = 1;
    cfg->RasterizerMultiply = 2.0f;
-   cfg->RasterizerFlags |= ImGuiFreeType::MonoHinting;
+   cfg->FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_MonoHinting;
    auto csgo_icons_font = m_io->Fonts->AddFontFromMemoryCompressedTTF( Icons_compressed_data, Icons_compressed_size, 14.0f, cfg );
 
    this->fonts.push_back( skeet_font );
@@ -270,9 +300,6 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
    this->fonts.push_back( skeet_indicator );
    ImGuiFreeType::BuildFontAtlas( m_io->Fonts, 0 );
 
-   auto shared_data = ImGui::GetDrawListSharedData( );
-   m_draw_list = new ImDrawList( shared_data );
-   m_render_draw_list = new ImDrawList( shared_data );
 }
 
 #ifdef _DEBUG
@@ -290,9 +317,6 @@ void AddFontNew( ) {
 #endif
 
 void DX9Render::BeginScene( ) {
-   m_draw_list->Clear( );
-   m_draw_list->PushClipRectFullScreen( );
-   m_draw_list->PushTextureID( m_io->Fonts->TexID );
 
 #if 0
    float i = 20.0f;
@@ -313,37 +337,11 @@ void DX9Render::BeginScene( ) {
 }
 
 void DX9Render::EndScene( ) {
-   m_render_mutex.lock( );
-   {
-	  m_draw_list->PopTextureID( );
 
-	  // swap buffers
-	  std::swap( m_draw_list, m_render_draw_list );
-   }
-   m_render_mutex.unlock( );
 }
 
 void DX9Render::RenderScene( ) {
-   m_render_mutex.lock( );
-   {
-	  // check if have primitives to draw
-	  if ( m_render_draw_list->IdxBuffer.Size > 0 && m_render_draw_list->VtxBuffer.Size > 0 ) {
-		 // TODO: render both menu and custom render draw data in one ImGui_ImplDX9_RenderDrawData call
 
-		 // setup draw data
-		 ImDrawData data;
-		 data.CmdLists = &m_render_draw_list;
-		 data.CmdListsCount = 1;
-		 data.DisplaySize = m_io->DisplaySize;
-		 data.DisplayPos = ImVec2( 0.0, 0.0f );
-		 data.TotalIdxCount = m_render_draw_list->IdxBuffer.Size;
-		 data.TotalVtxCount = m_render_draw_list->VtxBuffer.Size;
-		 data.Valid = true;
-
-		 ImGui_ImplDX9_RenderDrawData( &data );
-	  }
-   }
-   m_render_mutex.unlock( );
 }
 
 Vector2D DX9Render::GetScreenSize( ) {
@@ -405,15 +403,15 @@ void DX9Render::AddTextW( Vector2D pos, ColorU32 color, int flags, wchar_t* text
 	  //auto shadow_color = ( ( ( color & 0xFF000000 ) >> 24 ) / 2 ) << 24;
 	  auto shadow_color = color & 0xFF000000;
 
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y + 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y - 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y - 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y + 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y + 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y - 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y - 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y + 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
 
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x, draw_pos.y + 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x, draw_pos.y - 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x, draw_pos.y + 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x, draw_pos.y - 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
    } else if ( flags & DROP_SHADOW ) {
 	  // auto shadow_color = static_cast< float >( ( color & 0xFF000000 ) >> 24 );
 	  // shadow_color *= 0.8f;
@@ -421,10 +419,10 @@ void DX9Render::AddTextW( Vector2D pos, ColorU32 color, int flags, wchar_t* text
 	   //FloatColor shadow = FloatColor( 0.0f, 0.0f, 0.0f, shadow_color / 255.0f );
 
 	  auto shadow_color = color & 0xFF000000;
-	  font->RenderText( this->m_draw_list, font_size, draw_pos + ImVec2( 1.0f, 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, draw_pos + ImVec2( 1.0f, 1.0f ), shadow_color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
    }
 
-   font->RenderText( this->m_draw_list, font_size, draw_pos, color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
+   font->RenderText( ImGui::GetForegroundDrawList( ), font_size, draw_pos, color, clip_rect, ( const char* ) buffer, ( const char* ) text_end );
 }
 
 void DX9Render::AddText( Vector2D pos, ColorU32 color, int flags, const char* text, ... ) {
@@ -469,15 +467,15 @@ void DX9Render::AddText( Vector2D pos, ColorU32 color, int flags, const char* te
 	  //auto shadow_color = ( ( ( color & 0xFF000000 ) >> 24 ) / 2 ) << 24;
 	  auto shadow_color = color & 0xFF000000;
 
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y + 1.0f ), shadow_color, clip_rect, buffer, text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y - 1.0f ), shadow_color, clip_rect, buffer, text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y - 1.0f ), shadow_color, clip_rect, buffer, text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y + 1.0f ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y + 1.0f ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y - 1.0f ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y - 1.0f ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y + 1.0f ), shadow_color, clip_rect, buffer, text_end );
 
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y ), shadow_color, clip_rect, buffer, text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y ), shadow_color, clip_rect, buffer, text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x, draw_pos.y + 1.0f ), shadow_color, clip_rect, buffer, text_end );
-	  font->RenderText( this->m_draw_list, font_size, ImVec2( draw_pos.x, draw_pos.y - 1.0f ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x + 1.0f, draw_pos.y ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x - 1.0f, draw_pos.y ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x, draw_pos.y + 1.0f ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, ImVec2( draw_pos.x, draw_pos.y - 1.0f ), shadow_color, clip_rect, buffer, text_end );
    } else if ( flags & DROP_SHADOW ) {
 	  // auto shadow_color = static_cast< float >( ( color & 0xFF000000 ) >> 24 );
 	  // shadow_color *= 0.8f;
@@ -485,10 +483,10 @@ void DX9Render::AddText( Vector2D pos, ColorU32 color, int flags, const char* te
 	   //FloatColor shadow = FloatColor( 0.0f, 0.0f, 0.0f, shadow_color / 255.0f );
 
 	  auto shadow_color = color & 0xFF000000;
-	  font->RenderText( this->m_draw_list, font_size, draw_pos + ImVec2( 1.0f, 1.0f ), shadow_color, clip_rect, buffer, text_end );
+	  font->RenderText( ImGui::GetForegroundDrawList( ), font_size, draw_pos + ImVec2( 1.0f, 1.0f ), shadow_color, clip_rect, buffer, text_end );
    }
 
-   font->RenderText( this->m_draw_list, font_size, draw_pos, color, clip_rect, buffer, text_end );
+   font->RenderText( ImGui::GetForegroundDrawList( ), font_size, draw_pos, color, clip_rect, buffer, text_end );
 }
 
 void DX9Render::AddChar( Vector2D point, ColorU32 color, int flags, const wchar_t symbol ) {
@@ -504,54 +502,54 @@ void DX9Render::AddRect( const Vector2D& a, float w, float h, ColorU32 col, floa
 }
 
 void DX9Render::AddLine( const Vector2D& from, const Vector2D& to, ColorU32 color, float thickness ) {
-   this->m_draw_list->AddLine( ToImVec2( from ), ToImVec2( to ), color, thickness );
+   ImGui::GetForegroundDrawList( )->AddLine( ToImVec2( from ), ToImVec2( to ), color, thickness );
 }
 
 void DX9Render::AddRect( const Vector2D& min, const Vector2D& max, ColorU32 color, float rounding, int32_t rounding_corners_flags, float thickness ) {
-   this->m_draw_list->AddRect( ToImVec2( min ), ToImVec2( max ), color, rounding, rounding_corners_flags, thickness );
+   ImGui::GetForegroundDrawList( )->AddRect( ToImVec2( min ), ToImVec2( max ), color, rounding, rounding_corners_flags, thickness );
 }
 
 void DX9Render::AddRectFilled( const Vector2D& min, const Vector2D& max, ColorU32 color, float rounding, int32_t rounding_corners ) {
-   this->m_draw_list->AddRectFilled( ToImVec2( min ), ToImVec2( max ), color, rounding, rounding_corners );
+   ImGui::GetForegroundDrawList( )->AddRectFilled( ToImVec2( min ), ToImVec2( max ), color, rounding, rounding_corners );
 }
 
 void DX9Render::AddRectFilledMultiColor( const Vector2D& min, const Vector2D& max, ColorU32 col_upr_left, ColorU32 col_upr_right, ColorU32 col_bot_right, ColorU32 col_bot_left ) {
-   this->m_draw_list->AddRectFilledMultiColor( ToImVec2( min ), ToImVec2( max ), col_upr_left, col_upr_right, col_bot_right, col_bot_left );
+   ImGui::GetForegroundDrawList( )->AddRectFilledMultiColor( ToImVec2( min ), ToImVec2( max ), col_upr_left, col_upr_right, col_bot_right, col_bot_left );
 }
 
 void DX9Render::AddQuad( const Vector2D& a, const Vector2D& b, const Vector2D& c, const Vector2D& d, ColorU32 color, float strokeWidth ) {
-   this->m_draw_list->AddQuad( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), ToImVec2( d ), color, strokeWidth );
+   ImGui::GetForegroundDrawList( )->AddQuad( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), ToImVec2( d ), color, strokeWidth );
 }
 
 void DX9Render::AddQuadFilled( const Vector2D& a, const Vector2D& b, const Vector2D& c, const Vector2D& d, ColorU32 col ) {
-   this->m_draw_list->AddQuadFilled( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), ToImVec2( d ), col );
+   ImGui::GetForegroundDrawList( )->AddQuadFilled( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), ToImVec2( d ), col );
 }
 
 void DX9Render::AddTriangle( const Vector2D& a, const Vector2D& b, const Vector2D& c, ColorU32 col, float thickness ) {
-   this->m_draw_list->AddTriangle( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), col, thickness );
+   ImGui::GetForegroundDrawList( )->AddTriangle( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), col, thickness );
 }
 
 void DX9Render::AddTriangleFilled( const Vector2D& a, const Vector2D& b, const Vector2D& c, ColorU32 color ) {
-   auto flags = this->m_draw_list->Flags;
-   this->m_draw_list->Flags &= ~ImDrawListFlags_AntiAliasedFill;
-   this->m_draw_list->AddTriangleFilled( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), color );
-   this->m_draw_list->Flags = flags;
+   auto flags = ImGui::GetForegroundDrawList( )->Flags;
+   ImGui::GetForegroundDrawList( )->Flags &= ~ImDrawListFlags_AntiAliasedFill;
+   ImGui::GetForegroundDrawList( )->AddTriangleFilled( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), color );
+   ImGui::GetForegroundDrawList( )->Flags = flags;
 }
 
 void DX9Render::AddTriangleMultiColor( const Vector2D& a, const Vector2D& b, const Vector2D& c, ColorU32 a_col, ColorU32 b_col, ColorU32 c_col ) {
-   this->m_draw_list->AddTriangleFilled( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), a_col );
+   ImGui::GetForegroundDrawList( )->AddTriangleFilled( ToImVec2( a ), ToImVec2( b ), ToImVec2( c ), a_col );
 }
 
 void DX9Render::AddCircle( const Vector2D& pos, float radius, ColorU32 color, int32_t segments, float strokeWidth ) {
-   this->m_draw_list->AddCircle( ToImVec2( pos ), radius, color, segments, strokeWidth );
+   ImGui::GetForegroundDrawList( )->AddCircle( ToImVec2( pos ), radius, color, segments, strokeWidth );
 }
 
 void DX9Render::AddCircleFilled( const Vector2D& centre, float radius, ColorU32 col, int32_t segments ) {
-   this->m_draw_list->AddCircleFilled( ToImVec2( centre ), radius, col, segments );
+   ImGui::GetForegroundDrawList( )->AddCircleFilled( ToImVec2( centre ), radius, col, segments );
 }
 
 void DX9Render::AddPolyline( const Vector2D* points, const int32_t num_points, ColorU32 col, bool closed, float thickness ) {
-   this->m_draw_list->AddPolyline( ( ImVec2* ) points, num_points, col, closed, thickness );
+   ImGui::GetForegroundDrawList( )->AddPolyline( ( ImVec2* ) points, num_points, col, closed, thickness );
 }
 
 void DX9Render::AddConvexPolyFilled( const Vector2D* points, const int32_t num_points, ColorU32 col ) {
