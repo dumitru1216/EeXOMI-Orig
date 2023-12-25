@@ -441,10 +441,6 @@
     </ClCompile>
     <ClCompile Include="clip_win.cpp" />
     <ClCompile Include="clip.cpp" />
-    <ClCompile Include="MenuV3\blur.cpp" />
-    <ClCompile Include="MenuV3\custom.cpp" />
-    <ClCompile Include="MenuV3\MenuV3.cpp" />
-    <ClCompile Include="imgui_tables.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CSecure.hpp">
@@ -968,14 +964,6 @@
     </ClInclude>
     <ClInclude Include="clip.h" />
     <ClInclude Include="clip_lock_impl.h" />
-    <ClInclude Include="MenuV3\blur.hpp" />
-    <ClInclude Include="MenuV3\blur_x.hpp" />
-    <ClInclude Include="MenuV3\blur_y.hpp" />
-    <ClInclude Include="MenuV3\bytes.hpp" />
-    <ClInclude Include="MenuV3\custom.hpp" />
-    <ClInclude Include="MenuV3\MenuV3.hpp" />
-    <ClInclude Include="SimulationContext.hpp" />
-    <ClInclude Include="TextureForSpriteshpp.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Entrypoint">
