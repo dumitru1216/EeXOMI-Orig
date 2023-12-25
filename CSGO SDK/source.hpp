@@ -77,6 +77,7 @@ namespace Source
    extern Encrypted_t<IViewRender> m_pViewRender;
    extern Encrypted_t<CHud> m_pHud;
    extern Encrypted_t<SFHudDeathNoticeAndBotStatus> g_pDeathNotices;
+   extern Encrypted_t<IEffects> g_pEffects;
    extern WNDPROC oldWindowProc;
    extern HWND hWindow;
 

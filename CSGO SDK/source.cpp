@@ -365,6 +365,21 @@ void __fastcall hkInvalidatePhysicsRecursive( uintptr_t ecx, void*, int nChangeF
 };
 #endif
 
+using CreateInterfaceFn = void* ( * )( const char*, int* );
+void* create_interface( const std::string& image_name, const std::string& name ) {
+	auto image = GetModuleHandleA( image_name.c_str( ) );
+	if ( !image )
+		return nullptr;
+
+	auto fn = ( CreateInterfaceFn )( GetProcAddress( image, "CreateInterface" ) );
+	if ( !fn )
+		return nullptr;
+
+	std::cout << "[log] created image: " + image_name + " name: " + name + "\n";
+
+	return fn( name.c_str( ), nullptr );
+}
+
 namespace Source
 {
    Encrypted_t<IBaseClientDLL> m_pClient = nullptr;
@@ -406,6 +421,7 @@ namespace Source
    Encrypted_t<IViewRender> m_pViewRender = nullptr;
    Encrypted_t<CHud> m_pHud = nullptr;
    Encrypted_t<SFHudDeathNoticeAndBotStatus> g_pDeathNotices = nullptr;
+   Encrypted_t<IEffects> g_pEffects = nullptr;
 
    WNDPROC oldWindowProc;
    HWND hWindow = nullptr;
@@ -677,6 +693,12 @@ namespace Source
 	  g_pDeathNotices = m_pHud->FindHudElement< SFHudDeathNoticeAndBotStatus* >( XorStr( "SFHudDeathNoticeAndBotStatus" ) );
 	  if ( !g_pDeathNotices.IsValid( ) )
 		  return false;
+
+	  g_pEffects = ( IEffects* )create_interface( "client.dll", "IEffects001" );
+	  if ( !g_pEffects.IsValid( ) ) {
+		  Win32::Error( XorStr( "g_pEffects is nullptr (Source::%s)" ), __FUNCTION__ );
+		  return false;
+	  }
 
 	  auto D3DDevice9 = **( IDirect3DDevice9*** ) Engine::Displacement.Data.m_D3DDevice;
 	  if ( !D3DDevice9 )

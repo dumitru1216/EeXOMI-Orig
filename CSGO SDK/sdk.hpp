@@ -1469,3 +1469,38 @@ public:
 		return reinterpret_cast< T >( FindHudElement_t( this, name ) );
 	}
 };
+
+/* game effects */
+class IPredictionSystem {
+public:
+	virtual ~IPredictionSystem( ) { }
+
+	IPredictionSystem* pNextSystem; // 0x04
+	bool bSuppressEvent; // 0x08
+	C_BaseEntity* pSuppressHost; // 0x0C // i guess
+	int nStatusPushed; // 0x10
+};
+static_assert( sizeof( IPredictionSystem ) == 0x14 );
+
+class IEffects : public IPredictionSystem {
+public:
+	virtual ~IEffects( ) { };
+	virtual void Beam( const Vector& Start, const Vector& End, int nModelIndex,
+					   int nHaloIndex, unsigned char frameStart, unsigned char frameRate,
+					   float flLife, unsigned char width, unsigned char endWidth, unsigned char fadeLength,
+					   unsigned char noise, unsigned char red, unsigned char green,
+					   unsigned char blue, unsigned char brightness, unsigned char speed ) = 0;
+
+	virtual void Smoke( const Vector& origin, int modelIndex, float scale, float framerate ) = 0;
+	virtual void Sparks( const Vector& position, int nMagnitude = 1, int nTrailLength = 1, const Vector* pvecDir = NULL ) = 0;
+	virtual void Dust( const Vector& pos, const Vector& dir, float size, float speed ) = 0;
+	virtual void MuzzleFlash( const Vector& vecOrigin, const Vector& vecAngles, float flScale, int iType ) = 0;
+	virtual void MetalSparks( const Vector& position, const Vector& direction ) = 0;
+	virtual void EnergySplash( const Vector& position, const Vector& direction, bool bExplosive = false ) = 0;
+	virtual void Ricochet( const Vector& position, const Vector& direction ) = 0;
+
+	virtual float Time( ) = 0;
+	virtual bool IsServer( ) = 0;
+
+	virtual void SuppressEffectsSounds( bool bSuppress ) = 0;
+};
