@@ -3,173 +3,295 @@
 #include "player.hpp"
 #include "InputSys.hpp"
 #include "Exploits.hpp"
+#include "TickbaseShift.hpp"
+#include "displacement.hpp"
+#pragma optimize("", off)
 
-using WriteUsercmdDeltaToBufferFn = bool( __thiscall* )( void*, int, void*, int, int, bool );
-#if 0
-void WriteUsercmd( bf_write* buf, CUserCmd* incmd, CUserCmd* outcmd ) {
-   using WriteUsercmd_t = void( __fastcall* )( void*, CUserCmd*, CUserCmd* );
-   static WriteUsercmd_t WriteUsercmdF = ( WriteUsercmd_t ) Memory::Scan( "client.dll", ( "55 8B EC 83 E4 F8 51 53 56 8B D9 8B 0D" ) );
 
-   __asm
-   {
-	  mov     ecx, buf
-	  mov     edx, incmd
-	  push    outcmd
-	  call    WriteUsercmdF
-	  add     esp, 4
-   }
+void WriteUsercmdd( bf_write* buf, CUserCmd* incmd, CUserCmd* outcmd ) {
+	__asm
+	{
+		mov     ecx, buf
+		mov     edx, incmd
+		push    outcmd
+		call    Engine::Displacement.Function.m_WriteUsercmd
+		add     esp, 4
+	}
 }
 
-#if 0
-bool TickbaseManipulation( void* pThis, int tickbase_shift, CCLCMsg_Move * CL_Move, void* ECX, int nSlot, int from, void* buffer ) {
-   static auto ret = Source::m_pClientSwap->VCall<WriteUsercmdDeltaToBufferFn>( 24 );
+bool __fastcall Hooked::write_user_cmd_delta_to_buffer(
+	void* ecx, void* edx,
+	int slot, bf_write* buffer,
+	int from, int to, bool is_new_cmd
+) {
 
-   auto v28 = CL_Move->num_new_commands( ) + tickbase_shift;
-   auto v29 = CL_Move->num_new_commands( );
-   CL_Move->set_num_backup_commands( 0u );
-   if ( v28 > 62 )
-	  v28 = 62;
-   CUserCmd to_cmd, from_cmd;
 
-   CL_Move->set_num_backup_commands( v28 );
+	C_CSPlayer* pLocal = C_CSPlayer::GetLocalPlayer( );
+	if ( !pLocal || pLocal->IsDead( ) )
+		return Hooked::oWriteUsercmdDeltaToBuffer( ( void* )ecx, slot, ( void* )buffer, from, to, true );
 
-   auto nextCmdNr = Source::m_pClientState->m_nChokedCommands( ) + Source::m_pClientState->m_nLastOutgoingCommand( ) + 1;
-   auto to = nextCmdNr - v29 + 1;
-   if ( to > nextCmdNr ) {
-   LABEL_41:
-	  auto cmd_from_slot = &Source::m_pInput->m_pCommands[ from % MULTIPLAYER_BACKUP ];
-	  if ( cmd_from_slot ) {
-		 from_cmd = *cmd_from_slot;
-		 to_cmd = CUserCmd{};
 
-		 ++to_cmd.command_number;
-		 to_cmd.tick_count += 200;
-		 if ( v29 <= v28 ) {
-			auto totalNewCommands = v28 - v29 + 1;
-			do {
-			   WriteUsercmd( ( bf_write* ) buffer, &to_cmd, &from_cmd );
-			   from_cmd = to_cmd;
-			   ++to_cmd.command_number;
-			   ++to_cmd.tick_count;
-			   --totalNewCommands;
-			} while ( totalNewCommands );
-		 }
-	  }
-	  return true;
-   } else {
-	  while ( ret( pThis, nSlot, buffer, from, to, 1 ) ) {
-		 from = to++;
-		 if ( to > nextCmdNr )
-			goto LABEL_41;
-	  }
-	  return false;
-   }
-   return false;
+
+
+	if ( g_tickbase_control.m_shift_amount ) {
+
+		if ( from == -1 ) {
+
+			uintptr_t frame_ptr = 0;
+			__asm mov frame_ptr, ebp;
+			auto backup_commands = reinterpret_cast < int* > ( frame_ptr + 0xFD8 );
+			auto new_commands = reinterpret_cast < int* > ( frame_ptr + 0xFDC );
+
+
+			std::cout << "CLCMove called with " << std::to_string( g_tickbase_control.m_shift_amount ) << " shift\n";
+
+
+			if ( g_tickbase_control.m_break_lc )
+				g_tickbase_control.handle_break_lc( ecx, edx, slot, buffer, from, to, new_commands, backup_commands );
+			else
+				g_tickbase_control.handle_other_shift( ecx, edx, slot, buffer, from, to, new_commands, backup_commands );
+		}
+
+		return true;
+	}
+
+	if ( from == -1 ) {
+		uintptr_t frame_ptr = 0;
+		__asm mov frame_ptr, ebp;
+		auto new_commands = reinterpret_cast < int* > ( frame_ptr + 0xFDC );
+
+
+		const auto v86 = std::min( *new_commands + g_tickbase_control.m_charged_ticks, 16 );
+
+		int v69{};
+
+		const auto v70 = v86 - *new_commands;
+		if ( v70 >= 0 )
+			v69 = v70;
+
+		g_tickbase_control.m_charged_ticks = v69;
+	}
+
+	return oWriteUsercmdDeltaToBuffer( ecx, slot, buffer, from, to, is_new_cmd );
 }
-#endif
+using namespace Source;
+void c_exploits::handle_break_lc( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds ) {
 
-bool __stdcall TickbaseManipulation( CCLCMsg_Move_t* msg, int tickbase_shift, void* this0, int nSlot, void* buffer ) {
-   static auto WriteUsercmdDeltaToBuffer = Source::m_pClientSwap->VCall<WriteUsercmdDeltaToBufferFn>( 24 );
+	// valve::g_cvar->con_print(true, 0xffccffffu, xorstr_("[ spark ] deltatobuffer has been ran.\n"));
 
-   auto backupNumCmds = msg->m_nNewCommands;
 
-   auto NewCommands = msg->m_nNewCommands + tickbase_shift;
-   if ( msg->m_nNewCommands > 62 )
-	  NewCommands = 62;
+	auto shift_amount = m_shift_amount;
+	m_shift_amount = 0;
 
-   msg->m_nNewCommands = NewCommands;
-   msg->m_nBackupCommands = 0;
+	const auto v86 = std::min( *m_new_cmds + m_ticks_allowed, 16 );
 
-   auto from = -1;
-   auto nextCmdNr = Source::m_pClientState->m_nLastOutgoingCommand( ) + Source::m_pClientState->m_nChokedCommands( ) + 1;
-   auto to = nextCmdNr - backupNumCmds + 1;
-   while ( to <= nextCmdNr ) {
-	  auto result = WriteUsercmdDeltaToBuffer( this0, nSlot, buffer, from, ++to, true );
-	  from = to;
-	  if ( !result )
-		 return false;
-   }
+	int v69{};
 
-   auto v13 = Memory::VCall<CUserCmd * ( __thiscall* )( void*, int, int ) >( Source::m_pInput, 32 / 4 )( Source::m_pInput, nSlot, from );
-   if ( !v13 )
-	  return true;
+	const auto v70 = v86 - *m_new_cmds;
+	if ( v70 >= 0 )
+		v69 = v70;
 
-   if ( backupNumCmds <= NewCommands ) {
-	  CUserCmd from_cmd = *v13;
-	  CUserCmd to_cmd = *v13;
-	  ++to_cmd.command_number;
-	  to_cmd.tick_count += 200;
+	m_ticks_allowed = v69;
 
-	  auto totalNewCommands = NewCommands - backupNumCmds + 1;
-	  do {
-		 WriteUsercmd( ( bf_write* ) buffer, &to_cmd, &from_cmd );
-		 from_cmd = to_cmd;
-		 ++to_cmd.command_number;
-		 ++to_cmd.tick_count;
-		 --totalNewCommands;
-	  } while ( totalNewCommands );
-   }
+	const auto old_new_cmds = *m_new_cmds;
 
-   return true;
+	*m_new_cmds = std::clamp( *m_new_cmds + shift_amount, 1, 62 );
+	*m_backup_cmds = 0;
+
+	const auto next_cmd_number = m_pClientState->m_nLastOutgoingCommand( ) + m_pClientState->m_nChokedCommands( ) + 1;
+
+	for ( to = next_cmd_number - old_new_cmds + 1; to <= next_cmd_number; ++to ) {
+		if ( !Hooked::oWriteUsercmdDeltaToBuffer( ( void* )ecx, slot, ( void* )buffer, from, to, true ) )
+			return;
+
+		from = to;
+	}
+
+	for ( auto i = m_pClientState->m_nLastOutgoingCommand( ) + 1; i <= next_cmd_number; ++i )
+		g_tickbase_control.m_local_data[ i % 150 ].m_shift_amount = shift_amount;
+
+	const auto user_cmd = m_pInput->GetUserCmd( slot, from );
+	if ( !user_cmd )
+		return;
+
+	CUserCmd from_user_cmd = *user_cmd, to_user_cmd = *user_cmd;
+
+	if ( shift_amount ) {
+		++to_user_cmd.command_number;
+		std::cout << "processing fake cmds (break lc)\n";
+		to_user_cmd.tick_count = std::numeric_limits< int >::max( );
+
+		do {
+
+			WriteUsercmdd( buffer, &to_user_cmd, &from_user_cmd );
+			from_user_cmd = to_user_cmd;
+			++to_user_cmd.command_number;
+
+			--shift_amount;
+		} while ( shift_amount );
+	}
 }
-#endif
-#if 0
 
-bool __fastcall Hooked::WriteUsercmdDeltaToBuffer( void* ECX, void* EDX, int nSlot, void* buffer, int o_from, int o_to, bool isnewcommand ) {
-   g_Vars.globals.szLastHookCalled = XorStr( "37" );
-   static auto ret = Source::m_pClientSwap->VCall<WriteUsercmdDeltaToBufferFn>( 24 );
+void c_exploits::handle_other_shift( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds ) {
 
-   uintptr_t framePtr;
-   __asm mov framePtr, ebp;
-   auto msg = reinterpret_cast< CCLCMsg_Move_t* >( framePtr + 0xFCC );
+	auto shift_amount = m_shift_amount;
+	m_shift_amount = 0;
 
-   if ( !g_Vars.globals.TickbaseShift )
-	  return ret( ECX, nSlot, buffer, o_from, o_to, isnewcommand );
+	const auto write_real_cmds = !m_break_lc;
 
-   if ( o_from != -1 )
-	  return 1;
+	const auto v86 = std::min( *m_new_cmds + m_ticks_allowed, 16 );
 
-   auto tickbaseShift = ( g_Vars.globals.TickbaseShift );
-   g_Vars.globals.TickbaseShift = 0;
+	int v69{};
 
-   //if ( tickbaseShift < 0 )
-	 // return TickbaseManipulation( msg, std::abs( tickbaseShift ), ECX, nSlot, buffer );
+	auto v70 = v86 - *m_new_cmds;
+	if ( write_real_cmds )
+		v70 -= shift_amount;
 
-   msg->m_nBackupCommands = 0;
+	if ( v70 >= 0 )
+		v69 = v70;
 
-   auto newCmds = msg->m_nNewCommands;
-   auto shiftedTickbase = newCmds - abs( tickbaseShift );
-   if ( shiftedTickbase < 1 )
-	  shiftedTickbase = 1;
+	m_ticks_allowed = v69;
 
-   msg->m_nNewCommands = newCmds;
-   newCmds = shiftedTickbase;
+	const auto old_new_cmds = *m_new_cmds;
 
-   auto from = -1;
-   auto nextCmdNr = Source::m_pClientState->m_nChokedCommands( ) + Source::m_pClientState->m_nLastOutgoingCommand( ) + 1;
-   auto to = nextCmdNr - shiftedTickbase + 1;
-   if ( to > nextCmdNr ) {
-   LABEL_12:
-	  auto v14 = newCmds + g_Vars.globals.LagLimit - shiftedTickbase;
-	  if ( v14 > 16 ) {
-		 g_Vars.globals.LagLimit = 16;
-		 return 1;
-	  }
+	*m_new_cmds = std::clamp( *m_new_cmds + shift_amount, 1, 62 );
+	*m_backup_cmds = 0;
 
-	  if ( v14 < 0 )
-		 v14 = 0;
+	auto first_tick_base = adjust_tick_base( old_new_cmds, *m_new_cmds, shift_amount );
 
-	  g_Vars.globals.LagLimit = v14;
-	  return 1;
-   }
+	const auto next_cmd_number = m_pClientState->m_nLastOutgoingCommand( ) + m_pClientState->m_nChokedCommands( ) + 1;
 
-   while ( ret( ECX, nSlot, buffer, from, to, true ) ) {
-	  from = to++;
-	  if ( to > nextCmdNr ) {
-		 goto LABEL_12;
-	  }
-   }
+	for ( to = next_cmd_number - old_new_cmds + 1; to <= next_cmd_number; ++to ) {
+		if ( !Hooked::oWriteUsercmdDeltaToBuffer( ( void* )ecx, slot, ( void* )buffer, from, to, true ) )
+			return;
 
-   return 0;
+		from = to;
+	}
+
+	for ( auto i = m_pClientState->m_nLastOutgoingCommand( ) + 1; i <= next_cmd_number; ++i ) {
+		auto& local_data = g_tickbase_control.m_local_data[ i % 150 ];
+
+		local_data.m_shift_amount = write_real_cmds ? 0 : shift_amount;
+		local_data.m_override_tick_base = true;
+		local_data.m_restore_tick_base = !write_real_cmds;
+		local_data.m_adjusted_tick_base = first_tick_base++;
+	}
+
+	const auto user_cmd = m_pInput->GetUserCmd( slot, from );
+	if ( !user_cmd ) {
+		std::cout << "failed to get a usercmd, returning.\n";
+		return;
+	}
+
+	CUserCmd from_user_cmd = *user_cmd, to_user_cmd = *user_cmd;
+
+	++to_user_cmd.command_number;
+
+	*( DWORD* )( m_pPrediction.Xor( ) + 0xC ) = -1;
+	*( DWORD* )( m_pPrediction.Xor( ) + 0x1C ) = 0;
+
+	Vector2D target_move{};
+
+	if ( write_real_cmds ) {
+
+		std::cout << "processing real cmds.\n";
+		++m_pClientState->m_nChokedCommands( );
+		++m_pClientState->net_channel->m_nChokedPackets;
+		++m_pClientState->net_channel->m_nOutSequenceNr;
+
+		bool shifting = false;//m_type == 4;
+
+		if ( !shifting ) {
+			const auto& local_data = g_tickbase_control.m_local_data[ next_cmd_number % 150 ];
+			target_move = { local_data.m_move.x, local_data.m_move.y };
+
+
+			//if ( g_Vars.rage.dt2 ) {
+			//	if ( std::abs( local_data.m_move.x ) > 10.f )
+			//		target_move.x = std::copysign( 450.f, local_data.m_move.x );
+			//
+			//	if ( std::abs( local_data.m_move.y ) > 10.f )
+			//		target_move.y = std::copysign( 450.f, local_data.m_move.y );
+			//}
+		}
+
+		int v80{};
+
+		do {
+			m_pPrediction->Update(
+				m_pClientState->m_nDeltaTick( ),
+				m_pClientState->m_nDeltaTick( ) > 0,
+				m_pClientState->m_nLastCommandAck( ),
+				m_pClientState->m_nLastOutgoingCommand( ) + m_pClientState->m_nChokedCommands( )
+			);
+
+			to_user_cmd.buttons &= ~0xFFBEFFF9;
+			to_user_cmd.forwardmove = to_user_cmd.sidemove = {};
+
+			auto player = C_CSPlayer::GetLocalPlayer( );
+
+			if ( player && !player->IsDead( ) ) {
+
+				// extended teleport!!
+				//if ( g_Vars.rage.dt2 ) {
+				//	to_user_cmd.forwardmove = target_move.x;
+				//	to_user_cmd.sidemove = target_move.y;
+				//}
+
+
+
+				// store revelant data here!! (woo)
+				auto& local_data = g_tickbase_control.m_local_data[ to_user_cmd.command_number % 150 ];
+				local_data.m_tick_base = local_data.m_adjusted_tick_base = player->m_nTickBase( );
+				local_data.m_spawn_time = player->m_flSpawnTime( );
+			}
+
+			m_pInput->m_pCommands[ to_user_cmd.command_number % 150 ] = to_user_cmd;
+			m_pInput->m_pVerifiedCommands[ to_user_cmd.command_number % 150 ] = { to_user_cmd, to_user_cmd.GetChecksum( ) };
+
+			WriteUsercmdd( buffer, &to_user_cmd, &from_user_cmd );
+
+			auto& local_data = g_tickbase_control.m_local_data[ to_user_cmd.command_number % 150 ];
+
+			local_data.m_override_tick_base = true;
+			local_data.m_adjusted_tick_base = first_tick_base++;
+
+			++v80;
+
+
+			if ( v80 >= shift_amount ) {
+
+				// unload shit here ig
+				g_tickbase_control.m_charged_ticks = 0;
+				g_tickbase_control.m_second_shot = 1;
+				g_tickbase_control.m_shift_to_fix = shift_amount;
+				g_tickbase_control.m_should_fix = true;
+				g_tickbase_control.m_is_charged = false;
+
+				// set second shot as true
+				g_tickbase_control.m_second_shot = true;
+			} else {
+				++m_pClientState->m_nChokedCommands( );
+				++m_pClientState->net_channel->m_nChokedPackets;
+				++m_pClientState->net_channel->m_nOutSequenceNr;
+			}
+
+			from_user_cmd = to_user_cmd;
+
+			++to_user_cmd.command_number;
+		} while ( v80 < shift_amount );
+	} else {
+		to_user_cmd.tick_count = std::numeric_limits< int >::max( );
+		std::cout << "processing fake cmds.\n";
+		do {
+			WriteUsercmdd( buffer, &to_user_cmd, &from_user_cmd );
+
+			from_user_cmd = to_user_cmd;
+			++to_user_cmd.command_number;
+
+			--shift_amount;
+		} while ( shift_amount );
+	}
+
 }
-#endif
+#pragma optimize("", on)

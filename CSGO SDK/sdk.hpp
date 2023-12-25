@@ -1153,11 +1153,7 @@ struct MaterialSystem_SortInfo_t {
    IMaterial* material;
    int			lightmapPageID;
 };
-class CVerifiedUserCmd {
-public:
-   CUserCmd m_cmd = { };
-   CRC32_t m_crc = 0u;
-};
+
 
 class CGlobalVarsBase {
 public:

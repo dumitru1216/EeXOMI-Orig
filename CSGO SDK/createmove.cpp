@@ -182,53 +182,11 @@ namespace Hooked {
 
 			movement->InPrediction( );
 
-#if 0
-			static float old_spawntime = 0.f;
-			static auto memes = false;
-			if ( memes ) {
-				GoalChoke = 3;
-				FakelagMemes = false;
-				memes = false;
-				LagLimit = 1;
-				PreviousLagLimit = 0;
-			}
-
-			static bool init = true;
-			if ( FakelagMemes || init ) {
-				if ( old_spawntime != pLocal->m_flSpawnTime( ) ) {
-					TickbaseStart = cmd->command_number;
-					*bSendPacket = true;
-					memes = true;
-					old_spawntime = pLocal->m_flSpawnTime( );
-				} else if ( InputSys::Get( )->IsKeyDown( VirtualKeys::F ) ) {
-					TickbaseStart = cmd->command_number;
-					*bSendPacket = true;
-					memes = true;
-				}
-				init = false;
-			}
-
-			if ( !FakelagMemes ) {
-				*bSendPacket = Source::m_pClientState->m_nChokedCommands( ) >= GoalChoke;
-				if ( *bSendPacket )
-					GoalChoke++;
-
-				if ( Source::m_pClientState->m_nChokedCommands( ) >= 32 ) {
-					*bSendPacket = true;
-					FakelagMemes = true;
-					g_Vars.fakelag.lag_limit = 24;
-					LagLimit = 24;
-				}
-			}
-			//else
-#endif
-
 			if ( Source::m_pClientState->m_nChokedCommands( ) >= 14 ) {
 				*bSendPacket = true;
 			}
 
 			movement->PostPrediction( );
-			// g_TickbaseController.copy_command( cmd.Xor( ), bSendPacket );
 
 			if ( cmd->buttons & IN_ATTACK
 				 && weapon->m_iItemDefinitionIndex( ) != WEAPON_C4
@@ -237,14 +195,12 @@ namespace Hooked {
 				 && pLocal->CanShoot( )
 				 && ( weaponInfo->m_ucFullAuto /*|| ( prev_buttons & IN_ATTACK ) == 0 )*/ ) ) {
 				lockedAngles = cmd->viewangles;
+				g_tickbase_control.m_last_exploit_time = Source::m_pGlobalVars->realtime;
+
 				LastShotTime = Source::m_pGlobalVars->tickcount;
 
 				g_Vars.globals.m_flLastShotTime = Source::m_pGlobalVars->realtime;
 
-				//if ( TickbaseShiftCtx.exploits_enabled || TickbaseShiftCtx.hold_tickbase_shift ) {
-				//   if ( !TickbaseShiftCtx.in_rapid )
-				//	  *bSendPacket = true;
-				//}
 
 				g_Vars.globals.WasShootingInChokeCycle = !( *bSendPacket );
 				g_Vars.globals.WasShooting = true;
@@ -252,17 +208,11 @@ namespace Hooked {
 				if ( weaponInfo->m_iWeaponType != WEAPONTYPE_KNIFE )
 					WasShootinPeek = true;
 
-				//if ( TickbaseShiftCtx.will_shift_tickbase > 0 ) {
-				//   TickbaseShiftCtx.hold_tickbase_shift = 1;
-				//   TickbaseShiftCtx.tickbase_shift_nr = cmd->command_number;
-				//   TickbaseShiftCtx.fix_tickbase_tick = pLocal->m_nTickBase( );
-				//   TickbaseShiftCtx.previous_tickbase_shift = TickbaseShiftCtx.will_shift_tickbase;
-				//}
 			} else {
 				g_Vars.globals.WasShooting = false;
 			}
 
-			// TickbaseShiftCtx.ApplyShift( cmd, bSendPacket );
+
 
 			IGrenadePrediction::Get( )->Tick( cmd->buttons );
 
@@ -272,9 +222,14 @@ namespace Hooked {
 		}
 		prediction.End( );
 
-		if ( !g_TickbaseController.m_shifting ) {
-			g_TickbaseController.tickbase_manipulation( cmd.Xor( ), bSendPacket );
-		}
+		g_tickbase_control.handle_exploits( bSendPacket, cmd.Xor( ) );
+
+		float move1 = std::clamp( cmd.Xor( )->forwardmove, -450.f, 450.f );
+		float move2 = std::clamp( cmd.Xor( )->sidemove, -450.f, 450.f );
+		float move3 = std::clamp( cmd.Xor( )->upmove, -320.f, 320.f );
+
+		g_tickbase_control.m_local_data[ cmd.Xor( )->command_number % 150 ].m_move = Vector( move1, move2, move3 );
+
 
 		if ( g_Vars.antiaim.enabled && g_Vars.antiaim.manual && g_Vars.antiaim.mouse_override.enabled ) {
 			pLocal->pl( ).v_angle = globals->PreviousViewangles;
@@ -368,75 +323,7 @@ namespace Hooked {
 		return result;
 	}
 
-#if 0
-	void __vectorcall CL_Move( float accumulated_extra_samples, bool bFinalTick ) {
-		g_TickbaseController.OnCLMove( bFinalTick, accumulated_extra_samples );
+	void __vectorcall CL_Move( bool bFinalTick, float accumulated_extra_samples ) {
+		g_tickbase_control.cl_move( bFinalTick, accumulated_extra_samples );
 	}
-
-	void __fastcall RunSimulation( void* this_, void*, int iCommandNumber, CUserCmd* pCmd, size_t local ) {
-		g_TickbaseController.OnRunSimulation( this_, iCommandNumber, pCmd, local );
-	}
-
-	void __fastcall PredictionUpdate( void* prediction, void*, int startframe, bool validframe, int incoming_acknowledged, int outgoing_command ) {
-		g_TickbaseController.OnPredictionUpdate( prediction, nullptr, startframe, validframe, incoming_acknowledged, outgoing_command );
-	}
-
-	void __vectorcall CL_Move( float accumulated_extra_samples, bool bFinalTick ) {
-		g_Vars.globals.szLastHookCalled = XorStr( "3" );
-		auto local = C_CSPlayer::GetLocalPlayer( );
-		if ( !local || local->IsDead( ) || !Source::m_pEngine->IsConnected( ) || !Source::m_pEngine->IsInGame( ) || !g_Vars.globals.HackIsReady || !local->m_hActiveWeapon( ).Get( ) || g_Vars.globals.hackUnload ) {
-			oCL_Move( accumulated_extra_samples, bFinalTick );
-
-			printf( "1" ); // pass
-
-			return;
-		}
-
-		if ( !TickbaseShiftCtx.CanShiftTickbase( ) ) {
-			TickbaseShiftCtx.over_choke_nr = Source::m_pClientState->m_nLastOutgoingCommand( ) + Source::m_pClientState->m_nChokedCommands( ) + 1;
-
-			printf( "2" ); // pass
-
-			return;
-		}
-
-		if ( !TickbaseShiftCtx.exploits_enabled ) {
-			printf( "3" );
-
-			if ( TickbaseShiftCtx.ticks_allowed - Source::m_pClientState->m_nChokedCommands( ) > 1 ) {
-				auto choke = Source::m_pClientState->m_nChokedCommands( );
-				auto teleport_release = false;
-				if ( teleport_release ) {
-					printf( "4" );
-
-					do {
-						TickbaseShiftCtx.over_choke_nr = choke + Source::m_pClientState->m_nLastOutgoingCommand( ) + 2;
-						TickbaseShiftCtx.lag_limit = 1;
-						TickbaseShiftCtx.in_rapid = true;
-						oCL_Move( accumulated_extra_samples, bFinalTick );
-						choke = Source::m_pClientState->m_nChokedCommands( );
-
-						printf( "6" );
-
-					} while ( TickbaseShiftCtx.ticks_allowed - choke > 1 );
-				} else {
-					printf( "5" );
-
-					TickbaseShiftCtx.over_choke_nr = choke + Source::m_pClientState->m_nLastOutgoingCommand( ) + 2;
-					TickbaseShiftCtx.lag_limit = 1;
-					TickbaseShiftCtx.in_rapid = true;
-					oCL_Move( accumulated_extra_samples, bFinalTick );
-				}
-
-				TickbaseShiftCtx.in_rapid = false;
-				TickbaseShiftCtx.was_in_rapid = true;
-			}
-		}
-
-		oCL_Move( accumulated_extra_samples, bFinalTick );
-
-		TickbaseShiftCtx.in_rapid = false;
-		TickbaseShiftCtx.was_in_rapid = false;
-	}
-#endif
 }

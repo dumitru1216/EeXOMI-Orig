@@ -1,142 +1,81 @@
 #pragma once
 #include "sdk.hpp"
 
-#if 0
-struct C_TickbaseShift {
-   int max_choke = 14;
-   int future_ticks = 8;
-   int max_tickbase_shift = 13;
-   int ticks_allowed = 0;
-   int min_tickbase_shift = 5;
-   bool exploits_enabled = false;
-   int lag_limit = 14;
-   bool in_rapid = false;
-   bool was_in_rapid = false;
-   int over_choke_nr = 0;
-   int will_shift_tickbase = 0;
-   int commands_to_shift = 0;
-   bool hold_tickbase_shift = false;
-   bool didnt_shift_tifckbase_previously = false;
-   bool double_tapped = false;
-   int tickbase_shift_nr = 0;
-   int fix_tickbase_tick = 0;
-   int previous_tickbase_shift = 0;
 
-   bool ExploitsEnabled( );
 
-   bool IsTickcountValid( int tickcount );
-   bool CanShiftTickbase( void );
-   void SelectShift( void );
-   void AdjustPlayerTimeBaseFix( int simulation_ticks );
-   void ApplyShift( Encrypted_t<CUserCmd> cmd, bool* bSendPacket );
-   void OnNewPacket( int command_nr, int tickbase_from_server, int tickbase_from_record, int tickbase_shift );
+struct local_data_t {
+
+	float					m_spawn_time{}, m_abs_yaw{};
+
+	int						m_tick_base{},
+		m_adjusted_tick_base{}, m_shift_amount{};
+	bool					m_override_tick_base{}, m_restore_tick_base{};
+
+	Vector					m_move{};
+	CUserCmd		m_user_cmd{};
 };
 
-extern C_TickbaseShift TickbaseShiftCtx;
-
-struct TickbaseShift_t {
-	TickbaseShift_t( ) = delete;
-	TickbaseShift_t( int _cmdnum, int _tickbase );
-	~TickbaseShift_t( ) = default;
-
-	int cmdnum, tickbase;
-};
-
-class TickbaseSystem {
-public:
-	size_t s_nSpeed = 14;
-
-	bool m_didFakeFlick;
-	bool ignoreallcmds;
-	int lastShiftedCmdNr;
-	int m_nServerTick;
-	int m_nCompensatedServerTick;
-	size_t s_nTickRate = 64;
-	float s_flTickInterval = 1.f / ( float )s_nTickRate;
-
-	// an unreplicated convar: sv_clockcorrection_msecs
-	float s_flClockCorrectionSeconds = 30.f / 1000.f;
-
-	int s_iClockCorrectionTicks = ( int )( s_flClockCorrectionSeconds * s_flTickInterval + 0.5f );
-	int s_iNetBackup = 64;
-	int m_nSimulationTicks = 0;
-	bool s_bFreshFrame = false;
-	bool s_bAckedBuild = true;
-	bool s_bShiftedBullet = false;
-	bool m_bSupressRecharge = false;
-	bool m_bForceUnChargeState = true;
-	bool allw = false;
-	float s_flTimeRequired = 0.5f;
-	float s_flTime = 0.5f;
-	size_t s_nTicksRequired = ( int )( s_flTimeRequired / s_flTickInterval + s_flTime );
-	size_t s_nTicksDelay = 32u;
-
-	bool s_bInMove = false;
-	int s_iMoveTickBase = 0;
-	int s_FinalTickbase = 0;
-	int s_PostTickBase = 0;
-	int s_PreTickBase = 0;
-	int s_PredCurtime = 0;
-	int estimated_tb = 0;
-	size_t s_nTicksSinceUse = 0u;
-	size_t s_nTicksSinceStarted = 0u;
-	bool s_InMovePrediction = false;
-	int s_iServerIdealTick = 0;
-	bool s_bBuilding = false;
-	bool bShifting = false;
-	bool charging = false;
-	bool bAllow = false;
-	size_t s_nExtraProcessingTicks = 0;
-	std::vector<TickbaseShift_t> g_iTickbaseShifts;
-
-	bool IsTickcountValid( int nTick );
-	int AdjustPlayerTimeBase( int nSimulationTicks );
-	//void OnFrameStageNotify(ClientFrameStage_t Stage);
-	void OnRunSimulation( void* this_, int iCommandNumber, CUserCmd* pCmd, size_t local );
-	void OnPredictionUpdate( void* prediction, void*, int startframe, bool validframe, int incoming_acknowledged, int outgoing_command );
-	void OnCLMove( bool bFinalTick, float unk );
-	void copy_command( CUserCmd* pCmd, bool* v1 );
-	bool Building( ) const;
-	bool Using( ) const;
-};
-
-extern TickbaseSystem g_TickbaseController;
-#endif 
-
-typedef void( *CLMove_t )( float accumulated_extra_samples, bool bFinalTick );
-inline CLMove_t o_CLMove;
-void CL_Move( float accumulated_extra_samples, bool bFinalTick );
-
-class TickbaseSystem {
+class c_exploits {
 public:
 
-	void tickbase_manipulation( Encrypted_t<CUserCmd> pCmd, bool* sendPacket );
-	bool Building( ) const;
-	bool Using( ) const;
 
-	bool p_doubletap;
-	bool p_shifting;
-	bool p_charged_dt;
-	int p_shift_commands;
-	int p_shift_tickbase;
-	int p_charged_ticks;
-	int p_charge_timer;
-	int p_ticks_to_shift;
-	int p_alternate_ticks;
-	int recharge_to_ticks;
-	bool p_shifted;
+	bool is_charged( );
+	void cl_move( bool bFinalTick, float accumulated_extra_samples );
+	void handle_exploits( bool* bSendPacket, CUserCmd* pCmd );
 
-	//bool m_double_tap;
-	bool m_shifting;
-	bool m_charged;
-	int m_shift_cmd;
-	int m_shift_tickbase;
-	int m_charged_ticks;
-	int m_charge_timer;
-	int m_tick_to_shift;
-	int m_tick_to_shift_alternate;
-	int m_tick_to_recharge;
-	bool m_shifted;
+	// charge related stuff
+	bool m_is_charged = false;
+	int m_charged_ticks = 0;
+	int m_max_process_ticks = 14;
+
+	// is this the 2nd dt shot?
+	bool m_second_shot = false;
+
+	// are we shifting rn?
+	bool b_shifting = false;
+
+	// used for WriteUsercmdDeltaToBuffer shifting
+	int m_shift_amount = 0;
+	bool m_can_shift = false;
+	bool m_break_lc = false;
+	int m_break_lc_cycle = 0;
+
+	int m_shift_to_fix;
+	bool m_should_fix = false;;
+
+	float m_last_exploit_time = FLT_MAX;
+	int m_last_shift_time = FLT_MAX;
+	int m_shift_command = 0;
+
+	bool m_should_charge = false;
+	bool m_double_tap = false;
+
+
+	struct cfg_t {
+		bool	m_enabled{}, m_defensive_dt{};
+		int		m_additions{}, m_dt_key{}, m_hide_shots_key{}, m_break_lc_timer{}, m_defensive_shift{ 14 };
+	};
+
+	bool					m_charged{}, m_shift{},
+		m_force_choke{}, m_dt_ready{}, m_using_dt_hc{};
+	int						m_ticks_allowed{}, m_cur_shift_amount{},
+		m_next_shift_amount{}, m_recharge_cmd{}, m_type{}, m_correction_amount{}, m_break_lagcomp_ticks{}, m_max_recharge{ 14 };
+
+	bool m_charging{};
+	float m_last_shot{};
+	bool m_can_choke{};
+	bool m_can_shoot{};
+	bool m_choke{};
+
+	int calc_correction_ticks( ) const;
+
+	int adjust_tick_base( const int old_new_cmds, const int total_new_cmds, const int delta ) const;
+
+
+
+	std::array< local_data_t, 150u >	m_local_data{};
+	void handle_break_lc( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds );
+	void handle_other_shift( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds );
 };
 
-extern TickbaseSystem g_TickbaseController;
+extern c_exploits g_tickbase_control;

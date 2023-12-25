@@ -1313,7 +1313,7 @@ namespace Source {
 			};
 
 		float hitchance = rageData->rbot->hitchance;
-		if ( g_TickbaseController.Using( ) )
+		if ( g_tickbase_control.m_double_tap )
 			hitchance = rageData->rbot->doubletap_hitchance;
 
 		if ( rageData->rbot->hitchance > 0.0f && can_hitchance( ) ) {

@@ -109,6 +109,7 @@ namespace Hooked
    using WriteUsercmdDeltaToBufferFn = bool( __thiscall* )( void*, int, void*, int, int, bool );
    inline WriteUsercmdDeltaToBufferFn oWriteUsercmdDeltaToBuffer;
    bool __fastcall WriteUsercmdDeltaToBuffer( void* ECX, void* EDX, int nSlot, void* buf, int from, int to, bool isnewcommand );
+   bool __fastcall write_user_cmd_delta_to_buffer( void* ecx, void* edx, int slot, bf_write* buffer, int from, int to, bool is_new_cmd );
 
    IClientNetworkable* hkCreateCCSPlayer( int entnum, int serialNum );
    bool __fastcall hkSetupBones( uintptr_t ecx, void* edx, matrix3x4_t* matrix, int bone_count, int bone_mask, float time );
@@ -153,15 +154,8 @@ namespace Hooked
    inline FnIsPlayingDemo oIsPlayingDemo;
    bool __fastcall hkIsPlayingDemo( void* ECX, void* EDX );
 
-  //using FnCL_Move = void( __vectorcall* )( float accumulated_extra_samples, bool bFinalTick );
-  //inline FnCL_Move oCL_Move;
-  //void __vectorcall CL_Move( float accumulated_extra_samples, bool bFinalTick );
-  //
-   //void __fastcall RunSimulation( void* this_, void*, int iCommandNumber, CUserCmd* pCmd, size_t local );
-   //inline Memory::DetourHook_t RunSimulationDetor( RunSimulation );
-   //
-   //void __fastcall PredictionUpdate( void* prediction, void*, int startframe, bool validframe, int incoming_acknowledged, int outgoing_command );
-   //inline Memory::DetourHook_t PredictionUpdateDetor( PredictionUpdate );
+   void __vectorcall CL_Move( bool bFinalTick, float accumulated_extra_samples );
+   inline decltype( &CL_Move ) oCL_Move;
 
    using FnIsConnected = bool( __thiscall* ) ( void );
    inline FnIsConnected oIsConnected;

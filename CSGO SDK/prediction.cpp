@@ -250,7 +250,7 @@ namespace Engine {
 		auto& correct = predictionData->m_CorrectionData.emplace_front( );
 		correct.command_nr = predictionData->m_pCmd->command_number;
 		correct.tickbase = predictionData->m_pPlayer->m_nTickBase( ) + 1;
-		correct.tickbase_shift = g_TickbaseController.m_tick_to_shift;
+		correct.tickbase_shift = g_tickbase_control.m_charged_ticks;
 		correct.chokedcommands = Source::m_pClientState->m_nChokedCommands( ) + 1;
 		correct.tickcount = Source::m_pGlobalVars->tickcount;
 
