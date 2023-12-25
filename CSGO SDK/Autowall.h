@@ -44,7 +44,7 @@ namespace Autowall
    float ScaleDamage( C_CSPlayer* player, float damage, float armor_ratio, int hitgroup );
    void TraceLine( const Vector& start, const Vector& end, uint32_t mask, ITraceFilter* ignore, CGameTrace* ptr );
    //void ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecAbsEnd, uint32_t mask, ITraceFilter* filter, CGameTrace* tr );
-   void ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecAbsEnd, uint32_t mask, ITraceFilter* filter, CGameTrace* tr, C_FireBulletData* pData );
+   void ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecAbsEnd, uint32_t mask, ITraceFilter* filter, CGameTrace* tr );
    bool TraceToExit( CGameTrace* enter_trace, Vector start, Vector direction, CGameTrace* exit_trace );
    bool HandleBulletPenetration( Encrypted_t<C_FireBulletData> data );
    float FireBullets( Encrypted_t<C_FireBulletData> data );

@@ -188,7 +188,7 @@ __forceinline float DistanceToRay( const Vector& vecPosition, const Vector& vecR
 	return flRange;
 }
 
-void Autowall::ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecAbsEnd, uint32_t mask, ITraceFilter* filter, CGameTrace* tr, C_FireBulletData* pData ) {
+void Autowall::ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecAbsEnd, uint32_t mask, ITraceFilter* filter, CGameTrace* tr ) {
    float smallestFraction = tr->fraction;
    constexpr float maxRange = 60.0f;
 
@@ -216,7 +216,7 @@ void Autowall::ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecA
 	  auto rangeAlong = delta.Dot( extend );
 
 	 /* should be better now */
-	  const Vector vecPosition = obb_center + pData->m_TargetPlayer->m_vecOrigin( );
+	  const Vector vecPosition = obb_center + ent->m_vecOrigin( );
 	  const float flRange = DistanceToRay( vecPosition, vecAbsStart, vecAbsEnd );
 	  if ( flRange < 0.0f || flRange > 60.0f )
 		  return;
@@ -231,154 +231,89 @@ void Autowall::ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecA
    }
 }
 
-//TODO: Improve this part, missed shot due to occulusion
+// game rebuilded
 bool Autowall::TraceToExit( CGameTrace* pEnterTrace, Vector vecStartPos, Vector vecDirection, CGameTrace* pExitTrace ) { 
-#if 0
-   static auto trace_to_exit = Memory::Scan( XorStr( "client.dll" ), XorStr( "55 8B EC 83 EC 30 F3 0F 10 75 ??" ) );
-   if ( !trace_to_exit )
-	  return false;
+	constexpr float flMaxDistance = 90.f, flStepSize = 4.f;
+	float flCurrentDistance = 0.f;
 
-   // ghetto, but okay
-   static auto sv_clip_penetration_traces_to_players = Source::m_pCvar->FindVar( XorStr( "sv_clip_penetration_traces_to_players" ) );
+	int iFirstContents = 0;
 
-   auto original = false;
-   if ( sv_clip_penetration_traces_to_players ) {
-	  original = sv_clip_penetration_traces_to_players->GetBool( );
-	  sv_clip_penetration_traces_to_players->SetValue( false );
-   }
+	bool bIsWindow = 0;
+	auto v23 = 0;
 
-   Vector kek;
-   Vector& pStart = kek;
+	do {
+		// Add extra distance to our ray
+		flCurrentDistance += flStepSize;
 
-   _asm
-   {
-	  push pExitTrace
-	  push vecDirection.z
-	  push vecDirection.y
-	  push vecDirection.x
-	  push vecStartPos.z
-	  push vecStartPos.y
-	  push vecStartPos.x
-	  mov edx, pEnterTrace
-	  mov ecx, pStart
-	  call trace_to_exit
-	  add esp, 0x1C
-   }
+		// Multiply the direction vector to the distance so we go outwards, add our position to it.
+		Vector vecEnd = vecStartPos + ( vecDirection * flCurrentDistance );
 
-   //  if ( sv_clip_penetration_traces_to_players ) {
-   //  sv_clip_penetration_traces_to_players->SetValue( original );
-   //  }
-#else
-   int enter_point_contents = 0;
-   int point_contents = 0;
+		int iPointContents = Source::m_pEngineTrace->GetPointContents( vecEnd, MASK_SHOT_PLAYER );
 
-   auto is_window = 0;
-   auto v23 = 0;
+		if ( !iFirstContents )
+			iFirstContents = iPointContents;
 
-   float fDistance = 0.0f;
-   Vector start, end;
-   do {
-	  fDistance += 4.0f;
-	  end = vecStartPos + ( vecDirection * fDistance );
+		if ( !( iPointContents & MASK_SHOT_HULL ) || ( ( iPointContents & CONTENTS_HITBOX ) && iPointContents != iFirstContents ) ) {
+			//Let's setup our end position by deducting the direction by the extra added distance
+			Vector vecStart = vecEnd - ( vecDirection * flStepSize );
 
-	  start = end - ( vecDirection * 4.0f );
-	  if ( !enter_point_contents ) {
-		 enter_point_contents = Source::m_pEngineTrace->GetPointContents( end, 0x4600400B );
-		 point_contents = enter_point_contents;
-	  } else {
-		 point_contents = Source::m_pEngineTrace->GetPointContents( end, 0x4600400B );
-	  }
+			// this gets a bit more complicated and expensive when we have to deal with displacements
+			TraceLine( vecEnd, vecStart, MASK_SHOT_PLAYER, nullptr, pExitTrace );
 
-	  if ( point_contents & MASK_SHOT_HULL && ( !( point_contents & CONTENTS_HITBOX ) || enter_point_contents == point_contents ) )
-		 continue;
+			// we hit an ent's hitbox, do another trace.
+			if ( pExitTrace->startsolid && pExitTrace->surface.flags & SURF_HITBOX ) {
+				uint32_t filter_[ 4 ] = { *reinterpret_cast< uint32_t* > ( Engine::Displacement.Function.m_TraceFilterSimple ), uint32_t( C_CSPlayer::GetLocalPlayer( ) ), 0, 0 };
+				filter_[ 1 ] = reinterpret_cast< uint32_t >( pExitTrace->hit_entity );
 
-	  uint32_t filter_[ 4 ] = { *reinterpret_cast< uint32_t* > ( Engine::Displacement.Function.m_TraceFilterSimple ),
-		   uint32_t( C_CSPlayer::GetLocalPlayer( ) ), 0, 0 };
+				// do another trace, but skip the player to get the actual exit surface 
+				TraceLine( vecStartPos, vecStart, MASK_SHOT_HULL, reinterpret_cast< CTraceFilter* >( filter_ ), pExitTrace );
 
-	  TraceLine(
-		 end,
-		 start,
-		 CONTENTS_HITBOX | CONTENTS_DEBRIS | CONTENTS_MONSTER | CONTENTS_MOVEABLE | CONTENTS_GRATE | CONTENTS_WINDOW | CONTENTS_SOLID,
-		 reinterpret_cast< CTraceFilter* >( filter_ ),
-		 pExitTrace );
+				if ( pExitTrace->DidHit( ) && !pExitTrace->startsolid ) {
+					vecEnd = pExitTrace->endpos;
+					return true;
+				}
 
-	  if ( pExitTrace->startsolid && pExitTrace->surface.flags & SURF_HITBOX ) {
+				continue;
+			} else {
 
-		 CTraceFilter filter;
-		 filter.pSkip = pExitTrace->hit_entity;
-		 filter_[ 1 ] = reinterpret_cast< uint32_t >( pExitTrace->hit_entity );
-		 TraceLine( end, vecStartPos, MASK_SHOT_HULL, reinterpret_cast< CTraceFilter* >( filter_ ), pExitTrace );
+				if ( !pExitTrace->DidHit( ) || pExitTrace->startsolid ) {
+					//if (pEnterTrace->DidHitNonWorldEntity() && IsBreakable((C_BaseEntity*)pEnterTrace->hit_entity)) {
+					//	// if we hit a breakable, make the assumption that we broke it if we can't find an exit (hopefully..)
+					//	// fake the end pos
+					//	pExitTrace = pEnterTrace;
+					//	pExitTrace->endpos = vecStartPos + vecDirection;
+					//	return true;
+					//}
+					if ( pExitTrace->hit_entity ) {
+						if ( pEnterTrace->DidHitNonWorldEntity( ) ) {
+							if ( IsBreakable( ( C_BaseEntity* )pEnterTrace->hit_entity ) ) {
+								pExitTrace = pEnterTrace;
+								pExitTrace->endpos = vecStartPos + vecDirection;
+								return true;
+							}
+						}
+					}
+	} else {
+					if ( IsBreakable( ( C_BaseEntity* )pEnterTrace->hit_entity ) && IsBreakable( ( C_BaseEntity* )pExitTrace->hit_entity ) )
+						return true;
 
-		 if ( pExitTrace->DidHit( ) && !pExitTrace->startsolid )
-			return true;
+					if ( pEnterTrace->surface.flags & SURF_NODRAW ||
+						 ( !( pExitTrace->surface.flags & SURF_NODRAW ) && pExitTrace->plane.normal.Dot( vecDirection ) <= 1.f ) ) {
+						const float flMultAmount = pExitTrace->fraction * 4.f;
 
-		 continue;
-	  }
+						// get the real end pos
+						vecStart -= vecDirection * flMultAmount;
+						return true;
+					}
 
-	  auto v21 = ( int* ) pEnterTrace->surface.name;
+					continue;
+				}
+}
+		}
+		// max pen distance is 90 units.
+	} while ( flCurrentDistance <= flMaxDistance );
 
-	  if ( v21 ) {
-		 if ( *v21 == 1936744813
-			  && v21[ 1 ] == 1601397551
-			  && v21[ 2 ] == 1768318575
-			  && v21[ 3 ] == 1731159395
-			  && v21[ 4 ] == 1936941420
-			  && v21[ 5 ] == 1651668271
-			  && v21[ 6 ] == 1734307425
-			  && v21[ 7 ] == 1936941420 ) {
-			is_window = 1;
-		 } else {
-			is_window = 0;
-			if ( *v21 != 1936744813 )
-			   goto LABEL_34;
-		 }
-		 if ( v21[ 1 ] == 1600480303
-			  && v21[ 2 ] == 1701536108
-			  && v21[ 3 ] == 1634494255
-			  && v21[ 4 ] == 1731162995
-			  && v21[ 5 ] == 1936941420 ) {
-			v23 = 1;
-		 LABEL_35:
-			if ( is_window || v23 ) {
-			   *pExitTrace = *pEnterTrace;
-			   pExitTrace->endpos = end + vecDirection;
-			   return true;
-			}
-			goto LABEL_37;
-		 }
-	  LABEL_34:
-		 v23 = 0;
-		 goto LABEL_35;
-	  }
-   LABEL_37:
-
-	  if ( !pExitTrace->DidHit( ) || pExitTrace->startsolid ) {
-		 if ( pEnterTrace->hit_entity && pEnterTrace->hit_entity->m_entIndex != 0
-			  && IsBreakable( ( C_BaseEntity* ) pEnterTrace->hit_entity, pEnterTrace->contents ) ) {
-			*pExitTrace = *pEnterTrace;
-			pExitTrace->endpos = vecStartPos + vecDirection;
-			return true;
-		 }
-
-		 continue;
-	  }
-
-	  if ( pExitTrace->surface.flags & SURF_NODRAW ) {
-		 if ( IsBreakable( ( C_BaseEntity* ) pExitTrace->hit_entity, pExitTrace->contents ) && IsBreakable( ( C_BaseEntity* ) pEnterTrace->hit_entity, pEnterTrace->contents ) )
-			return true;
-
-		 if ( !( pEnterTrace->surface.flags & SURF_NODRAW ) )
-			continue;
-	  }
-
-	  if ( pExitTrace->plane.normal.Dot( vecDirection ) <= 1.0 ) {
-		 return true;
-	  }
-
-   } while ( fDistance <= 90.0f );
-
-   return false;
-#endif
+	return false;
 }
 
 bool Autowall::HandleBulletPenetration( Encrypted_t<C_FireBulletData> data ) {
@@ -541,7 +476,7 @@ float Autowall::FireBullets( Encrypted_t<C_FireBulletData> data ) {
 			   data->m_EnterTrace = playerTrace;
 		 }
 	  } else {
-		 ClipTraceToPlayers( data->m_vecStart, end + data->m_vecDirection * 40.0f, MASK_SHOT_HULL | CONTENTS_HITBOX, data->m_Filter, &data->m_EnterTrace, data.Xor( ) );
+		 ClipTraceToPlayers( data->m_vecStart, end + data->m_vecDirection * 40.0f, MASK_SHOT_HULL | CONTENTS_HITBOX, data->m_Filter, &data->m_EnterTrace );
 	  }
 
 	  if ( data->m_EnterTrace.fraction == 1.f )
@@ -558,7 +493,7 @@ float Autowall::FireBullets( Encrypted_t<C_FireBulletData> data ) {
    #endif
 
 	  data->m_EnterSurfaceData = Source::m_pPhysSurface->GetSurfaceData( data->m_EnterTrace.surface.surfaceProps );
-	  if ( data->m_flTraceLength > 3000.0f && data->m_WeaponData->m_flPenetration > 0.f
+	  if ( data->m_flTraceLength > 3150.0f && data->m_WeaponData->m_flPenetration > 0.f
 		   || data->m_EnterSurfaceData->game.flPenetrationModifier < 0.1f ) {
 		 data->m_iPenetrationCount = 0;
 		 break;
