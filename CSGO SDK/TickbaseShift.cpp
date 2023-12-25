@@ -6,29 +6,32 @@
 #include "Exploits.hpp"
 #include "displacement.hpp"
 
-
+/* optimize off */
 #pragma optimize("", off)
 
 c_exploits g_tickbase_control;
 
 using namespace Source;
+
+/* return charged */
 bool c_exploits::is_charged( ) {
 	return m_charged_ticks >= m_max_process_ticks;
 }
 
 void c_exploits::cl_move( bool bFinalTick, float accumulated_extra_samples ) {
-
 	m_double_tap = g_Vars.rage.exploit && g_Vars.rage.double_tap_bind.enabled;
 	m_should_charge = fabsf( m_pGlobalVars->realtime - m_last_exploit_time ) > 0.5f;
 
-	C_CSPlayer* pLocal = C_CSPlayer::GetLocalPlayer( );
-
-	if ( !pLocal ) {
+	C_CSPlayer* p_local = C_CSPlayer::GetLocalPlayer( );
+	if ( !p_local ) {
+		/* reset */
 		m_double_tap = false;
 		m_should_charge = true;
 		m_charged = false;
 		m_charged_ticks = 0;
 		m_second_shot = false;
+
+		/* return call */
 		return Hooked::oCL_Move( bFinalTick, accumulated_extra_samples );
 	}
 
@@ -45,16 +48,14 @@ void c_exploits::cl_move( bool bFinalTick, float accumulated_extra_samples ) {
 
 void c_exploits::handle_exploits( bool* send_packet, CUserCmd* pCmd ) {
 
-	C_CSPlayer* pLocal = C_CSPlayer::GetLocalPlayer( );
+	C_CSPlayer* p_local = C_CSPlayer::GetLocalPlayer( );
+	if ( !p_local )
+		return;
 
 	// reset this!!
 	m_can_shift = false;
 
-	if ( !pLocal )
-		return;
-
 	if ( !m_double_tap ) {
-
 		if ( m_charged_ticks ) {
 			m_shift_amount = 14;
 			m_last_exploit_time = m_pGlobalVars->realtime;
@@ -62,8 +63,8 @@ void c_exploits::handle_exploits( bool* send_packet, CUserCmd* pCmd ) {
 			m_should_charge = false;
 			m_break_lc = false;
 		}
-
-
+		
+		/* recharge time */
 		if ( TIME_TO_TICKS( fabsf( m_pGlobalVars->realtime - m_last_shift_time ) ) <= 32 )
 			*send_packet = true;
 
@@ -77,11 +78,7 @@ void c_exploits::handle_exploits( bool* send_packet, CUserCmd* pCmd ) {
 	m_charged = is_charged( );
 	*send_packet = true;
 
-	// if (TIME_TO_TICKS(fabsf(m_pGlobalVars->realtime - m_last_shift_time)) < 14) 
-	//	*bSendPacket = true;
-
-
-	const auto pWeapon = reinterpret_cast< C_WeaponCSBaseGun* >( pLocal->m_hActiveWeapon( ).Get( ) );
+	const auto pWeapon = reinterpret_cast< C_WeaponCSBaseGun* >( p_local->m_hActiveWeapon( ).Get( ) );
 	if ( !pWeapon )
 		return;
 
@@ -90,18 +87,14 @@ void c_exploits::handle_exploits( bool* send_packet, CUserCmd* pCmd ) {
 		return;
 
 	if ( !m_charged ) {
-
 		if ( pCmd->buttons & IN_ATTACK )
 			m_last_shift_time = m_pGlobalVars->realtime;
-
 
 		m_second_shot = false;
 		return;
 	}
 
-	if ( pWeaponData->m_iWeaponType == WEAPONTYPE_C4 ||
-		 /*pWeaponData->m_iWeaponType == WEAPONTYPE_KNIFE ||*/
-		 pWeaponData->m_iWeaponType == WEAPONTYPE_GRENADE ) {
+	if ( pWeaponData->m_iWeaponType == WEAPONTYPE_C4 || pWeaponData->m_iWeaponType == WEAPONTYPE_GRENADE ) {
 		return;
 	}
 
@@ -117,19 +110,10 @@ void c_exploits::handle_exploits( bool* send_packet, CUserCmd* pCmd ) {
 		m_should_charge = false;
 		m_break_lc = false;
 		*send_packet = true;
-	} 
-	// else if ( g_Vars.rage.dt1 ) { // thats broken
-	// 
-	// 	if ( ++m_break_lc_cycle >= 14 )
-	// 		m_break_lc_cycle = 0;
-	// 
-	// 	m_shift_amount = m_break_lc_cycle > 0 ? 16 : 0;
-	// }
-
+	}
 }
 
 int c_exploits::calc_correction_ticks( ) const {
-
 	static auto lol = m_pCvar->FindVar( "sv_clockcorrection_msecs" );
 
 	if ( !lol )
@@ -140,7 +124,6 @@ int c_exploits::calc_correction_ticks( ) const {
 
 	return TIME_TO_TICKS( std::clamp( lol->GetFloat( ) / 1000.f, 0.f, 1.f ) );
 }
-
 
 int c_exploits::adjust_tick_base( const int old_new_cmds, const int total_new_cmds, const int delta ) const {
 	auto ret = -1;
@@ -177,5 +160,5 @@ int c_exploits::adjust_tick_base( const int old_new_cmds, const int total_new_cm
 			 ? local_data.m_tick_base : player->m_nTickBase( ) ) - delta;
 }
 
-
+/* optimize on */
 #pragma optimize("", on)
