@@ -149,7 +149,46 @@ void Autowall::TraceLine( const Vector& start, const Vector& end, uint32_t mask,
    Source::m_pEngineTrace->TraceRay( ray, mask, ignore, ptr );
 }
 
-void Autowall::ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecAbsEnd, uint32_t mask, ITraceFilter* filter, CGameTrace* tr ) {
+/* src engine rebuld */
+__forceinline float DistanceToRay( const Vector& vecPosition, const Vector& vecRayStart, const Vector& vecRayEnd, float* flAlong = NULL, Vector* vecPointOnRay = NULL ) {
+	Vector vecTo = vecPosition - vecRayStart;
+	Vector vecDir = vecRayEnd - vecRayStart;
+	float flLength = vecDir.Normalize( );
+
+	float flRangeAlong = DotProduct( vecDir, vecTo );
+	if ( flAlong ) {
+		*flAlong = flRangeAlong;
+	}
+
+	float flRange;
+
+	if ( flRangeAlong < 0.0f ) {
+		// off start point
+		flRange = -vecTo.Length( );
+
+		if ( vecPointOnRay ) {
+			*vecPointOnRay = vecRayStart;
+		}
+	} else if ( flRangeAlong > flLength ) {
+		// off end point
+		flRange = -( vecPosition - vecRayEnd ).Length( );
+
+		if ( vecPointOnRay ) {
+			*vecPointOnRay = vecRayEnd;
+		}
+	} else { // within ray bounds
+		Vector vecOnRay = vecRayStart + vecDir * flRangeAlong;
+		flRange = ( vecPosition - vecOnRay ).Length( );
+
+		if ( vecPointOnRay ) {
+			*vecPointOnRay = vecOnRay;
+		}
+	}
+
+	return flRange;
+}
+
+void Autowall::ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecAbsEnd, uint32_t mask, ITraceFilter* filter, CGameTrace* tr, C_FireBulletData* pData ) {
    float smallestFraction = tr->fraction;
    constexpr float maxRange = 60.0f;
 
@@ -176,24 +215,18 @@ void Autowall::ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecA
 	  auto extend = ( obb_center - vecAbsStart );
 	  auto rangeAlong = delta.Dot( extend );
 
-	  float range;
-	  if ( rangeAlong >= 0.0f ) {
-		 if ( rangeAlong <= delta_length )
-			range = Vector( obb_center - ( ( delta * rangeAlong ) + vecAbsStart ) ).Length( );
-		 else
-			range = -( obb_center - vecAbsEnd ).Length( );
-	  } else {
-		 range = -extend.Length( );
-	  }
+	 /* should be better now */
+	  const Vector vecPosition = obb_center + pData->m_TargetPlayer->m_vecOrigin( );
+	  const float flRange = DistanceToRay( vecPosition, vecAbsStart, vecAbsEnd );
+	  if ( flRange < 0.0f || flRange > 60.0f )
+		  return;
 
-	  if ( range >= 0.0f && range <= maxRange ) {
-		 CGameTrace playerTrace;
-		 Source::m_pEngineTrace->ClipRayToEntity( ray, MASK_SHOT_HULL | CONTENTS_HITBOX, ent, &playerTrace );
-		 if ( playerTrace.fraction < smallestFraction ) {
-			// we shortened the ray - save off the trace
-			*tr = playerTrace;
-			smallestFraction = playerTrace.fraction;
-		 }
+	  CGameTrace playerTrace;
+	  Source::m_pEngineTrace->ClipRayToEntity( ray, MASK_SHOT_HULL | CONTENTS_HITBOX, ent, &playerTrace );
+	  if ( playerTrace.fraction < smallestFraction ) {
+		  // we shortened the ray - save off the trace
+		  *tr = playerTrace;
+		  smallestFraction = playerTrace.fraction;
 	  }
    }
 }
@@ -508,7 +541,7 @@ float Autowall::FireBullets( Encrypted_t<C_FireBulletData> data ) {
 			   data->m_EnterTrace = playerTrace;
 		 }
 	  } else {
-		 ClipTraceToPlayers( data->m_vecStart, end + data->m_vecDirection * 40.0f, MASK_SHOT_HULL | CONTENTS_HITBOX, data->m_Filter, &data->m_EnterTrace );
+		 ClipTraceToPlayers( data->m_vecStart, end + data->m_vecDirection * 40.0f, MASK_SHOT_HULL | CONTENTS_HITBOX, data->m_Filter, &data->m_EnterTrace, data.Xor( ) );
 	  }
 
 	  if ( data->m_EnterTrace.fraction == 1.f )
