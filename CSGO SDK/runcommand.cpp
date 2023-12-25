@@ -15,35 +15,6 @@
 
 extern int VelModTick;
 
-//extern std::map<int, Vector> predicted_origins;
-
-#if 0
-if ( predicted_origins.count( ucmd->command_number ) > 0 ) {
-   const auto origin = player->m_vecOrigin( );
-   const auto vel = player->m_vecVelocity( );
-   const auto pre = predicted_origins[ ucmd->command_number ];
-
-   const auto org_pred = std::get<0>( pre );
-   const auto vel_pred = std::get<1>( pre );
-
-   if ( org_pred.Distance( origin ) >= 0.01f ) {
-	  printf( XorStr( "| ORG | len: %.4f | delta ( %.4f %.4f %.4f ) \n" ), org_pred.Distance( origin ),
-		 org_pred.x - origin.x, org_pred.y - origin.y, org_pred.z - origin.z );
-
-	  if ( InputSys::Get( )->IsKeyDown( VirtualKeys::H ) ) {
-		 Source::m_pDebugOverlay->AddBoxOverlay( origin, Vector( -1.f, -1.f, -1.f ), Vector( 1.f, 1.f, 1.f ), QAngle( ), 255, 0, 0, 150, 1.0f );
-		 Source::m_pDebugOverlay->AddBoxOverlay( org_pred, Vector( -1.f, -1.f, -1.f ), Vector( 1.f, 1.f, 1.f ), QAngle( ), 0, 0, 255, 150, 1.0f );
-	  }
-   }
-
-   if ( vel_pred.Distance( vel ) >= 0.01f ) {
-	  printf( XorStr( "| VEL | len: %.4f | delta ( %.4f %.4f %.4f ) \n" ), vel_pred.Distance( vel ),
-		 vel_pred.x - vel.x, vel_pred.y - vel.y, vel_pred.z - vel.z );
-   }
-
-   predicted_origins.erase( ucmd->command_number );
-}
-#endif
 
 void FixViewmodel( CUserCmd* cmd, bool restore ) {
    static float cycleBackup = 0.0f;
