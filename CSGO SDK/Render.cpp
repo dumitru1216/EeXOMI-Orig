@@ -272,7 +272,7 @@ void DX9Render::Initialize( IDirect3DDevice9* Device ) {
 
    auto shared_data = ImGui::GetDrawListSharedData( );
    m_draw_list = new ImDrawList( shared_data );
-   m_render_draw_list = new ImDrawList( shared_data );
+   m_render_draw_list = new ImDrawList( shared_data );      
 }
 
 #ifdef _DEBUG

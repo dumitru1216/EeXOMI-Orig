@@ -28,23 +28,8 @@
 
 #include <sstream>
 
-
-// #define DEBUG_REPREDICT
-#ifdef DEBUG_REPREDICT
-std::map<int, std::tuple<Vector, Vector>> predicted_origins;
-#endif
-
 extern int LastShotTime;
 extern CUserCmd* previous_cmd;
-#ifdef DevelopMode
-// #define DEBUG_HITCHANCE
-// #define OPTIMIZATION_CHECKS
-// #define DEBUG_ONSHOT_AA
-#endif
-
-// TODO: 
-// Refactoring
-// Rework exploits
 
 // placed here for debug
 Engine::C_LagRecord extrapolated;
@@ -381,12 +366,12 @@ namespace Source {
 					break;
 				case Hitgroup_RightLeg:
 				case Hitgroup_LeftLeg:
-					ps = 50.0f;
+					ps = 15.0f; // no need 50.f
 					return  override_hitscan ? rageData->rbot->bt_legs_hitbox : rageData->rbot->legs_hitbox;
 					break;
 				case Hitgroup_RightArm:
 				case Hitgroup_LeftArm:
-					ps = 50.0f;
+					ps = 15.0f;
 					return override_hitscan ? rageData->rbot->bt_arms_hitbox : rageData->rbot->arms_hitbox;
 					break;
 				default:
@@ -777,12 +762,7 @@ namespace Source {
 		if ( reset_cmd ) {
 			*rageData->m_pCmd.Xor( ) = cmd_backup;
 			Engine::Prediction::Instance( )->Repredict( );
-		} else {
-#ifdef DEBUG_REPREDICT
-			// std::get<0>( predicted_origins[ rageData->m_pCmd->command_number ] ) = rageData->m_pLocal->m_vecOrigin( );
-			// std::get<1>( predicted_origins[ rageData->m_pCmd->command_number ] ) = rageData->m_pLocal->m_vecVelocity( );
-#endif
-		}
+		} 
 
 		return aim_success;
 	}
@@ -843,61 +823,6 @@ namespace Source {
 		points.push_back( pointTransformed );
 	}
 
-	void C_Ragebot::HitchanceRaysMT( C_HitchanceArray* data ) {
-		auto ragebot = ( C_Ragebot* )( Ragebot::Get( ).Xor( ) );
-		ragebot->HitchanceRaysInternal( data );
-	}
-
-	void C_Ragebot::HitchanceRaysInternal( C_HitchanceArray* data ) {
-		auto target = data->point->target;
-		for ( int i = 0; i < data->dataCount; ++i ) {
-			auto ray = &data->data[ i ];
-
-			auto intersection = false;
-			for ( auto capsule : target->capsules ) {
-				intersection = segment_to_segment( rageData->m_vecEyePos, ray->end, capsule.m_mins, capsule.m_maxs, capsule.m_radius );
-				if ( intersection ) {
-					intersection = true;
-					break;
-				}
-			}
-
-			if ( !intersection ) {
-				for ( auto box : target->obb ) {
-					intersection = Math::IntersectionBoundingBox( rageData->m_vecEyePos, ray->end, box.min, box.max );
-					if ( intersection ) {
-						break;
-					}
-				}
-			}
-
-			if ( !intersection )
-				continue;
-
-			Autowall::C_FireBulletData fireData;
-			fireData.m_bPenetration = true;
-
-			fireData.m_vecStart = this->rageData->m_vecEyePos;
-			fireData.m_vecDirection = ray->direction;
-			fireData.m_iHitgroup = convert_hitbox_to_hitgroup( data->point->hitbox_idx );
-			fireData.m_Player = this->rageData->m_pLocal;
-			fireData.m_TargetPlayer = target->player;
-			fireData.m_WeaponData = this->rageData->m_pWeaponInfo.Xor( );
-			fireData.m_Weapon = this->rageData->m_pWeapon;
-
-			auto damage = Autowall::FireBullets( &fireData );
-			if ( damage < 1.0f ) {
-				continue;
-			}
-
-			ray->hit = true;
-
-			auto ratio = int( float( target->player->m_iHealth( ) ) / damage ) + 1;
-			if ( ratio <= data->point->health_ratio )
-				ray->damageIsAccurate = true;
-		}
-	}
-
 	bool C_Ragebot::Hitchance( C_AimPoint* point, const Vector& start, float chance ) {
 		if ( chance <= 0.0f )
 			return true;
@@ -948,7 +873,7 @@ namespace Source {
 
 			float m_flRecoilIndex = rageData->m_pWeapon->m_flRecoilIndex( );
 			if ( rageData->m_pWeapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER ) {
-#if 0
+#if 1 /* we need this shit */
 				flRand1 = 1.f - flRand1 * flRand1;
 				flRand2 = 1.f - flRand2 * flRand2;
 #endif
@@ -984,6 +909,7 @@ namespace Source {
 			auto hit = false;
 			auto target = point->target;
 
+			/* thats a bit fucked but whatever*/
 			if ( hitbox->m_flRadius > 0.f ) {
 				for ( auto capsule : target->capsules ) {
 					hit = segment_to_segment( rageData->m_vecEyePos, end, capsule.m_mins, capsule.m_maxs, capsule.m_radius );
@@ -999,6 +925,7 @@ namespace Source {
 					}
 				}
 			}
+
 			if ( hit ) {
 				hits++;
 			}
@@ -1114,10 +1041,6 @@ namespace Source {
 			return false;
 		}
 
-		//if ( TickbaseShiftCtx.over_choke_nr ) {
-		   //return false;
-		//}
-
 		auto exploits_enabled = [ ]( ) {
 			return ( g_Vars.rage.exploit && g_Vars.rage.double_tap_bind.enabled );
 		};
@@ -1178,133 +1101,32 @@ namespace Source {
 		// reset delay state
 		rageData->m_iDelayTicks = 0;
 
-		// delay shot for best peek
-#if 0
-		if ( rageData->m_pLocal->m_vecVelocity( ).Length2D( ) >= 2.f && !exploits_enabled( ) ) {
-			Vector predicted_pos = rageData->m_vecEyePos + ( rageData->m_pLocal->m_vecVelocity( ) * 0.2f );
-			get_edge( predicted_pos, rageData->m_vecEyePos, 16.0f, rageData->m_pLocal );
-
-			if ( std::fabsf( rageData->m_flLastPeekTime - TICKS_TO_TIME( Source::m_pGlobalVars->tickcount ) ) <= 0.2f ) {
-				if ( predicted_pos.Distance( rageData->m_vecEyePos ) > rageData->m_PeekingPosition.Distance( rageData->m_vecEyePos ) ) {
-					rageData->m_PeekingPosition = predicted_pos;
-					rageData->m_flLastPeekTime = TICKS_TO_TIME( Source::m_pGlobalVars->tickcount );
-				} else {
-					predicted_pos = rageData->m_PeekingPosition;
-				}
-			} else {
-				rageData->m_PeekingPosition = predicted_pos;
-				rageData->m_flLastPeekTime = TICKS_TO_TIME( Source::m_pGlobalVars->tickcount );
-			}
-
-#if 0
-			if ( InputSys::Get( )->IsKeyDown( VirtualKeys::F ) ) {
-				Source::m_pDebugOverlay->AddLineOverlay( rageData->m_vecEyePos, predicted_pos,
-														 255, 255, 255, false, 1.0f );
-				Source::m_pDebugOverlay->AddBoxOverlay( predicted_pos, Vector( -1.f, -1.f, -1.f ), Vector( 1.f, 1.f, 1.f ),
-														QAngle( ), 255, 0, 0, 150, 1.0f );
-			}
-#endif
-
-			{
-				Autowall::C_FireBulletData fireData;
-				fireData.m_bPenetration = true;
-
-				fireData.m_vecStart = predicted_pos;
-				fireData.m_vecDirection = point->point - predicted_pos;
-				fireData.m_iHitgroup = convert_hitbox_to_hitgroup( point->hitbox_idx );
-				fireData.m_Player = this->rageData->m_pLocal;
-				fireData.m_TargetPlayer = point->target->player;
-				fireData.m_WeaponData = this->rageData->m_pWeaponInfo.Xor( );
-				fireData.m_Weapon = this->rageData->m_pWeapon;
-
-				auto damage = Autowall::FireBullets( &fireData );
-				auto health_ratio = 100;
-				auto lethal_damage = Autowall::ScaleDamage( fireData.m_TargetPlayer, fireData.m_WeaponData->m_iWeaponDamage, fireData.m_WeaponData->m_flArmorRatio, fireData.m_iHitgroup );
-				if ( damage > 0.0f ) {
-					health_ratio = int( float( point->target->player->m_iHealth( ) ) / damage ) + 1;
-				}
-
-				if ( point->health_ratio > health_ratio ) {
-					return false;
-				}
-			}
-
-			if ( !point->is_safe ) {
-				auto hdr = *( studiohdr_t** )( point->target->player->m_pStudioHdr( ) );
-				auto hitboxSet = hdr->pHitboxSet( point->target->player->m_nHitboxSet( ) );
-				auto pelvis = hitboxSet->pHitbox( HITBOX_PELVIS );
-				auto stomach = hitboxSet->pHitbox( HITBOX_STOMACH );
-
-				auto ps = 0.0f;
-				if ( GetBoxOption( pelvis, hitboxSet, ps, point->target->override_hitscan ) ) {
-					auto p = ( pelvis->bbmax + pelvis->bbmin ) * 0.5f;
-					p = p.Transform( point->target->record->GetBoneMatrix( point->target->side )[ pelvis->bone ] );
-
-					Autowall::C_FireBulletData fireData;
-					fireData.m_bPenetration = true;
-
-					fireData.m_vecStart = predicted_pos;
-					fireData.m_vecDirection = p - predicted_pos;
-					fireData.m_iHitgroup = convert_hitbox_to_hitgroup( point->hitbox_idx );
-					fireData.m_Player = this->rageData->m_pLocal;
-					fireData.m_TargetPlayer = point->target->player;
-					fireData.m_WeaponData = this->rageData->m_pWeaponInfo.Xor( );
-					fireData.m_Weapon = this->rageData->m_pWeapon;
-					auto damage = Autowall::FireBullets( &fireData );
-
-					if ( damage > 0.0f ) {
-						auto health_ratio = int( float( point->target->player->m_iHealth( ) ) / damage ) + 1;
-						if ( point->health_ratio > health_ratio ) {
-							return false;
-						}
-					}
-				}
-
-				if ( GetBoxOption( stomach, hitboxSet, ps, point->target->override_hitscan ) ) {
-					auto p = ( stomach->bbmax + stomach->bbmin ) * 0.5f;
-					p = p.Transform( point->target->record->GetBoneMatrix( point->target->side )[ stomach->bone ] );
-
-					Autowall::C_FireBulletData fireData;
-					fireData.m_bPenetration = true;
-
-					fireData.m_vecStart = predicted_pos;
-					fireData.m_vecDirection = p - predicted_pos;
-					fireData.m_iHitgroup = convert_hitbox_to_hitgroup( point->hitbox_idx );
-					fireData.m_Player = this->rageData->m_pLocal;
-					fireData.m_TargetPlayer = point->target->player;
-					fireData.m_WeaponData = this->rageData->m_pWeaponInfo.Xor( );
-					fireData.m_Weapon = this->rageData->m_pWeapon;
-					auto damage = Autowall::FireBullets( &fireData );
-
-					if ( damage > 0.0f ) {
-						auto  health_ratio = int( float( point->target->player->m_iHealth( ) ) / damage ) + 1;
-						if ( point->health_ratio > health_ratio ) {
-							return false;
-						}
-					}
-				}
-			}
-		}
-#endif
 		auto can_hitchance = [ this ]( ) {
 			// nospread enabled
 			if ( rageData->m_flSpread == 0.0f || rageData->m_flInaccuracy == 0.0f )
 				return false;
 
-			const auto weapon_id = rageData->m_pWeapon->m_iItemDefinitionIndex( );
 			const auto crouched = rageData->m_pLocal->m_fFlags( ) & FL_DUCKING;
 			const auto sniper = rageData->m_pWeaponInfo->m_iWeaponType == WEAPONTYPE_SNIPER_RIFLE;
-			const auto round_acc = [ ]( const float accuracy ) { return roundf( accuracy * 1000.f ) / 1000.f; };
 
-			float rounded_acc = round_acc( rageData->m_flInaccuracy );
+			const auto round_acc = [ ]( const float accuracy ) { return floorf( accuracy * 170.f ) / 170.f; }; // xref: old - 1000
+			const auto round_acc2 = [ ]( const float accuracy ) { return floorf( accuracy * 300.f ) / 300.f; }; // xref: old - 1000 // we use that for the second one
+
+			auto id = rageData->m_pWeapon->m_iItemDefinitionIndex( );
+			const auto scoped = ( rageData->rbot->autoscope ||
+								  rageData->m_pWeapon->m_zoomLevel( ) ) && ( id == WEAPON_AWP || id == WEAPON_G3SG1 || id == WEAPON_SCAR20 || id == WEAPON_SSG08 );
+
 
 			// no need for hitchance, if we can't increase it anyway.
+			/* this logic is wrong, and old we should fix that */
 			if ( crouched ) {
-				if ( rounded_acc == round_acc( sniper ? rageData->m_pWeaponInfo->m_flInaccuracyCrouchAlt : rageData->m_pWeaponInfo->m_flInaccuracyCrouch ) ) {
+				// xref: fatality
+				if ( round_acc2( rageData->m_flInaccuracy ) <= ( scoped ? rageData->m_pWeaponInfo->m_flInaccuracyStandAlt : rageData->m_pWeaponInfo->m_flInaccuracyStand ) ) {
 					return false;
 				}
 			} else {
-				if ( rounded_acc == round_acc( sniper ? rageData->m_pWeaponInfo->m_flInaccuracyStandAlt : rageData->m_pWeaponInfo->m_flInaccuracyStand ) ) {
+				// xref: fatality
+				if ( round_acc( rageData->m_flInaccuracy ) <= ( scoped ? rageData->m_pWeaponInfo->m_flInaccuracyStandAlt : rageData->m_pWeaponInfo->m_flInaccuracyStand ) ) {
 					return false;
 				}
 			}
