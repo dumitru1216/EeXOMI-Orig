@@ -327,6 +327,7 @@ namespace Source {
 	class C_Ragebot : public Ragebot {
 	public:
 		void StripAttack( Encrypted_t<CUserCmd> cmd );
+		void CockRevolver( );
 		// only sanity checks, etc.
 		virtual bool Run( Encrypted_t<CUserCmd> cmd, C_CSPlayer* local, bool* sendPacket );
 
@@ -403,11 +404,6 @@ namespace Source {
 		virtual bool AccuracyBoost( C_AimPoint* point, const Vector& start, float chance );
 
 		__forceinline bool IsPointAccurate( C_AimPoint* point, const Vector& start );
-
-		static void HitchanceRaysMT( C_HitchanceArray* _data );
-		void HitchanceRaysInternal( C_HitchanceArray* _data );
-		void AutowallHitchanceRay( C_HitchanceData* _data );
-
 		virtual void AddPoint( C_CSPlayer* player, Engine::C_LagRecord* record, int side, std::vector<Vector>& points, const Vector& point, mstudiobbox_t* hitbox, mstudiohitboxset_t* hitboxSet, bool isMultipoint );
 
 		virtual bool RunHitscan( );
@@ -452,6 +448,34 @@ namespace Source {
 			cmd->buttons &= ~IN_ATTACK;
 	}
 
+	void C_Ragebot::CockRevolver( ) {
+		if ( rageData->m_pWeapon->m_iItemDefinitionIndex( ) != WEAPON_REVOLVER )
+			return;
+
+		if ( !( rageData->m_pCmd->buttons & IN_RELOAD ) && rageData->m_pWeapon->m_iClip1( ) ) {
+			static float cockTime = 0.f;
+
+			const float curtime = rageData->m_pLocal->m_nTickBase( ) * m_pGlobalVars->interval_per_tick;
+
+			rageData->m_pCmd->buttons &= ~IN_ATTACK2;
+
+			if ( rageData->m_pLocal->CanShoot( 0, true ) ) {
+				if ( cockTime <= curtime ) {
+					if ( rageData->m_pWeapon->m_flNextSecondaryAttack( ) <= curtime ) {
+						cockTime = curtime + 0.234375f;
+					} else {
+						rageData->m_pCmd->buttons |= IN_ATTACK2;
+					}
+				} else {
+					rageData->m_pCmd->buttons |= IN_ATTACK;
+				}
+			} else {
+				cockTime = curtime + 0.234375f;
+				rageData->m_pCmd->buttons &= ~IN_ATTACK;
+			}
+		}
+	}
+
 	bool C_Ragebot::Run( Encrypted_t<CUserCmd> cmd, C_CSPlayer* local, bool* sendPacket ) {
 #if 0
 		if ( !InputSys::Get( )->IsKeyDown( VirtualKeys::F ) )
@@ -460,10 +484,6 @@ namespace Source {
 
 		if ( !g_Vars.rage.enabled )
 			return false;
-
-#ifdef AUTOWALL_CALLS
-		AutowallCalls = 0;
-#endif
 
 		if ( !g_Vars.globals.RandomInit ) {
 			return false;
@@ -488,18 +508,6 @@ namespace Source {
 		if ( !local || local->IsDead( ) )
 			return false;
 
-		if ( !local->CanShoot( ) )
-			StripAttack( cmd );
-
-		// we have a normal weapon or a non cocking revolver
-		// choke if its the processing tick.
-		bool revolver = weapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER;
-		if ( local->CanShoot( ) && !Source::m_pClientState->m_nChokedCommands( ) && !revolver && !( g_Vars.rage.double_tap_bind.enabled && g_Vars.rage.exploit ) ) {
-			*sendPacket = false;
-			StripAttack( cmd );
-			return false;
-		}
-
 		rageData->m_pLocal = local;
 		rageData->m_pWeapon = weapon;
 		rageData->m_pWeaponInfo = weaponInfo;
@@ -510,6 +518,8 @@ namespace Source {
 		if ( !rageData->m_pCmd.IsValid( ) || !rageData->m_pLocal || !rageData->m_pWeapon || !rageData->m_pWeaponInfo.IsValid( ) )
 			return false;
 
+		// CockRevolver( );
+#if 1
 		if ( weapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER ) {
 			static bool unk_meme = false;
 			static bool unk_rofl = false;
@@ -542,9 +552,8 @@ namespace Source {
 				 || !rageData->rbot->between_shots )
 				return false;
 		}
-
+#endif
 		bool ret = RunInternal( );
-
 		return ret;
 	}
 
@@ -873,7 +882,7 @@ namespace Source {
 
 			float m_flRecoilIndex = rageData->m_pWeapon->m_flRecoilIndex( );
 			if ( rageData->m_pWeapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER ) {
-#if 1 /* we need this shit */
+#if 0 /* we need this shit */
 				flRand1 = 1.f - flRand1 * flRand1;
 				flRand2 = 1.f - flRand2 * flRand2;
 #endif
@@ -1119,9 +1128,9 @@ namespace Source {
 			/* weapon revolver 
 				xref: fatality
 			*/
-			if ( id == WEAPON_REVOLVER ) {
-				return Source::m_pGlobalVars->curtime > rageData->m_pWeapon->m_flNextSecondaryAttack( ) - TICKS_TO_TIME( 7 );
-			}
+			//if ( id == WEAPON_REVOLVER ) {
+			//	return Source::m_pGlobalVars->curtime > rageData->m_pWeapon->m_flNextSecondaryAttack( ) - TICKS_TO_TIME( 7 );
+			//}
 
 			// no need for hitchance, if we can't increase it anyway.
 			/* this logic is wrong, and old we should fix that */
@@ -1156,16 +1165,54 @@ namespace Source {
 	}
 
 	void C_Ragebot::Multipoint( C_CSPlayer* player, Engine::C_LagRecord* record, int side, std::vector<Vector>& points, mstudiobbox_t* hitbox, mstudiohitboxset_t* hitboxSet, float pointScale ) {
-		auto boneMatrix = record->GetBoneMatrix( );
-
+		// we dont have a hitbox
 		if ( !hitbox )
 			return;
 
+		// we dont have a hitbox set idx
 		if ( !hitboxSet )
 			return;
 
-		Vector center = ( hitbox->bbmax + hitbox->bbmin ) * 0.5f;
+		// since we use record for our multipoints it would be better if we dont go ahead if we have no record
+		if ( !record ) // in test
+			return;
+
+		auto boneMatrix = record->GetBoneMatrix( );
+
+		Vector center = ( hitbox->bbmax + hitbox->bbmin ) * 0.5f; // thats corr
 		Vector centerTrans = center.Transform( boneMatrix[ hitbox->bone ] );
+
+		const auto cur_angles = Math::CalcAngle( rageData->m_vecEyePos, center );
+		Vector forward{};
+		Math::AngleVectors( cur_angles, forward ); /* should work */
+
+		// improve knife accuracy
+		// xref: fatality
+		if ( rageData->m_pWeaponInfo->m_iWeaponType == WEAPONTYPE_KNIFE ) { // this seems to work
+			const auto radius = hitbox->m_flRadius == -1 ? 3.f : hitbox->m_flRadius;
+			const auto back = forward * -radius * 0.975f;
+
+			// we dont use that side anymore we wont even bother to check for it or remove it
+			AddPoint( player, record, side, points,
+					  Vector( center + back ).Transform( boneMatrix[ hitbox->bone ] ), // should be fine
+					  hitbox, hitboxSet, false
+			);
+
+			// go ahead and return;
+			return;
+		}
+
+		// auto dist_scaled_dmg = static_cast< float >( rageData->m_pWeaponInfo->m_iWeaponDamage );
+		// dist_scaled_dmg *= pow( rageData->m_pWeaponInfo->m_flRangeModifier, rageData->m_vecEyePos.Distance( center ) / 500.f );
+		// auto max_body_damage = dist_scaled_dmg;
+		// Autowall::ScaleDamage( player, max_body_damage, rageData->m_pWeaponInfo->m_flArmorRatio, Hitgroup_Stomach ); // should be fine
+		// 
+		// auto scaled_damage = dist_scaled_dmg;
+		// Autowall::ScaleDamage( player, scaled_damage, rageData->m_pWeaponInfo->m_flArmorRatio, hitbox->group );
+		// const auto minimum_damage = static_cast< int >( scaled_damage ) - 1;
+		// 
+		// if ( static_cast< int >( scaled_damage ) + 1 < rageData->rbot->min_damage ) )
+		// 	return;
 
 		// FIXME: move eye pos to global variables
 		if ( g_Vars.esp.aim_points ) {
@@ -1222,20 +1269,6 @@ namespace Source {
 				);
 			}
 		} else {
-			auto density = 3;//rageData->rbot->mp_density;
-			if ( density == 3 ) {
-				static float last_add_time = 0.f;
-				static auto adaptive_density = 0;
-				if ( **( int** )Engine::Displacement.Data.m_uHostFrameTicks > 1 ) {
-					adaptive_density = 0;
-				} else if ( std::fabsf( Source::m_pGlobalVars->realtime - last_add_time ) >= 0.2f ) {
-					adaptive_density++;
-					last_add_time = Source::m_pGlobalVars->realtime;
-				}
-
-				density = adaptive_density;
-			}
-
 			bool vertical = hitbox == hitboxSet->pHitbox( HITBOX_HEAD );
 
 			auto min = hitbox->bbmin.Transform( boneMatrix[ hitbox->bone ] );
@@ -1243,7 +1276,6 @@ namespace Source {
 
 			auto delta = centerTrans - rageData->m_vecEyePos;
 			delta.Normalized( );
-
 
 			auto max_min = max - min;
 			max_min.Normalized( );
@@ -1272,24 +1304,6 @@ namespace Source {
 				Vector middle = ( right.Normalized( ) + up.Normalized( ) ) * 0.5f;
 				Vector middle2 = ( right.Normalized( ) - up.Normalized( ) ) * 0.5f;
 
-#if 0
-				if ( InputSys::Get( )->IsKeyDown( VirtualKeys::H ) ) {
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans - cr * 10.0f, centerTrans, 0, 255, 0, false, 1.0f );
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans + cr * 10.0f, centerTrans, 0, 255, 0, false, 1.0f );
-
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans - right * 10.0f, centerTrans, 0, 0, 255, false, 1.0f );
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans + right * 10.0f, centerTrans, 0, 0, 255, false, 1.0f );
-
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans - up * 10.0f, centerTrans, 255, 0, 0, false, 1.0f );
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans + up * 10.0f, centerTrans, 255, 0, 0, false, 1.0f );
-
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans - middle * 10.0f, centerTrans, 255, 255, 255, false, 1.0f );
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans + middle * 10.0f, centerTrans, 255, 255, 255, false, 1.0f );
-
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans - middle2 * 10.0f, centerTrans, 255, 0, 255, false, 1.0f );
-					Source::m_pDebugOverlay->AddLineOverlay( centerTrans + middle2 * 10.0f, centerTrans, 255, 0, 255, false, 1.0f );
-				}
-#endif
 				RayTracer::Ray ray = RayTracer::Ray( rageData->m_vecEyePos, centerTrans + ( middle * 1000.0f ) );
 				RayTracer::TraceFromCenter( ray, box, trace, RayTracer::Flags_RETURNEND );
 				points_unscaled.push_back( trace.m_traceEnd );
@@ -1324,26 +1338,6 @@ namespace Source {
 						  hitbox, hitboxSet, true
 				);
 			}
-
-#if 0
-			if ( density >= 2 ) {
-				Vector p1, p2;
-				if ( vertical ) {
-					p1 = ( centerTrans + p[ 0 ] ) * 0.5f;
-					p2 = ( centerTrans + p[ 1 ] ) * 0.5f;
-				} else {
-					p1 = ( centerTrans + p[ 6 ] ) * 0.5f;
-					p2 = ( centerTrans + p[ 7 ] ) * 0.5f;
-				}
-
-				AddPoint( player, record, side, points,
-						  p1,
-						  hitbox, hitboxSet, true );
-				AddPoint( player, record, side, points,
-						  p2,
-						  hitbox, hitboxSet, true );
-			}
-#endif
 		}
 	}
 
@@ -1353,17 +1347,15 @@ namespace Source {
 		rageData->m_bFailedHitchance = false;
 		rageData->m_bPrepareAim = false;
 
-		//g_TickbaseController.m_bSupressRecharge = false; // suppress recharge
-
-		// IProfiler::ProfileData_t ProfileData = IProfiler::Get( )->GetData( 0 ); 
+		//IProfiler::ProfileData_t ProfileData = IProfiler::Get( )->GetData( 0 ); 
 		std::vector<C_AimPoint> aim_points;
 		aim_points.reserve( 256 );
 
 		std::vector<C_AimTarget> aim_targets;
-		aim_targets.reserve( Source::m_pGlobalVars->maxClients );
+		aim_targets.reserve( 3 ); // max 8 targets fuck u soufiw
 
-		// TODO: implement team check in lag comp
-		for ( int idx = 1; idx <= Source::m_pGlobalVars->maxClients; ++idx ) {
+		// test
+		for ( int idx = 1; idx <= Source::m_pGlobalVars->maxClients; ++idx ) { // this will scan for all clients, wont it?
 			auto player = C_CSPlayer::GetPlayerByIndex( idx );
 			if ( !player || player == rageData->m_pLocal || player->IsDead( ) || player->m_bGunGameImmunity( ) || player->IsTeammate( rageData->m_pLocal ) )
 				continue;
