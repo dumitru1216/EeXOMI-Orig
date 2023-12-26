@@ -1116,6 +1116,12 @@ namespace Source {
 			const auto scoped = ( rageData->rbot->autoscope ||
 								  rageData->m_pWeapon->m_zoomLevel( ) ) && ( id == WEAPON_AWP || id == WEAPON_G3SG1 || id == WEAPON_SCAR20 || id == WEAPON_SSG08 );
 
+			/* weapon revolver 
+				xref: fatality
+			*/
+			if ( id == WEAPON_REVOLVER ) {
+				return Source::m_pGlobalVars->curtime > rageData->m_pWeapon->m_flNextSecondaryAttack( ) - TICKS_TO_TIME( 7 );
+			}
 
 			// no need for hitchance, if we can't increase it anyway.
 			/* this logic is wrong, and old we should fix that */
