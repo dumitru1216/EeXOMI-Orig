@@ -540,6 +540,9 @@ namespace Source {
 		// CockRevolver( );
 #if 1
 		if ( weapon->m_iItemDefinitionIndex( ) == WEAPON_REVOLVER ) {
+			CockRevolver( );
+
+#if 0
 			static bool unk_meme = false;
 			static bool unk_rofl = false;
 			static float cockTime = 0.f;
@@ -557,7 +560,7 @@ namespace Source {
 				cockTime = curtime + 0.234375f;
 				rageData->m_pCmd->buttons &= ~IN_ATTACK;
 			}
-
+#endif
 #if 0
 			unk_rofl = unk_meme;
 			unk_meme = TickbaseShiftCtx.over_choke_nr > 0;
@@ -637,6 +640,89 @@ namespace Source {
 		return rageData->rbot->active;
 	}
 
+	// c_ragebot::runinternal
+#if 0
+	if ( rageData->rbot->no_spread && !g_Vars.misc.anti_untrusted
+		 && ( g_Vars.globals.m_iServerType > 7 ) && rageData->m_pLocal->CanShoot( ) && rageData->m_pCmd->buttons & IN_ATTACK ) {
+		reset_cmd = false;
+
+		auto weapon_inaccuracy = Engine::Prediction::Instance( )->GetInaccuracy( );
+		auto weapon_spread = Engine::Prediction::Instance( )->GetSpread( );
+
+		auto random_seed = rageData->m_pCmd->random_seed & 255;
+
+		auto rand1 = g_Vars.globals.SpreadRandom[ random_seed ].flRand1;
+		auto rand_pi1 = g_Vars.globals.SpreadRandom[ random_seed ].flRandPi1;
+		auto rand2 = g_Vars.globals.SpreadRandom[ random_seed ].flRand2;
+		auto rand_pi2 = g_Vars.globals.SpreadRandom[ random_seed ].flRandPi2;
+
+		int id = rageData->m_pWeapon->m_iItemDefinitionIndex( );
+		auto recoil_index = rageData->m_pWeapon->m_flRecoilIndex( );
+
+		if ( id == 64 ) {
+			if ( rageData->m_pCmd->buttons & IN_ATTACK2 ) {
+				rand1 = 1.0f - rand1 * rand1;
+				rand2 = 1.0f - rand2 * rand2;
+			}
+		} else if ( id == 28 && recoil_index < 3.0f ) {
+			for ( int i = 3; i > recoil_index; i-- ) {
+				rand1 *= rand1;
+				rand2 *= rand2;
+			}
+
+			rand1 = 1.0f - rand1;
+			rand2 = 1.0f - rand2;
+		}
+
+		auto rand_inaccuracy = rand1 * weapon_inaccuracy;
+		auto rand_spread = rand2 * weapon_spread;
+
+		Vector2D spread =
+		{
+		   std::cos( rand_pi1 ) * rand_inaccuracy + std::cos( rand_pi2 ) * rand_spread,
+		   std::sin( rand_pi1 ) * rand_inaccuracy + std::sin( rand_pi2 ) * rand_spread,
+		};
+
+		// 
+		// pitch/yaw/roll
+		// 
+
+		Vector side, up;
+		Vector forward = QAngle::Zero.ToVectors( &side, &up );
+
+		Vector direction = forward + ( side * spread.x ) + ( up * spread.y );
+		direction.Normalize( );
+
+		QAngle angles_spread = direction.ToEulerAngles( );
+
+		angles_spread.x -= rageData->m_pCmd->viewangles.x;
+		angles_spread.Normalize( );
+
+		forward = angles_spread.ToVectorsTranspose( &side, &up );
+
+		angles_spread = forward.ToEulerAngles( &up );
+		angles_spread.Normalize( );
+
+		angles_spread.y += rageData->m_pCmd->viewangles.y;
+		angles_spread.Normalize( );
+
+		rageData->m_pCmd->viewangles = angles_spread;
+		rageData->m_pCmd->viewangles.Normalize( );
+
+		// 
+		// pitch/roll
+		// 
+		// cmd->viewangles.x += ToDegrees( std::atan( spread.Length() ) );
+		// cmd->viewangles.z = -ToDegrees( std::atan2( spread.x, spread.y ) );
+
+		// 
+		// yaw/roll
+		// 
+		// cmd->viewangles.y += ToDegrees( std::atan( spread.Length() ) );
+		// cmd->viewangles.z = -( ToDegrees( std::atan2( spread.x, spread.y ) ) - 90.0f );
+	}
+#endif
+
 	bool C_Ragebot::RunInternal( ) {
 		auto cmd_backup = *rageData->m_pCmd.Xor( );
 
@@ -645,7 +731,6 @@ namespace Source {
 		int restore_zoom_level = INT_MAX;
 
 		rageData->m_bPredictedScope = false;
-
 		rageData->m_flSpread = Engine::Prediction::Instance( )->GetSpread( );
 		rageData->m_flInaccuracy = Engine::Prediction::Instance( )->GetInaccuracy( );
 
@@ -667,10 +752,13 @@ namespace Source {
 						static int playerSurfaceFrictionOffset = Horizon::Memory::FindInDataMap( rageData->m_pLocal->GetPredDescMap( ), XorStr( "m_surfaceFriction" ) );
 						float playerSurfaceFriction = *( float* )( uintptr_t( rageData->m_pLocal ) + playerSurfaceFrictionOffset );
 						float max_accelspeed = g_Vars.sv_accelerate->GetFloat( ) * Source::m_pGlobalVars->interval_per_tick * maxSpeed * playerSurfaceFriction;
-						ticks = int( speed / max_accelspeed ) + 1;
+						
+						/* use static_case instead */
+						ticks = static_cast< int >( speed / max_accelspeed ) + 1;
 					}
-				} else
+				} else {
 					Source::Movement::Get( )->StopPlayerAtMinimalSpeed( );
+				}
 
 				if ( rageData->m_pLocal->m_fFlags( ) & FL_ONGROUND ) {
 					Source::Movement::Get( )->AutoStop( ticks );
@@ -678,6 +766,8 @@ namespace Source {
 					if ( Source::Movement::Get( )->StopPlayer( ) )
 						repredict = true;
 				}
+
+				// reset 
 				reset_cmd = false;
 			}
 
@@ -704,86 +794,6 @@ namespace Source {
 		rageData->m_pCmd->viewangles -= rageData->m_pLocal->m_aimPunchAngle( ) * g_Vars.weapon_recoil_scale->GetFloat( );
 		rageData->m_pCmd->viewangles.Normalize( );
 
-		if ( rageData->rbot->no_spread && !g_Vars.misc.anti_untrusted
-			 && ( g_Vars.globals.m_iServerType > 7 ) && rageData->m_pLocal->CanShoot( ) && rageData->m_pCmd->buttons & IN_ATTACK ) {
-			reset_cmd = false;
-
-			auto weapon_inaccuracy = Engine::Prediction::Instance( )->GetInaccuracy( );
-			auto weapon_spread = Engine::Prediction::Instance( )->GetSpread( );
-
-			auto random_seed = rageData->m_pCmd->random_seed & 255;
-
-			auto rand1 = g_Vars.globals.SpreadRandom[ random_seed ].flRand1;
-			auto rand_pi1 = g_Vars.globals.SpreadRandom[ random_seed ].flRandPi1;
-			auto rand2 = g_Vars.globals.SpreadRandom[ random_seed ].flRand2;
-			auto rand_pi2 = g_Vars.globals.SpreadRandom[ random_seed ].flRandPi2;
-
-			int id = rageData->m_pWeapon->m_iItemDefinitionIndex( );
-			auto recoil_index = rageData->m_pWeapon->m_flRecoilIndex( );
-
-			if ( id == 64 ) {
-				if ( rageData->m_pCmd->buttons & IN_ATTACK2 ) {
-					rand1 = 1.0f - rand1 * rand1;
-					rand2 = 1.0f - rand2 * rand2;
-				}
-			} else if ( id == 28 && recoil_index < 3.0f ) {
-				for ( int i = 3; i > recoil_index; i-- ) {
-					rand1 *= rand1;
-					rand2 *= rand2;
-				}
-
-				rand1 = 1.0f - rand1;
-				rand2 = 1.0f - rand2;
-			}
-
-			auto rand_inaccuracy = rand1 * weapon_inaccuracy;
-			auto rand_spread = rand2 * weapon_spread;
-
-			Vector2D spread =
-			{
-			   std::cos( rand_pi1 ) * rand_inaccuracy + std::cos( rand_pi2 ) * rand_spread,
-			   std::sin( rand_pi1 ) * rand_inaccuracy + std::sin( rand_pi2 ) * rand_spread,
-			};
-
-			// 
-			// pitch/yaw/roll
-			// 
-
-			Vector side, up;
-			Vector forward = QAngle::Zero.ToVectors( &side, &up );
-
-			Vector direction = forward + ( side * spread.x ) + ( up * spread.y );
-			direction.Normalize( );
-
-			QAngle angles_spread = direction.ToEulerAngles( );
-
-			angles_spread.x -= rageData->m_pCmd->viewangles.x;
-			angles_spread.Normalize( );
-
-			forward = angles_spread.ToVectorsTranspose( &side, &up );
-
-			angles_spread = forward.ToEulerAngles( &up );
-			angles_spread.Normalize( );
-
-			angles_spread.y += rageData->m_pCmd->viewangles.y;
-			angles_spread.Normalize( );
-
-			rageData->m_pCmd->viewangles = angles_spread;
-			rageData->m_pCmd->viewangles.Normalize( );
-
-			// 
-			// pitch/roll
-			// 
-			// cmd->viewangles.x += ToDegrees( std::atan( spread.Length() ) );
-			// cmd->viewangles.z = -ToDegrees( std::atan2( spread.x, spread.y ) );
-
-			// 
-			// yaw/roll
-			// 
-			// cmd->viewangles.y += ToDegrees( std::atan( spread.Length() ) );
-			// cmd->viewangles.z = -( ToDegrees( std::atan2( spread.x, spread.y ) ) - 90.0f );
-		}
-
 		if ( restore_zoom_level != INT_MAX )
 			rageData->m_pWeapon->m_zoomLevel( ) = restore_zoom_level;
 
@@ -796,16 +806,11 @@ namespace Source {
 	}
 
 	void C_Ragebot::AddPoint( C_CSPlayer* player, Engine::C_LagRecord* record, int side, std::vector<Vector>& points, const Vector& point, mstudiobbox_t* hitbox, mstudiohitboxset_t* hitboxSet, bool isMultipoint ) {
-		// auto matrix = record->GetBoneMatrix( side );
-		 //auto pointTransformed = point.Transform( matrix[ hitbox->bone ] );
 		auto pointTransformed = point;
-
 		bool safety = false;
 
-		if ( !hitbox )
-			return;
-
-		if ( !hitboxSet )
+		// better 
+		if ( !hitbox || !hitboxSet )
 			return;
 
 		switch ( hitbox->group ) {
@@ -837,7 +842,7 @@ namespace Source {
 				break;
 		}
 
-
+#if 0
 		auto missed = false;
 		auto lag_data = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
 		if ( lag_data.IsValid( ) )
@@ -846,6 +851,17 @@ namespace Source {
 		if ( missed || safety ) {
 			if ( !IsPointSafe( record, pointTransformed, hitbox, 3 )/* && !IsStaticPointSafe( record, pointTransformed, hitbox )*/ )
 				return;
+		}
+#endif
+
+		/* this should work better in the optimization state */
+		if ( Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex ).IsValid( ) ) {
+			auto missed = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex )->m_iMissedShots >= rageData->rbot->max_misses;
+			if ( missed || safety ) {
+				auto pointTransformed = point;
+				if ( !IsPointSafe( record, pointTransformed, hitbox, 3 ) /* && !IsStaticPointSafe(record, pointTransformed, hitbox)*/ )
+					return;
+			}
 		}
 
 		points.push_back( pointTransformed );
@@ -1144,13 +1160,6 @@ namespace Source {
 			const auto scoped = ( rageData->rbot->autoscope ||
 								  rageData->m_pWeapon->m_zoomLevel( ) ) && ( id == WEAPON_AWP || id == WEAPON_G3SG1 || id == WEAPON_SCAR20 || id == WEAPON_SSG08 );
 
-			/* weapon revolver 
-				xref: fatality
-			*/
-			//if ( id == WEAPON_REVOLVER ) {
-			//	return Source::m_pGlobalVars->curtime > rageData->m_pWeapon->m_flNextSecondaryAttack( ) - TICKS_TO_TIME( 7 );
-			//}
-
 			// no need for hitchance, if we can't increase it anyway.
 			/* this logic is wrong, and old we should fix that */
 			if ( crouched ) {
@@ -1168,6 +1177,16 @@ namespace Source {
 			return true;
 			};
 
+		float hitchance = g_tickbase_control.m_double_tap ? rageData->rbot->doubletap_hitchance : rageData->rbot->hitchance;
+		if ( rageData->rbot->hitchance > 0.0f && can_hitchance( ) ) {
+			if ( !Hitchance( point, start, hitchance ) )
+				return false;
+
+			if ( rageData->m_pLocal->m_fFlags( ) & FL_ONGROUND && !AccuracyBoost( point, start, rageData->rbot->hitchance_accuracy ) )
+				return false;
+		}
+
+#if 0
 		float hitchance = rageData->rbot->hitchance;
 		if ( g_tickbase_control.m_double_tap )
 			hitchance = rageData->rbot->doubletap_hitchance;
@@ -1179,7 +1198,7 @@ namespace Source {
 			if ( rageData->m_pLocal->m_fFlags( ) & FL_ONGROUND && !AccuracyBoost( point, start, rageData->rbot->hitchance_accuracy ) )
 				return false;
 		}
-
+#endif
 		return true;
 	}
 
@@ -1220,18 +1239,6 @@ namespace Source {
 			// go ahead and return;
 			return;
 		}
-
-		// auto dist_scaled_dmg = static_cast< float >( rageData->m_pWeaponInfo->m_iWeaponDamage );
-		// dist_scaled_dmg *= pow( rageData->m_pWeaponInfo->m_flRangeModifier, rageData->m_vecEyePos.Distance( center ) / 500.f );
-		// auto max_body_damage = dist_scaled_dmg;
-		// Autowall::ScaleDamage( player, max_body_damage, rageData->m_pWeaponInfo->m_flArmorRatio, Hitgroup_Stomach ); // should be fine
-		// 
-		// auto scaled_damage = dist_scaled_dmg;
-		// Autowall::ScaleDamage( player, scaled_damage, rageData->m_pWeaponInfo->m_flArmorRatio, hitbox->group );
-		// const auto minimum_damage = static_cast< int >( scaled_damage ) - 1;
-		// 
-		// if ( static_cast< int >( scaled_damage ) + 1 < rageData->rbot->min_damage ) )
-		// 	return;
 
 		// FIXME: move eye pos to global variables
 		if ( g_Vars.esp.aim_points ) {
@@ -1393,6 +1400,24 @@ namespace Source {
 				for ( int i = 0; i < hitboxSet->numhitboxes; ++i ) {
 					auto box = hitboxSet->pHitbox( i );
 
+					// calculate this once per hitbox
+					auto& boneData = player->m_CachedBoneData( ).Element( box->bone );
+					auto transformedMin = box->bbmin.Transform( boneData );
+					auto transformedMax = box->bbmax.Transform( boneData );
+					
+					if ( box->m_flRadius == -1.f ) {
+						auto& obb = target.obb.emplace_back( );
+						obb.min = transformedMin;
+						obb.max = transformedMax;
+						obb.idx = i;
+					} else {
+						auto& capsule = target.capsules.emplace_back( );
+						capsule.m_mins = transformedMin;
+						capsule.m_maxs = transformedMax;
+						capsule.m_radius = box->m_flRadius;
+						capsule.m_idx = i;
+				}
+#if 0
 					if ( box->m_flRadius == -1.f ) {
 						auto& obb = target.obb.emplace_back( );
 						obb.min = box->bbmin.Transform( player->m_CachedBoneData( ).Element( box->bone ) );
@@ -1405,6 +1430,8 @@ namespace Source {
 						capsule.m_radius = box->m_flRadius;
 						capsule.m_idx = i;
 					}
+
+#endif
 				}
 			}
 		}
