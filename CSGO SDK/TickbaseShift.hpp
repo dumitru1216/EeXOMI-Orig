@@ -41,6 +41,7 @@ public:
 	bool m_can_shift = false;
 	bool m_break_lc = false;
 	bool m_shift_cycle = false;
+	bool m_force_fake_shift = false;
 	int m_break_lc_cycle = 0;
 
 

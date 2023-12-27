@@ -437,7 +437,7 @@ public:
       int m_iLastCommandAck = 0;
 
       float m_flLastShotTime = 0.f;
-
+	  Vector aStartPos;
       bool m_bInCreateMove = false;
 
    } GLOBAL, * PGLOBAL;

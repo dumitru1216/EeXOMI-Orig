@@ -194,7 +194,7 @@ void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, b
 	*( DWORD* )( m_pPrediction.Xor( ) + 0x1C ) = 0;
 
 	Vector2D target_move{};
-	
+
 	// shift
 	this->m_shift_cycle = true;
 
@@ -222,11 +222,11 @@ void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, b
 		if ( g_local_player && !g_local_player->IsDead( ) ) {
 			/*
 			 if ( m_type != 4
-                    && !( to_user_cmd.m_buttons & valve::e_buttons::in_jump )
-                    && g_local_player->self( )->flags( ) & valve::e_ent_flags::on_ground ) {
+					&& !( to_user_cmd.m_buttons & valve::e_buttons::in_jump )
+					&& g_local_player->self( )->flags( ) & valve::e_ent_flags::on_ground ) {
 			*/
 
-			if ( this->m_type != 4 && !( to_user_cmd.buttons & IN_JUMP ) && g_local_player->m_fFlags() & FL_ONGROUND ) {
+			if ( this->m_type != 4 && !( to_user_cmd.buttons & IN_JUMP ) && g_local_player->m_fFlags( ) & FL_ONGROUND ) {
 				int v17{};
 				if ( ( shift_amount - ( 2 ) ) >= 0 )
 					v17 = shift_amount - ( 1 );
@@ -245,7 +245,89 @@ void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, b
 				to_user_cmd.forwardmove = target_move.x;
 				to_user_cmd.sidemove = target_move.y;
 			}
+
+			if ( !is_zero_vec3_t( g_Vars.globals.aStartPos ) && m_type == 3 ) {
+				auto angle = Math::CalcAngle( g_local_player->GetAbsOrigin( ), g_Vars.globals.aStartPos );
+				to_user_cmd.viewangles.y = angle.y;
+				to_user_cmd.forwardmove = ( 450.f );
+				to_user_cmd.sidemove = ( 0.0f );
+			}
 		}
+
+		m_pInput->m_pCommands[ to_user_cmd.command_number % 150 ] = to_user_cmd;
+		m_pInput->m_pVerifiedCommands[ to_user_cmd.command_number % 150 ] = { to_user_cmd, to_user_cmd.GetChecksum( ) };
+
+		WriteUsercmdd( buffer, &to_user_cmd, &from_user_cmd );
+
+		auto& local_data = g_tickbase_control.m_local_data[ to_user_cmd.command_number % 150 ];
+
+		local_data.m_override_tick_base = true;
+		local_data.m_adjusted_tick_base = first_tick_base++;
+
+		++shifted_cmds;
+
+		if ( shifted_cmds >= shift_amount ) {
+			if ( to_user_cmd.tick_count != std::numeric_limits < float >::max( ) ) {
+				m_shift_cycle = false;
+
+				if ( !is_zero_vec3_t( g_Vars.globals.aStartPos ) && m_type == 3 )
+					m_force_fake_shift = true;
+
+
+				/* unload it now */
+				g_tickbase_control.m_charged_ticks = 0;
+				g_tickbase_control.m_second_shot = 1;
+				g_tickbase_control.m_shift_to_fix = shift_amount;
+				g_tickbase_control.m_should_fix = true;
+				g_tickbase_control.m_is_charged = false;
+
+				// set second shot as true
+				g_tickbase_control.m_second_shot = true;
+			}
+		} else {
+			++m_pClientState->m_nChokedCommands( );
+			++m_pClientState->net_channel->m_nChokedPackets;
+			++m_pClientState->net_channel->m_nOutSequenceNr;
+		}
+
+		from_user_cmd = to_user_cmd;
+		++to_user_cmd.command_number;
+#if 0
+		if ( v80 >= shift_amount ) {
+
+			// unload shit here ig
+			g_tickbase_control.m_charged_ticks = 0;
+			g_tickbase_control.m_second_shot = 1;
+			g_tickbase_control.m_shift_to_fix = shift_amount;
+			g_tickbase_control.m_should_fix = true;
+			g_tickbase_control.m_is_charged = false;
+
+			// set second shot as true
+			g_tickbase_control.m_second_shot = true;
+	} else {
+			++m_pClientState->m_nChokedCommands( );
+			++m_pClientState->net_channel->m_nChokedPackets;
+			++m_pClientState->net_channel->m_nOutSequenceNr;
+		}
+
+		from_user_cmd = to_user_cmd;
+
+		++to_user_cmd.command_number;
+		} while ( v80 < shift_amount );
+	} else {
+		to_user_cmd.tick_count = std::numeric_limits< int >::max( );
+		std::cout << "processing fake cmds.\n";
+		do {
+			WriteUsercmdd( buffer, &to_user_cmd, &from_user_cmd );
+
+			from_user_cmd = to_user_cmd;
+			++to_user_cmd.command_number;
+
+			--shift_amount;
+		} while ( shift_amount );
+	}
+#endif
+
 	} while ( shifted_cmds < shift_amount );
 }
 
@@ -397,7 +479,8 @@ void c_exploits::handle_other_shift( void* ecx, void* edx, const int slot, bf_wr
 
 			++to_user_cmd.command_number;
 		} while ( v80 < shift_amount );
-	} else {
+	} 
+	else {
 		to_user_cmd.tick_count = std::numeric_limits< int >::max( );
 		std::cout << "processing fake cmds.\n";
 		do {

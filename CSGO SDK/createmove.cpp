@@ -101,6 +101,7 @@ namespace Hooked {
 		if ( pLocal->IsDead( ) ) {
 			WasShootinPeek = false;
 			AutoPeekPos.Set( );
+			g_Vars.globals.aStartPos.Set( );
 
 			Engine::Prediction::Instance( ).Invalidate( );
 			g_Vars.globals.m_bInCreateMove = false;
@@ -158,7 +159,8 @@ namespace Hooked {
 						static bool switch_option = false;
 						switch_option = !switch_option;
 						if ( switch_option ) {
-							AutoPeekPos = pLocal->m_vecOrigin( );
+							AutoPeekPos = pLocal->m_vecOrigin( ); // startoos
+							g_Vars.globals.aStartPos = pLocal->m_vecOrigin( );
 							if ( !( pLocal->m_fFlags( ) & FL_ONGROUND ) ) {
 								Ray_t ray;
 								ray.Init( pLocal->m_vecOrigin( ), pLocal->m_vecOrigin( ) - Vector( 0.0f, 0.0f, 1000.0f ) );
@@ -168,10 +170,13 @@ namespace Hooked {
 								Source::m_pEngineTrace->TraceRay( ray, 0x46004003u, &filter, &tr );
 								if ( tr.fraction < 1.0f ) {
 									AutoPeekPos = tr.endpos + Vector( 0.0f, 0.0f, 2.0f );
+									g_Vars.globals.aStartPos = tr.endpos + Vector( 0.0f, 0.0f, 2.0f );
+									
 								}
 							}
 						} else {
 							AutoPeekPos = Vector( 0.0f, 0.0f, 0.0f );
+							g_Vars.globals.aStartPos = Vector( 0.0f, 0.0f, 0.0f );
 						}
 					}
 					was_enabled = false;
