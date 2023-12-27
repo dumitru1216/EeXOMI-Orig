@@ -1352,7 +1352,7 @@ namespace Source {
 		aim_points.reserve( 256 );
 
 		std::vector<C_AimTarget> aim_targets;
-		aim_targets.reserve( 3 ); // max 8 targets fuck u soufiw
+		aim_targets.reserve( Source::m_pGlobalVars->maxClients ); // max 8 targets fuck u soufiw
 
 		// test
 		for ( int idx = 1; idx <= Source::m_pGlobalVars->maxClients; ++idx ) { // this will scan for all clients, wont it?
@@ -1433,9 +1433,14 @@ namespace Source {
 		std::vector<C_AimPoint> best_aimpoints;
 
 		for ( auto& data : aim_data ) {
-			if ( !best_target ) {
+			if ( !best_target ) { // should be corr
 				best_target = &data.first;
-				continue;
+				best_aimpoints = data.second;
+
+				if ( aim_data.size( ) == 1 )
+					break;
+				else
+					continue;
 			}
 
 			auto check_targets = [ & ]( C_AimTarget a, C_AimTarget b ) -> bool {
@@ -1458,6 +1463,7 @@ namespace Source {
 						return average_hitchance_a >= average_hitchance_b; break;
 				}
 				};
+
 
 			if ( check_targets( data.first, *best_target ) ) {
 				best_target = &data.first;
