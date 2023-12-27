@@ -1432,8 +1432,10 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 				  ImGui::Text( XorStr( "Double tap" ) );
 				  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
 				  ImGui::KeyBox( "", &g_Vars.rage.double_tap_bind );
-				  const char* dt_type[] = { XorStr( "Offensive" ), XorStr( "Instant" ) };
-				  //ImGui::ComboA( XorStr( "Double tap mode" ), &g_Vars.rage.double_tap_type, dt_type, ARRAYSIZE( dt_type ) );
+
+				  const char* dt_type[] = { XorStr( "Offensive" ), XorStr( "Defensive (!)" ) };
+				  ImGui::ComboA( XorStr( "Double tap mode" ), &g_Vars.rage.double_tap_type, dt_type, ARRAYSIZE( dt_type ) );
+
 				  ImGui::SliderFloatA( XorStr( "Double tap hit chance" ), &rbot->doubletap_hitchance, 0.f, 100.f, XorStr( "%.0f %%" ) );
 
 				  ImGui::Text( XorStr( "Hide shots" ) );

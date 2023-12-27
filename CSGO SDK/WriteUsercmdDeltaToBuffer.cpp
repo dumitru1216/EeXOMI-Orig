@@ -43,10 +43,16 @@ bool __fastcall Hooked::write_user_cmd_delta_to_buffer(
 			std::cout << "CLCMove called with " << std::to_string( g_tickbase_control.m_shift_amount ) << " shift\n";
 
 
-			if ( g_tickbase_control.m_break_lc )
+			if ( g_tickbase_control.m_break_lc ) {
 				g_tickbase_control.handle_break_lc( ecx, edx, slot, buffer, from, to, new_commands, backup_commands );
-			else
-				g_tickbase_control.handle_other_shift( ecx, edx, slot, buffer, from, to, new_commands, backup_commands );
+			}
+			else {
+				if ( g_Vars.rage.double_tap_type == 0 ) {
+					g_tickbase_control.handle_other_shift( ecx, edx, slot, buffer, from, to, new_commands, backup_commands );
+				} else {
+					g_tickbase_control.handle_defensive_shift( ecx, edx, slot, buffer, from, to, new_commands, backup_commands );
+				}
+			}
 		}
 
 		return true;
@@ -226,7 +232,7 @@ void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, b
 					&& g_local_player->self( )->flags( ) & valve::e_ent_flags::on_ground ) {
 			*/
 
-			if ( this->m_type != 4 && !( to_user_cmd.buttons & IN_JUMP ) && g_local_player->m_fFlags( ) & FL_ONGROUND ) {
+			if ( /*this->m_type != 4 &&*/  !( to_user_cmd.buttons & IN_JUMP ) && g_local_player->m_fFlags( ) & FL_ONGROUND ) {
 				int v17{};
 				if ( ( shift_amount - ( 2 ) ) >= 0 )
 					v17 = shift_amount - ( 1 );
@@ -246,7 +252,7 @@ void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, b
 				to_user_cmd.sidemove = target_move.y;
 			}
 
-			if ( !is_zero_vec3_t( g_Vars.globals.aStartPos ) && m_type == 3 ) {
+			if ( !is_zero_vec3_t( g_Vars.globals.aStartPos ) ) { /* && m_type == 3 */
 				auto angle = Math::CalcAngle( g_local_player->GetAbsOrigin( ), g_Vars.globals.aStartPos );
 				to_user_cmd.viewangles.y = angle.y;
 				to_user_cmd.forwardmove = ( 450.f );
@@ -270,7 +276,7 @@ void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, b
 			if ( to_user_cmd.tick_count != std::numeric_limits < float >::max( ) ) {
 				m_shift_cycle = false;
 
-				if ( !is_zero_vec3_t( g_Vars.globals.aStartPos ) && m_type == 3 )
+				if ( !is_zero_vec3_t( g_Vars.globals.aStartPos ) /* && m_type == 3 */ ) 
 					m_force_fake_shift = true;
 
 

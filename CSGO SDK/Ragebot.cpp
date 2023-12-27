@@ -452,6 +452,8 @@ namespace Source {
 		if ( rageData->m_pWeapon->m_iItemDefinitionIndex( ) != WEAPON_REVOLVER )
 			return;
 
+#if 0
+
 		if ( !( rageData->m_pCmd->buttons & IN_RELOAD ) && rageData->m_pWeapon->m_iClip1( ) ) {
 			static float cockTime = 0.f;
 
@@ -473,6 +475,23 @@ namespace Source {
 				cockTime = curtime + 0.234375f;
 				rageData->m_pCmd->buttons &= ~IN_ATTACK;
 			}
+		}
+#endif
+
+		/* neverlose v1 */
+		/* thx soufiw */
+		if ( rageData->m_pCmd->buttons & IN_ATTACK )
+			return;
+
+		rageData->m_pCmd->buttons &= ~IN_ATTACK2;
+
+		static float next_cock_time = 0.f;
+
+		if ( rageData->m_pWeapon->m_flPostponeFireReadyTime( ) > Source::m_pGlobalVars->curtime ) {
+			if ( Source::m_pGlobalVars->curtime > next_cock_time )
+				rageData->m_pCmd->buttons |= IN_ATTACK;
+		} else {
+			next_cock_time = Source::m_pGlobalVars->curtime + 0.25f;
 		}
 	}
 
