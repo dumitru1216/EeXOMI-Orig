@@ -126,6 +126,20 @@ void c_exploits::handle_break_lc( void* ecx, void* edx, const int slot, bf_write
 	}
 }
 
+__forceinline bool is_zero_vec3_t( Vector vec ) {
+	return ( vec.x > -0.01f && vec.x < 0.01f &&
+			 vec.y > -0.01f && vec.y < 0.01f &&
+			 vec.z > -0.01f && vec.z < 0.01f );
+}
+
+template<typename T>
+void limit_val( T& value, const T& min, const T& max ) {
+	if ( value > max )
+		value = max;
+	else if ( value < min )
+		value = min;
+}
+
 void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds ) {
 	auto shift_amount = m_shift_amount;
 	m_shift_amount = 0;
@@ -213,7 +227,23 @@ void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, b
 			*/
 
 			if ( this->m_type != 4 && !( to_user_cmd.buttons & IN_JUMP ) && g_local_player->m_fFlags() & FL_ONGROUND ) {
+				int v17{};
+				if ( ( shift_amount - ( 2 ) ) >= 0 )
+					v17 = shift_amount - ( 1 );
 
+				/* tbh i dont need autostop */
+				if ( shifted_cmds >= v17 ) {
+					Source::Movement::Get( )->StopPlayerAtMinimalSpeed( ); // flag that first 
+					Source::Movement::Get( )->AutoStop( );
+				} else {
+					to_user_cmd.forwardmove = target_move.x;
+					to_user_cmd.sidemove = target_move.y;
+				}
+			}
+
+			if ( m_type == 4 ) {
+				to_user_cmd.forwardmove = target_move.x;
+				to_user_cmd.sidemove = target_move.y;
 			}
 		}
 	} while ( shifted_cmds < shift_amount );
