@@ -1454,6 +1454,18 @@ namespace Source {
 					temp_points.emplace_back( point );
 			}
 
+			// i hope thats better 
+			if ( !temp_points.empty( ) ) {
+				for ( auto& p : temp_points ) {
+					ScanPoint( &p );
+					if ( p.damage > 1.0f ) {
+						aim_data.emplace_back( target, temp_points );
+						break;
+					}
+				}
+			}
+
+#ifdef 0
 			if ( !temp_points.empty( ) ) {
 				/* scan point */
 				for ( size_t i = 0u; i < temp_points.size( ); ++i )
@@ -1473,6 +1485,7 @@ namespace Source {
 			} else {
 				continue;
 			}
+#endif
 		}
 
 		C_AimTarget* best_target = nullptr;
@@ -1518,11 +1531,7 @@ namespace Source {
 			}
 		}
 
-		if ( !best_target ) {
-			return false;
-		}
-
-		if ( !best_aimpoints.size( ) ) {
+		if ( !best_aimpoints.size( ) || !best_target ) {
 			return false;
 		}
 
@@ -1987,17 +1996,6 @@ namespace Source {
 		return false;
 	}
 
-	void C_Ragebot::ScanPointArrayMT( void* _data ) {
-		auto data = ( C_PointsArray* )_data;
-		auto ragebot = ( C_Ragebot* )( Ragebot::Get( ).Xor( ) );
-		ragebot->ScanPointArrayInternal( data );
-	}
-
-	void C_Ragebot::ScanPointArrayInternal( C_PointsArray* data ) {
-		for ( int i = 0; i < data->pointsCount; ++i )
-			ScanPoint( &data->points[ i ] );
-	}
-
 	void C_Ragebot::ScanPoint( C_AimPoint* point_scan ) {
 		Autowall::C_FireBulletData fireData;
 		fireData.m_bPenetration = this->rageData->rbot->autowall;
@@ -2028,76 +2026,8 @@ namespace Source {
 			point_scan->is_safe = IsPointSafe( point_scan->record, point_scan->point, hitbox, 3 );
 			point_scan->is_static_safe = IsStaticPointSafe( point_scan->record, point_scan->point, hitbox, point_scan->target->side );
 
-			// nospread enabled
-			if ( rageData->m_flSpread == 0.0f && rageData->m_flInaccuracy == 0.0f ) {
-				float spread = rageData->m_flSpread + rageData->m_flInaccuracy;
-
-				Vector right, up;
-				dir.GetVectors( right, up );
-
-				int hits = 0;
-
-				auto min = hitbox->bbmin.Transform( point_scan->target->player->m_CachedBoneData( ).Element( hitbox->bone ) );
-				auto max = hitbox->bbmax.Transform( point_scan->target->player->m_CachedBoneData( ).Element( hitbox->bone ) );
-
-				for ( int x = 1; x <= 4; ++x ) {
-					for ( int j = 0; j < x * 5; ++j ) {
-						float flSpread = spread * float( float( x ) / 4.f );
-
-						float flDirCos, flDirSin;
-						DirectX::XMScalarSinCos( &flDirCos, &flDirSin, DirectX::XM_2PI * float( float( j ) / float( x * 5 ) ) );
-
-						float spread_x = flDirCos * flSpread;
-						float spread_y = flDirSin * flSpread;
-
-						Vector direction;
-						direction.x = dir.x + ( spread_x * right.x ) + ( spread_y * up.x );
-						direction.y = dir.y + ( spread_x * right.y ) + ( spread_y * up.y );
-						direction.z = dir.z + ( spread_x * right.z ) + ( spread_y * up.z );
-
-						auto end = rageData->m_vecEyePos + direction * rageData->m_pWeaponInfo->m_flWeaponRange;
-
-						auto did_hit = false;
-						if ( hitbox->m_flRadius > 0.f ) {
-							did_hit = segment_to_segment( rageData->m_vecEyePos, end, min, max, hitbox->m_flRadius );
-							if ( did_hit )
-								hits++;
-						} else {
-							did_hit = Math::IntersectionBoundingBox( rageData->m_vecEyePos, end, min, max );
-							if ( did_hit )
-								hits++;
-						}
-
-						if ( !did_hit ) {
-							for ( auto& capsule : point_scan->target->capsules ) {
-								if ( capsule.m_idx != point_scan->hitbox_idx ) {
-									did_hit = segment_to_segment( rageData->m_vecEyePos, end, capsule.m_mins, capsule.m_maxs, capsule.m_radius );
-									if ( did_hit ) {
-										hits++;
-										break;
-									}
-								}
-							}
-
-							if ( !did_hit ) {
-								for ( auto& obb : point_scan->target->obb ) {
-									if ( obb.idx != point_scan->hitbox_idx ) {
-										did_hit = Math::IntersectionBoundingBox( rageData->m_vecEyePos, end, obb.min, obb.max );
-										if ( did_hit ) {
-											hits++;
-											break;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-
-				point_scan->hitchance = float( hits ) / 0.5f;
-			} else {
-				point_scan->hitchance = 100.0f;
-			}
+			// no need ns
+			point_scan->hitchance = 100.0f;
 		} else {
 			point_scan->health_ratio = 100;
 			point_scan->hitchance = 0.0f;

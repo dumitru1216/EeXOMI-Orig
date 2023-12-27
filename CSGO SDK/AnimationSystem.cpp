@@ -1055,7 +1055,8 @@ namespace Engine {
 			current->m_angEyeAngles.y = current->m_flLowerBodyYawTarget;
 			g_ResolverData[ index ].m_ResolverText = "AIR";
 
-			data.m_bCollectedValidMoveData = false;
+			// they prob got on the ground and moved
+			// data.m_bCollectedValidMoveData = false;
 
 			data.m_iResolverMode = eResolverModes::AIR;
 			lag_data->m_iResolverMode = eResolverModes::AIR;
