@@ -111,6 +111,27 @@ void c_exploits::handle_exploits( bool* send_packet, CUserCmd* pCmd ) {
 	}
 }
 
+void c_exploits::skip_lag_interpolation( bool targeting ) {
+    C_CSPlayer* p_local = C_CSPlayer::GetLocalPlayer( );
+    if ( !p_local || p_local->IsDead() )
+        return;
+
+    if ( !targeting ) {
+        /* backup this shit */
+        this->m_predicted_tick = p_local->m_nPredictedTickbase( );
+
+        /* store this here */
+        p_local->m_nPredictedTickbase( ) = Source::m_pGlobalVars->tickcount + TIME_TO_TICKS( Source::m_pEngine->GetNetChannelInfo( )->GetLatency( 0 ) +
+                                                                                             Source::m_pEngine->GetNetChannelInfo( )->GetLatency( 1 ) );
+
+        /* close it now */
+        return;
+    }
+
+    /* restore */
+    p_local->m_nPredictedTickbase( ) = this->m_predicted_tick;
+}
+
 int c_exploits::calc_correction_ticks( ) const { // should be cor
 	static auto lol = m_pCvar->FindVar( "sv_clockcorrection_msecs" );
 
@@ -133,7 +154,7 @@ int c_exploits::adjust_tick_base( const int old_new_cmds, const int total_new_cm
 		if ( prev_local_data.m_spawn_time == player->m_flSpawnTime( ) ) {
 			ret = prev_local_data.m_tick_base + 1;
 
-			const auto tick_count = ret + old_new_cmds;
+			const auto tick_count = ret + old_new_cmds - m_correction_amount;
 
 			const auto ideal_final_tick = tick_count + correction_ticks;
 

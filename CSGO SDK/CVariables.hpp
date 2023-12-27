@@ -565,6 +565,7 @@ public:
    config_option( bool, experimental_resolver, false );
 
    config_option( bool, exploit, false );
+   config_option( bool, dt_lag_dis, false );
    config_option( int, exploit_type, 0 ); // tickbase/rapid
    config_option( int, double_tap_type, 0 );
 

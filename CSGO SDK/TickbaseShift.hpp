@@ -23,6 +23,8 @@ public:
 	void cl_move( bool bFinalTick, float accumulated_extra_samples );
 	void handle_exploits( bool* bSendPacket, CUserCmd* pCmd );
 
+	void skip_lag_interpolation( bool targeting );
+
 	// charge related stuff
 	bool m_is_charged = false;
 	int m_charged_ticks = 0;
@@ -59,7 +61,7 @@ public:
 	bool					m_charged{}, m_shift{},
 		m_force_choke{}, m_dt_ready{}, m_using_dt_hc{};
 	int						m_ticks_allowed{}, m_cur_shift_amount{},
-		m_next_shift_amount{}, m_recharge_cmd{}, m_type{}, m_correction_amount{}, m_break_lagcomp_ticks{}, m_max_recharge{ 14 };
+		m_next_shift_amount{}, m_recharge_cmd{}, m_type{}, m_correction_amount{}, m_break_lagcomp_ticks{}, m_max_recharge{ 14 }, m_predicted_tick{};
 
 	bool m_charging{};
 	float m_last_shot{};

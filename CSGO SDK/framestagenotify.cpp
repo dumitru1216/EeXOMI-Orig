@@ -213,6 +213,11 @@ namespace Hooked
 		 }
 
 		 if ( stage == FRAME_RENDER_START && Source::m_pEngine->IsConnected( ) ) {
+			 /* disable lag shit */
+			 if ( g_Vars.rage.dt_lag_dis ) {
+				 g_tickbase_control.skip_lag_interpolation( false );
+			 }
+
 			// disable animation interpolation 
 			if ( Engine::Displacement.Data.m_uClientSideAnimationList ) {
 			   auto clientAnimations = ( CUtlVector<clientanimating_t>* )Engine::Displacement.Data.m_uClientSideAnimationList;
@@ -439,6 +444,11 @@ namespace Hooked
 
 	  if ( g_Vars.globals.RenderIsReady ) {
 		 if ( stage == FRAME_RENDER_START && Source::m_pEngine->IsConnected( ) ) {
+			 /* disable lag shit */
+			 if ( g_Vars.rage.dt_lag_dis ) {
+				 g_tickbase_control.skip_lag_interpolation( true );
+			 }
+
 			local->m_vecViewOffset( ).z = RenderViewOffsetZ;
 
 			if ( g_Vars.esp.bloom_effect ) {
@@ -474,6 +484,25 @@ namespace Hooked
 				  r_modelAmbientMin->SetValue( g_Vars.esp.model_brightness / 10.0f );
 			   }
 			}
+		 }
+
+		 if ( stage == FRAME_NET_UPDATE_END && Source::m_pEngine->IsConnected( ) ) {
+			 const auto correction_ticks = g_tickbase_control.calc_correction_ticks( );
+			 if ( correction_ticks == -1 ) {
+				 g_tickbase_control.m_correction_amount = 0;
+			 }
+			 else {
+				 if ( local->m_flSimulationTime( ) > local->m_flOldSimulationTime( ) ) {
+					 auto diff = TIME_TO_TICKS( local->m_flSimulationTime( ) ) - Source::m_pEngine->GetServerTick( /* should work like that */ );
+					 if ( std::abs( diff ) <= correction_ticks ) {
+						 g_tickbase_control.m_correction_amount = diff;
+					 }
+
+#if 0 // seems to work fine
+					 ILoggerEvent::Get( )->PushEvent( XorStr( "shifter correction" ), FloatColor( 255, 0, 0 ) );
+#endif
+				 }
+			 }
 		 }
 
 		 if ( RestoreData && stage == FRAME_RENDER_END ) {
