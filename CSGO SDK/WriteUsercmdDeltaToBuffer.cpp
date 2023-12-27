@@ -30,9 +30,6 @@ bool __fastcall Hooked::write_user_cmd_delta_to_buffer(
 	if ( !pLocal || pLocal->IsDead( ) )
 		return Hooked::oWriteUsercmdDeltaToBuffer( ( void* )ecx, slot, ( void* )buffer, from, to, true );
 
-
-
-
 	if ( g_tickbase_control.m_shift_amount ) {
 
 		if ( from == -1 ) {
@@ -74,24 +71,20 @@ bool __fastcall Hooked::write_user_cmd_delta_to_buffer(
 
 	return oWriteUsercmdDeltaToBuffer( ecx, slot, buffer, from, to, is_new_cmd );
 }
+
 using namespace Source;
 void c_exploits::handle_break_lc( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds ) {
-
-	// valve::g_cvar->con_print(true, 0xffccffffu, xorstr_("[ spark ] deltatobuffer has been ran.\n"));
-
-
 	auto shift_amount = m_shift_amount;
 	m_shift_amount = 0;
 
-	const auto v86 = std::min( *m_new_cmds + m_ticks_allowed, 16 );
+	const auto actual_cmds = std::min( *m_new_cmds + m_ticks_allowed, 16 );
+	int ticks_allowed{};
 
-	int v69{};
+	const auto who_tf = actual_cmds - *m_new_cmds;
+	if ( who_tf >= 0 )
+		ticks_allowed = who_tf;
 
-	const auto v70 = v86 - *m_new_cmds;
-	if ( v70 >= 0 )
-		v69 = v70;
-
-	m_ticks_allowed = v69;
+	m_ticks_allowed = ticks_allowed;
 
 	const auto old_new_cmds = *m_new_cmds;
 
@@ -118,11 +111,12 @@ void c_exploits::handle_break_lc( void* ecx, void* edx, const int slot, bf_write
 
 	if ( shift_amount ) {
 		++to_user_cmd.command_number;
-		std::cout << "processing fake cmds (break lc)\n";
 		to_user_cmd.tick_count = std::numeric_limits< int >::max( );
 
-		do {
+		std::cout << "processing fake cmds (break lc)\n";
 
+		do {
+			
 			WriteUsercmdd( buffer, &to_user_cmd, &from_user_cmd );
 			from_user_cmd = to_user_cmd;
 			++to_user_cmd.command_number;
@@ -130,6 +124,99 @@ void c_exploits::handle_break_lc( void* ecx, void* edx, const int slot, bf_write
 			--shift_amount;
 		} while ( shift_amount );
 	}
+}
+
+void c_exploits::handle_defensive_shift( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds ) {
+	auto shift_amount = m_shift_amount;
+	m_shift_amount = 0;
+
+	const auto actual_cmds = std::min( *m_new_cmds + m_ticks_allowed, 16 );
+
+	int new_ticks_allowed{};
+
+	auto wtf = actual_cmds - *m_new_cmds;
+	wtf -= shift_amount;
+
+	if ( wtf >= 0 )
+		new_ticks_allowed = wtf;
+
+	m_ticks_allowed = new_ticks_allowed;
+
+	const auto old_new_cmds = *m_new_cmds;
+
+	*m_new_cmds = std::clamp( *m_new_cmds + shift_amount, 1, 62 );
+	*m_backup_cmds = 0;
+
+	auto first_tick_base = adjust_tick_base( old_new_cmds, *m_new_cmds, shift_amount );
+	const auto next_cmd_number = m_pClientState->m_nLastOutgoingCommand( ) + m_pClientState->m_nChokedCommands( ) + 1;
+
+	for ( to = next_cmd_number - old_new_cmds + 1; to <= next_cmd_number; ++to ) {
+		if ( !Hooked::oWriteUsercmdDeltaToBuffer( ( void* )ecx, slot, ( void* )buffer, from, to, true ) )
+			return;
+
+		from = to;
+	}
+
+	for ( auto i = m_pClientState->m_nLastOutgoingCommand( ) + 1; i <= next_cmd_number; ++i ) {
+		auto& local_data = g_tickbase_control.m_local_data[ i % 150 ];
+
+		local_data.m_shift_amount = 0;
+		local_data.m_override_tick_base = true;
+		local_data.m_restore_tick_base = local_data.m_restore_tick_base;//!write_real_cmds; thats mess
+		local_data.m_adjusted_tick_base = first_tick_base++;
+	}
+
+	const auto user_cmd = m_pInput->GetUserCmd( slot, from );
+	if ( !user_cmd ) {
+		std::cout << "failed to get a usercmd, returning.\n";
+		return;
+	}
+
+	CUserCmd from_user_cmd = *user_cmd, to_user_cmd = *user_cmd;
+
+	++to_user_cmd.command_number;
+
+	*( DWORD* )( m_pPrediction.Xor( ) + 0xC ) = -1;
+	*( DWORD* )( m_pPrediction.Xor( ) + 0x1C ) = 0;
+
+	Vector2D target_move{};
+	
+	// shift
+	this->m_shift_cycle = true;
+
+	++m_pClientState->m_nChokedCommands( );
+	++m_pClientState->net_channel->m_nChokedPackets;
+	++m_pClientState->net_channel->m_nOutSequenceNr;
+
+	const auto& local_data = g_tickbase_control.m_local_data[ next_cmd_number % 150 ];
+	target_move = { local_data.m_move.x, local_data.m_move.y };
+
+	int shifted_cmds{};
+
+	do {
+		m_pPrediction->Update(
+			m_pClientState->m_nDeltaTick( ),
+			m_pClientState->m_nDeltaTick( ) > 0,
+			m_pClientState->m_nLastCommandAck( ),
+			m_pClientState->m_nLastOutgoingCommand( ) + m_pClientState->m_nChokedCommands( )
+		);
+
+		to_user_cmd.buttons &= ~0xFFBEFFF9;
+		to_user_cmd.forwardmove = to_user_cmd.sidemove = {};
+
+		auto g_local_player = C_CSPlayer::GetLocalPlayer( );
+		if ( g_local_player && !g_local_player->IsDead( ) ) {
+			/*
+			 if ( m_type != 4
+                    && !( to_user_cmd.m_buttons & valve::e_buttons::in_jump )
+                    && g_local_player->self( )->flags( ) & valve::e_ent_flags::on_ground ) {
+			*/
+
+			if ( this->m_type != 4 && !( to_user_cmd.buttons & IN_JUMP ) && g_local_player->m_fFlags() & FL_ONGROUND ) {
+
+			}
+		}
+	} while ( shifted_cmds < shift_amount );
 }
 
 void c_exploits::handle_other_shift( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds ) {

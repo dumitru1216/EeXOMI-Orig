@@ -40,7 +40,10 @@ public:
 	int m_shift_amount = 0;
 	bool m_can_shift = false;
 	bool m_break_lc = false;
+	bool m_shift_cycle = false;
 	int m_break_lc_cycle = 0;
+
+
 
 	int m_shift_to_fix;
 	bool m_should_fix = false;;
@@ -77,6 +80,7 @@ public:
 
 	std::array< local_data_t, 150u >	m_local_data{};
 	void handle_break_lc( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds );
+	void handle_defensive_shift( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds );
 	void handle_other_shift( void* ecx, void* edx, const int slot, bf_write* buffer, int& from, int& to, int* m_new_cmds, int* m_backup_cmds );
 };
 

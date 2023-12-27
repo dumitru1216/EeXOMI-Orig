@@ -1428,6 +1428,7 @@ void CMenuV2::MenuRender( IDirect3DDevice9* pDevice ) {
 				  ImGui::Separator( );
 
 				  ImGui::Checkbox( XorStr( "Enabled" ), &g_Vars.rage.exploit );
+				 // ImGui::Checkbox( XorStr( "Skip interpolation" ), &g_Vars.rage.dt_lag_dis );
 				  ImGui::Text( XorStr( "Double tap" ) );
 				  ImGui::SameLine( ImGui::GetContentRegionAvailWidth( ) );
 				  ImGui::KeyBox( "", &g_Vars.rage.double_tap_bind );
