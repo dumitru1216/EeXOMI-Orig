@@ -78,7 +78,7 @@ void C_ServerSounds::Start( ) {
 
             if ( str.find( str2 ) != std::string::npos ) {
                Vector origin = data.origin;
-               *( bool* ) ( ( uintptr_t ) player + 0xED ) = true; // dormant check
+               *( bool* ) ( ( uintptr_t ) player + 0xE9 ) = true; // dormant check
                player->SetAbsOrigin( origin );
             }
          }
@@ -93,7 +93,7 @@ void C_ServerSounds::Finish( ) {
       if ( !player || player->IsDead( ) )
          continue;
 
-      *( bool* ) ( ( uintptr_t ) player + 0xED ) = data.m_bDormant; // dormant check
+      *( bool* ) ( ( uintptr_t ) player + 0xE9 ) = data.m_bDormant; // dormant check
       player->SetAbsOrigin( data.m_vecAbsOrigin );
    }
 }

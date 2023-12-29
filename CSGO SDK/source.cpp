@@ -837,7 +837,7 @@ namespace Source
 
 	  oGetScreenAspectRatio = Hooked::HooksManager.HookVirtual<decltype( oGetScreenAspectRatio )>( m_pEngine.Xor( ), &Hooked::hkGetScreenAspectRatio, Index::EngineClient::GetScreenAspectRatio );
 	  oFireEvents = Hooked::HooksManager.HookVirtual<decltype( oFireEvents )>( m_pEngine.Xor( ), &hkFireEvents, 59 );
-	  oDispatchUserMessage = Hooked::HooksManager.HookVirtual<decltype( oDispatchUserMessage )>( m_pClient.Xor( ), &hkDispatchUserMessage, 38 );
+	 //  oDispatchUserMessage = Hooked::HooksManager.HookVirtual<decltype( oDispatchUserMessage )>( m_pClient.Xor( ), &hkDispatchUserMessage, 38 ); doesnt seem to be that important
 	  oIsConnected = Hooked::HooksManager.HookVirtual<decltype( oIsConnected )>( m_pEngine.Xor( ), &hkIsConnected, 27 );
 	  oIsBoxVisible = Hooked::HooksManager.HookVirtual<decltype( oIsBoxVisible )>( m_pEngine.Xor( ), &Hooked::hkIsBoxVisible, 32 );
 

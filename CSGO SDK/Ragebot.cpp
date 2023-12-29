@@ -842,7 +842,7 @@ namespace Source {
 				break;
 		}
 
-#if 0
+#if 1
 		auto missed = false;
 		auto lag_data = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex );
 		if ( lag_data.IsValid( ) )
@@ -853,16 +853,6 @@ namespace Source {
 				return;
 		}
 #endif
-
-		/* this should work better in the optimization state */
-		if ( Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex ).IsValid( ) ) {
-			auto missed = Engine::LagCompensation::Get( )->GetLagData( player->m_entIndex )->m_iMissedShots >= rageData->rbot->max_misses;
-			if ( missed || safety ) {
-				auto pointTransformed = point;
-				if ( !IsPointSafe( record, pointTransformed, hitbox, 3 ) /* && !IsStaticPointSafe(record, pointTransformed, hitbox)*/ )
-					return;
-			}
-		}
 
 		points.push_back( pointTransformed );
 	}
@@ -1400,24 +1390,7 @@ namespace Source {
 				for ( int i = 0; i < hitboxSet->numhitboxes; ++i ) {
 					auto box = hitboxSet->pHitbox( i );
 
-					// calculate this once per hitbox
-					auto& boneData = player->m_CachedBoneData( ).Element( box->bone );
-					auto transformedMin = box->bbmin.Transform( boneData );
-					auto transformedMax = box->bbmax.Transform( boneData );
-					
-					if ( box->m_flRadius == -1.f ) {
-						auto& obb = target.obb.emplace_back( );
-						obb.min = transformedMin;
-						obb.max = transformedMax;
-						obb.idx = i;
-					} else {
-						auto& capsule = target.capsules.emplace_back( );
-						capsule.m_mins = transformedMin;
-						capsule.m_maxs = transformedMax;
-						capsule.m_radius = box->m_flRadius;
-						capsule.m_idx = i;
-				}
-#if 0
+#if 1
 					if ( box->m_flRadius == -1.f ) {
 						auto& obb = target.obb.emplace_back( );
 						obb.min = box->bbmin.Transform( player->m_CachedBoneData( ).Element( box->bone ) );
@@ -1465,7 +1438,7 @@ namespace Source {
 				}
 			}
 
-#ifdef 0
+#if 0
 			if ( !temp_points.empty( ) ) {
 				/* scan point */
 				for ( size_t i = 0u; i < temp_points.size( ); ++i )
